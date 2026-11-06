@@ -107,7 +107,7 @@ function OutcomeTooltip({
         ];
 
   return (
-    <div className="min-w-44 rounded-lg  border-foreground/10 border bg-popover p-3 text-xs text-popover-foreground shadow-sm">
+    <div className="min-w-44 rounded-lg  border-border border bg-popover p-3 text-xs text-popover-foreground shadow-none">
       <p className="mb-2 font-semibold">{bucket.label}</p>
       <dl className="space-y-1.5">
         {entries.map((entry) => (
@@ -156,11 +156,11 @@ function ResolutionChart() {
   const grouping = report.daily.length > 7 ? "7-day interval" : "day";
 
   return (
-    <Card className="min-w-0 gap-0 overflow-hidden rounded-xl ring-1 ring-foreground/10 bg-card py-0 shadow-none">
-      <CardHeader className="flex flex-col gap-3 border-b border-foreground/10 px-5 py-4 xl:px-6">
+    <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none">
+      <CardHeader className="flex flex-col gap-3 border-b border-border px-6 py-5">
         <div className="flex flex-wrap items-start justify-between gap-3 w-full">
           <div>
-            <h3 className="text-base font-semibold">Investigation outcomes</h3>
+            <h3 className="text-panel-title">Investigation outcomes</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {report.dates} · grouped by {grouping}
             </p>
@@ -172,7 +172,7 @@ function ResolutionChart() {
           />
         </div>
       </CardHeader>
-      <CardContent className="min-w-0 space-y-5 px-5 py-5 xl:px-6">
+      <CardContent className="min-w-0 flex flex-col gap-6 px-6 py-6">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <Tabs
             value={mode}
@@ -287,12 +287,12 @@ function ResolutionChart() {
             </BarChart>
           </ChartContainer>
         ) : (
-          <p className="rounded-lg border border-dashed border-foreground/10 p-8 text-sm text-muted-foreground">
+          <p className="rounded-lg border border-dashed border-border p-8 text-sm text-muted-foreground">
             No investigation outcomes for this period.
           </p>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-foreground/10 pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground sm:text-sm">
             {mode === "closed" ? (
               <>
@@ -350,7 +350,7 @@ function DataBarRow({
 
   return (
     <div className="space-y-1">
-      <div className="relative isolate flex min-h-11 items-center overflow-hidden rounded-md bg-muted/60 px-3 py-2">
+      <div className="relative isolate flex min-h-13 items-center overflow-hidden rounded-md bg-muted/60 px-3 py-2">
         {bounded !== null && (
           <div
             aria-hidden="true"
@@ -398,11 +398,11 @@ function ImpactMetrics() {
   const failurePct = finishedRuns ? (report.failed / finishedRuns) * 100 : 0;
 
   return (
-    <Card className="min-w-0 gap-0 overflow-hidden rounded-xl ring-1 ring-foreground/10 bg-card py-0 shadow-none">
-      <CardHeader className="flex flex-col gap-3 border-b border-foreground/10 px-4 py-4">
+    <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none">
+      <CardHeader className="flex flex-col gap-3 border-b border-border px-5 py-5">
         <div className="flex items-start justify-between w-full">
           <div className="min-w-0">
-            <h3 className="text-base font-semibold">Performance</h3>
+            <h3 className="text-panel-title">Performance</h3>
             <p className="mt-1 text-xs text-muted-foreground">{report.dates}</p>
           </div>
 
@@ -413,7 +413,7 @@ function ImpactMetrics() {
           />
         </div>
       </CardHeader>
-      <CardContent className="flex-1 space-y-2.5 px-3 py-3.5 sm:px-4">
+      <CardContent className="flex-1 flex flex-col gap-3 px-5 py-5">
         <DataBarRow
           label={
             <span className="inline-flex items-center gap-2">
@@ -465,7 +465,7 @@ function ImpactMetrics() {
           count={report.failed}
           percentage={failurePct}
         />
-        {/* <p className="border-t border-foreground/10 pt-3 text-xs leading-5 text-muted-foreground">
+        {/* <p className="border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
           Closures: {report.closed}. Failed runs: {report.failed} of{" "}
           {finishedRuns} finished runs. Time saved assumes {analystMinutes}{" "}
           analyst minutes per OSCAR closure, not measured time.
@@ -484,14 +484,14 @@ function CaseDistribution() {
 
   return (
     <>
-      <Card className="min-w-0 gap-0 overflow-hidden rounded-xl ring-1 ring-foreground/10 bg-card py-0 shadow-none">
-        <CardHeader className="border-b border-foreground/10 px-4 py-4">
-          <h3 className="text-base font-semibold">Priority mix</h3>
+      <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none">
+        <CardHeader className="border-b border-border px-5 py-5">
+          <h3 className="text-panel-title">Priority mix</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             {openTotal} open cases · current snapshot
           </p>
         </CardHeader>
-        <CardContent className="flex-1 space-y-2.5 px-3 py-3.5 sm:px-4">
+        <CardContent className="flex-1 flex flex-col gap-3 px-5 py-5">
           {openPriorities.map((item) => {
             const share = openTotal ? (item.value / openTotal) * 100 : 0;
             return (
@@ -508,21 +508,21 @@ function CaseDistribution() {
               />
             );
           })}
-          {/* <p className="border-t border-foreground/10 pt-3 text-xs leading-5 text-muted-foreground">
+          {/* <p className="border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
             Current open-case snapshot. Not affected by the chart or performance
             period.
           </p> */}
         </CardContent>
       </Card>
 
-      <Card className="min-w-0 gap-0 overflow-hidden rounded-xl ring-1 ring-foreground/10 bg-card py-0 shadow-none">
-        <CardHeader className="border-b border-foreground/10 px-4 py-4">
-          <h3 className="text-base font-semibold">Verdict mix</h3>
+      <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none">
+        <CardHeader className="border-b border-border px-5 py-5">
+          <h3 className="text-panel-title">Verdict mix</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             {verdictTotal} closed cases · 7-day sample
           </p>
         </CardHeader>
-        <CardContent className="flex-1 space-y-2.5 px-3 py-3.5 sm:px-4">
+        <CardContent className="flex-1 flex flex-col gap-3 px-5 py-5">
           {verdicts.map((item) => {
             const share = verdictTotal ? (item.value / verdictTotal) * 100 : 0;
             return (
@@ -539,7 +539,7 @@ function CaseDistribution() {
               />
             );
           })}
-          {/* <p className="border-t border-foreground/10 pt-3 text-xs leading-5 text-muted-foreground">
+          {/* <p className="border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
             Verdict data is available only for Oct 28 - Nov 3 in the current
             fixtures.
           </p> */}
@@ -555,12 +555,12 @@ export function PlatformImpact() {
     <section
       id="platform-impact"
       aria-labelledby="impact-heading"
-      className="mt-12 space-y-4 lg:space-y-5 "
+      className="mt-10 flex flex-col gap-6"
     >
       <div className="flex flex-wrap items-center gap-2">
         <h2
           id="impact-heading"
-          className="text-lg font-semibold tracking-tight"
+          className="text-section-title"
         >
           Platform impact
         </h2>
@@ -575,7 +575,7 @@ export function PlatformImpact() {
       <ResolutionChart />
 
       {/* Three cards side-by-side at laptop widths, even with an expanded sidebar. */}
-      <div className="grid min-w-0 items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid min-w-0 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
         <ImpactMetrics />
         <CaseDistribution />
       </div>

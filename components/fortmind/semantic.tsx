@@ -28,7 +28,7 @@ export function SemanticIcon({
   return (
     <Icon
       className={cn(
-        "size-4 shrink-0 stroke-2",
+        "size-3.5 shrink-0 stroke-[1.75]",
         semanticStyles[definition.tone].foreground,
       )}
       data-ui="semantic-icon"
@@ -48,6 +48,7 @@ export function SemanticBadge({
   render,
   compact = false,
   queue = false,
+  showIcon = true,
 }: {
   definition: SemanticState;
   treatment?: "badge" | "priority" | "status" | "inline" | "solid";
@@ -55,6 +56,7 @@ export function SemanticBadge({
   render?: React.ReactElement;
   compact?: boolean;
   queue?: boolean;
+  showIcon?: boolean;
 }) {
   const Icon = definition.icon;
   return (
@@ -63,25 +65,23 @@ export function SemanticBadge({
       variant="outline"
       iconSize="compact"
       className={cn(
-        "h-6 gap-1.25 rounded-sm px-1.75 py-0.5 text-xs leading-4.5 font-medium [&>svg]:shrink-0 motion-reduce:transition-none",
+        "h-6 gap-1.25 rounded-sm px-1.75 py-0.5 text-xs leading-4.5 font-medium transition-none [&>svg]:shrink-0 [&>svg]:stroke-[1.75]",
         semanticStyles[definition.tone].badge,
-        semanticStyles[definition.tone].interactive,
         (treatment === "priority" ||
           treatment === "status" ||
           treatment === "inline") && [
           "gap-1.5 border-transparent bg-transparent px-0 text-neutral-foreground",
           semanticStyles[definition.tone].icon,
         ],
+        !showIcon &&
+          treatment === "status" &&
+          semanticStyles[definition.tone].foreground,
         treatment === "solid" && semanticStyles[definition.tone].solid,
         queue &&
-          treatment === "priority" && [
-            "rounded-none border-0",
-            semanticStyles[definition.tone].solidIcon,
-            definition.label === "Urgent" &&
-              "[&>svg]:text-danger-foreground dark:[&>svg]:text-danger",
-          ],
+          treatment === "priority" &&
+          "rounded-none border-0 has-data-[icon=inline-start]:pl-0",
         compact &&
-          "h-auto min-h-5.5 max-w-full gap-1 border-transparent px-1.25 py-px text-[11px] whitespace-normal",
+          "h-auto min-h-5.5 max-w-full gap-1 px-1.25 py-px text-caption whitespace-nowrap has-data-[icon=inline-start]:pl-1.25",
       )}
       data-tone={definition.tone}
       data-treatment={treatment}
@@ -89,11 +89,13 @@ export function SemanticBadge({
       title={definition.meaning}
       render={render}
     >
-      <Icon
-        aria-hidden="true"
-        data-icon="inline-start"
-        data-semantic-icon={definition.iconName}
-      />
+      {showIcon && (
+        <Icon
+          aria-hidden="true"
+          data-icon="inline-start"
+          data-semantic-icon={definition.iconName}
+        />
+      )}
       {label}
     </Badge>
   );
@@ -128,7 +130,11 @@ export function CaseStatusBadge({
 }) {
   const label = value === "Closed" && closedByOscar ? "Closed by OSCAR" : value;
   return (
-    <SemanticBadge definition={workflowStates[label]} treatment="status" />
+    <SemanticBadge
+      definition={workflowStates[label]}
+      treatment="status"
+      showIcon={false}
+    />
   );
 }
 export function SeverityBadge({

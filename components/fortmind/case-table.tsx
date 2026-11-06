@@ -1,27 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { queueIconClass, semanticStyles } from "@/lib/semantic-styles";
+import { queueIconClass } from "@/lib/semantic-styles";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { caseHref } from "@/lib/platform-routes";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import {
+  ChevronDown,
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
-  Columns3,
   Download,
   ListFilter,
-  Rows3,
-  AlignJustify,
   ChevronLeft,
   ChevronRight,
   Search,
   Copy,
   Check,
-  CircleHelp,
   Network,
   Server,
   UserRound,
@@ -32,9 +29,8 @@ import {
   Eye,
   MoreHorizontal,
   ArrowUpRight,
-  Clock3,
-  ChevronDown,
-  UsersRound,
+  SlidersHorizontal,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +39,15 @@ import { assignmentStates } from "@/lib/semantic-states";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverDescription,
+} from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -54,6 +58,10 @@ import {
   DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -63,14 +71,6 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
 import {
   Empty,
   EmptyHeader,
@@ -83,31 +83,25 @@ import {
   verdicts,
   sources,
   filterCases,
-  matchesQueue,
+  statuses,
   formatAge,
-  investigationPhases,
   type SecurityCase,
   type Queue,
+  type CaseStatus,
   type CaseFilters,
   type Source,
   type Tone,
 } from "@/lib/preview-data";
+import { priorityStates, queueStatusStates } from "@/lib/semantic-states";
 import {
-  oscarStates,
-  phaseStates,
-  priorityStates,
-  queueStatusStates,
-  verdictStates,
-} from "@/lib/semantic-states";
+  caseListViews,
+  caseListEntry,
+  matchesCaseListView,
+  type CaseListView,
+} from "@/lib/case-list-views";
 import { QueueStatusIndicator, QueueVerdictBadge } from "./case-queue-semantic";
-import {
-  PriorityBadge,
-  CaseStatusBadge,
-  ConfidenceIndicator,
-  SemanticIcon,
-} from "./semantic";
+import { PriorityBadge, CaseStatusBadge } from "./semantic";
 
-const queues: Queue[] = ["Needs you", "Running", "Closed", "Failed", "All"];
 const initialFilters: CaseFilters = {
   queue: "All",
   search: "",
@@ -118,8 +112,8 @@ const initialFilters: CaseFilters = {
   autonomous: false,
 };
 const optionalColumns = [
-  "priority",
   "verdict",
+  "priority",
   "status",
   "owner",
   "age",
@@ -128,12 +122,12 @@ const optionalColumns = [
 type OptionalColumn = (typeof optionalColumns)[number];
 type SortKey = OptionalColumn | "title" | "attention";
 const columnClasses: Record<OptionalColumn, string> = {
-  priority: "w-28 max-[1201px]:w-25 max-md:hidden",
-  verdict: "w-40 max-md:hidden",
-  status: "w-[147px] max-[1201px]:w-[138px] max-md:hidden",
-  owner: "w-31 max-[1201px]:w-[111px] max-[1101px]:hidden",
-  age: "w-16 max-[1101px]:hidden",
-  source: "w-37.5 text-xs max-md:hidden",
+  priority: "w-34 max-[1200px]:hidden",
+  verdict: "w-46 max-[1000px]:hidden",
+  status: "w-36 max-[1000px]:hidden",
+  owner: "w-28 max-[1399px]:hidden",
+  age: "w-16 max-[1100px]:hidden",
+  source: "w-40 text-xs max-[1000px]:hidden",
 };
 const currentAnalyst = "Navdeep Annu";
 const sourceOptionIcons: Record<Source, LucideIcon> = {
@@ -168,10 +162,12 @@ function Owner({ name }: { name: string | null }) {
         </>
       ) : (
         <>
-          <UnassignedIcon
-            aria-hidden="true"
-            className="w-4 h-4 text-muted-foreground"
-          />
+          <span className="inline-flex size-5.5 shrink-0 items-center justify-center">
+            <UnassignedIcon
+              aria-hidden="true"
+              className="size-4 text-muted-foreground"
+            />
+          </span>
           <span
             className="text-muted-foreground"
             title={assignmentStates.Unassigned.meaning}
@@ -190,7 +186,7 @@ type FilterOption = {
   tone?: Tone;
 };
 
-function FilterMenu({
+function CaseFilterSubmenu({
   label,
   value,
   onChange,
@@ -202,50 +198,20 @@ function FilterMenu({
   options: FilterOption[];
 }) {
   const selected = options.find((option) => option.value === value);
-  const SelectedIcon = selected?.icon;
-  const DefaultIcon = label === "Owner" ? UsersRound : ListFilter;
-  const defaultLabel = label === "Owner" ? "All owners" : label;
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            data-ui="filter-trigger"
-            variant="outline"
-            size="sm"
-            className="w-30 justify-between gap-1.5 [&>_svg]:flex-none [&[data-filter-active='true']]:border-ring [&[data-filter-active='true']]:text-foreground"
-            aria-label={`Filter by ${label.toLowerCase()}: ${selected?.label ?? defaultLabel}`}
-            title={selected?.label ?? defaultLabel}
-            data-filter-active={Boolean(value)}
-            data-filter-kind={label}
-          />
-        }
-      >
-        {SelectedIcon && (
-          <SelectedIcon
-            data-ui="filter-option-icon"
-            className={cn(
-              "size-4 shrink-0 stroke-2",
-              queueIconClass(selected?.tone, selected?.label, label),
-            )}
-            data-tone={selected?.tone}
-            data-state={selected?.label}
-            aria-hidden="true"
-          />
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        {label}
+        {selected && (
+          <span className="ml-auto max-w-24 truncate text-caption text-muted-foreground">
+            {selected.label}
+          </span>
         )}
-        <span
-          data-ui="filter-trigger-label"
-          className="flex-1 min-w-0 overflow-hidden text-ellipsis text-left"
-        >
-          {selected?.label ?? defaultLabel}
-        </span>
-        <ChevronDown data-icon="inline-end" aria-hidden="true" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        data-ui="preview filter-menu"
-        align="start"
-        className="text-sm leading-5.5 text-foreground min-w-52.5 max-w-[min(300px,_calc(100vw_-_32px))]"
+      </DropdownMenuSubTrigger>
+      <DropdownMenuSubContent
+        data-ui="filter-menu"
         data-filter-kind={label}
+        className="min-w-56"
       >
         <DropdownMenuGroup>
           <DropdownMenuLabel>{label}</DropdownMenuLabel>
@@ -253,16 +219,7 @@ function FilterMenu({
             value={value}
             onValueChange={(next) => onChange(String(next))}
           >
-            <DropdownMenuRadioItem
-              value=""
-              closeOnClick
-              className="min-h-8 gap-2"
-            >
-              <DefaultIcon
-                data-ui="filter-option-icon"
-                className="size-4 shrink-0 stroke-2"
-                aria-hidden="true"
-              />
+            <DropdownMenuRadioItem value="" closeOnClick>
               {label === "Owner" ? "All owners" : `Any ${label.toLowerCase()}`}
             </DropdownMenuRadioItem>
             {options.map((option) => {
@@ -272,17 +229,14 @@ function FilterMenu({
                   key={option.value}
                   value={option.value}
                   closeOnClick
-                  className="min-h-8 gap-2"
                 >
                   {Icon && (
                     <Icon
-                      data-ui="filter-option-icon"
-                      className={cn(
-                        "size-4 shrink-0 stroke-2",
-                        queueIconClass(option.tone, option.label, label),
+                      className={queueIconClass(
+                        option.tone,
+                        option.label,
+                        label,
                       )}
-                      data-tone={option.tone}
-                      data-state={option.label}
                       aria-hidden="true"
                     />
                   )}
@@ -292,10 +246,11 @@ function FilterMenu({
             })}
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
   );
 }
+
 export function CopyTechnicalValue({
   label,
   value,
@@ -312,7 +267,7 @@ export function CopyTechnicalValue({
     >
       <code
         title={value}
-        className="min-w-0 font-mono text-[11px] leading-4.5 wrap-anywhere whitespace-normal select-all tracking-normal font-medium text-foreground"
+        className="min-w-0 font-mono text-caption leading-4.5 wrap-anywhere whitespace-normal select-all tracking-normal font-medium text-foreground"
       >
         {value}
       </code>
@@ -354,273 +309,158 @@ const entityIcons = {
 
 function usefulEntities(item: SecurityCase) {
   return Object.entries(item.entities).filter(
-    ([, value]) => value?.trim() && !/^(?:not supplied|not available|unknown|n\/a|-|—)$/i.test(value.trim()),
+    ([, value]) =>
+      value?.trim() &&
+      !/^(?:not supplied|not available|unknown|n\/a|-|—)$/i.test(value.trim()),
   );
 }
 
-export function CasePreview({
+/** A nonmodal preview stays anchored to the case that opened it. */
+export function CaseQuickPreview({
   item,
-  onClose,
+  children,
+  open,
+  onOpenChange,
 }: {
-  item: SecurityCase | null;
-  onClose: () => void;
+  item: SecurityCase;
+  children: ReactElement;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
+  const [localOpen, setLocalOpen] = useState(false);
+  const changeOpen = onOpenChange ?? setLocalOpen;
   const verdictLabel =
-    item?.status === "Closed"
+    item.status === "Closed"
       ? "Final verdict"
-      : item?.status === "Needs you" || item?.status === "Escalated"
+      : item.status === "Needs you" || item.status === "Escalated"
         ? "OSCAR proposes"
         : "Current assessment";
-  const currentPhase =
-    item?.status === "Running" || item?.status === "Failed"
-      ? investigationPhases.find(
-          (phase) => phase.toLowerCase() === item.investigationPhase?.trim().toLowerCase(),
-        )
-      : undefined;
-  const hasPhaseData =
-    Object.values(item?.investigationPhases ?? {}).some(Boolean) || Boolean(currentPhase);
+  const context = usefulEntities(item)
+    .filter(([key]) => ["hostname", "user", "ip"].includes(key))
+    .slice(0, 1);
   return (
-    <Sheet
-      open={Boolean(item)}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
-      <SheetContent
-        data-ui="preview workspace case-sheet preview-sheet"
-        className="text-sm leading-5.5 text-foreground w-full max-w-[510px] gap-0 overflow-hidden p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-[510px]"
+    <Popover open={open ?? localOpen} onOpenChange={changeOpen} modal={false}>
+      <PopoverTrigger render={children} />
+      <PopoverContent
+        data-ui="case-preview"
+        align="end"
+        sideOffset={8}
+        className="w-[440px] max-w-[calc(100vw-32px)] max-h-[min(480px,calc(100dvh-32px))] gap-0 overflow-hidden p-0"
+        onClick={(event) => event.stopPropagation()}
       >
-        {item && (
-          <>
-            <SheetHeader
-              data-ui="preview-header"
-              className="flex-none pt-5.5 pr-6 pb-4.25 pl-6 gap-0 border-b border-border"
-            >
-              <div
-                data-ui="preview-eyebrow"
-                className="flex items-center gap-2.25 pr-8 text-[10px] leading-4.5 [font-weight:650] tracking-[.075em] text-muted-foreground"
-              >
-                <span>CASE PREVIEW</span>
-                <CopyTechnicalValue label="case ID" value={item.id} />
-              </div>
-              <SheetTitle className="mt-2.5 pr-6.5 text-xl leading-6.75 [font-weight:650] tracking-[-.025em]">
-                {item.title}
-              </SheetTitle>
-              <SheetDescription className="sr-only">
-                Preview of case {item.id}
-              </SheetDescription>
-              <div
-                data-ui="preview-states"
-                className="flex flex-wrap items-center gap-2 mt-4 [&_[data-ui~='badge'][data-treatment='priority']]:text-xs [&_[data-ui~='badge'][data-treatment='status']]:text-xs"
-              >
-                <PriorityBadge value={item.priority} queue />
-                <span
-                  data-ui="state-divider"
-                  aria-hidden="true"
-                  className="w-px h-3.75 bg-border"
-                />
-                <CaseStatusBadge
-                  value={item.status}
-                  closedByOscar={item.closedByOscar}
-                />
-                <span
-                  data-ui="state-divider"
-                  aria-hidden="true"
-                  className="w-px h-3.75 bg-border"
-                />
-                <span
-                  data-ui="preview-verdict"
-                  className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
-                >
-                  <span>{verdictLabel}</span>
-                  <QueueVerdictBadge item={item} />
-                </span>
-              </div>
-            </SheetHeader>
-            <div
-              data-ui="sheet-body preview-body"
-              className="flex flex-col [&_section:last-child]:border-b-0 flex-1 min-h-0 overflow-y-auto pt-0 pr-6 pb-5 pl-6 gap-0"
-            >
-              <section
-                data-ui="preview-summary"
-                className="[&_h3_svg]:w-3.75 [&_h3_svg]:h-3.75 [&_h3_svg]:flex-none [&_h3_svg]:text-oscar-foreground pt-4.75 pr-0 pb-4.75 pl-0 border-b border-border"
-                aria-labelledby="cases-preview-summary-title"
-              >
-                <h3
-                  id="cases-preview-summary-title"
-                  className="text-xs leading-4.5 [font-weight:650] tracking-[-.005em] flex items-center gap-1.75"
-                >
-                  <SemanticIcon definition={oscarStates.OSCAR} /> OSCAR summary
-                </h3>
-                <p className="mt-2.25 text-[13px] leading-5.25 text-foreground">
-                  {item.summary}
-                </p>
-                {item.recommendedNextAction?.trim() && (
-                  <p data-ui="preview-next-action" className="mt-2.25 text-xs leading-4.5">
-                    <span className="font-semibold">Next action</span>
-                    <span className="text-muted-foreground"> · {item.recommendedNextAction.trim()}</span>
-                  </p>
-                )}
-              </section>
-              <section
-                data-ui="preview-section"
-                className="pt-4.75 pr-0 pb-4.75 pl-0 border-b border-border"
-                aria-labelledby="cases-preview-facts-title"
-              >
-                <h3
-                  id="cases-preview-facts-title"
-                  className="text-xs leading-4.5 [font-weight:650] tracking-[-.005em]"
-                >
-                  At a glance
-                </h3>
-                <dl
-                  data-ui="preview-facts"
-                  className="grid grid-cols-2 gap-y-3 gap-x-4.5 mt-3"
-                >
-                  <div className="min-w-0">
-                    <dt className="text-muted-foreground text-[11px] leading-4.25">
-                      Owner
-                    </dt>
-                    <dd className="mt-0.75 text-xs leading-4.75 font-medium">
-                      <Owner name={item.owner} />
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="text-muted-foreground text-[11px] leading-4.25">
-                      Source
-                    </dt>
-                    <dd className="mt-0.75 text-xs leading-4.75 font-medium">
-                      {item.source}
-                    </dd>
-                  </div>
-                  <div className="min-w-0">
-                    <dt className="text-muted-foreground text-[11px] leading-4.25">
-                      Age
-                    </dt>
-                    <dd className="mt-0.75 text-xs leading-4.75 font-medium">
-                      {formatAge(item.ageMinutes)} ago
-                    </dd>
-                  </div>
-                  {item.status !== "Queued" &&
-                    item.status !== "Running" &&
-                    item.status !== "Failed" && (
-                      <div className="min-w-0">
-                        <dt className="text-muted-foreground text-[11px] leading-4.25">
-                          Investigation confidence
-                        </dt>
-                        <dd className="mt-0.75 text-xs leading-4.75 font-medium">
-                          <ConfidenceIndicator {...item.confidence} />
-                        </dd>
-                      </div>
-                    )}
-                </dl>
-              </section>
-              <section
-                data-ui="preview-section preview-progress"
-                className="pt-4.75 pr-0 pb-4.75 pl-0 border-b border-border"
-                aria-labelledby="cases-preview-progress-title"
-              >
-                <h3
-                  id="cases-preview-progress-title"
-                  className="text-xs leading-4.5 [font-weight:650] tracking-[-.005em]"
-                >
-                  Investigation progress
-                </h3>
-                <ol className="mt-2.75 grid grid-cols-5 gap-1.5">
-                  {investigationPhases.map((phase) => {
-                    const status = item.investigationPhases?.[phase] ??
-                      (phase === currentPhase
-                        ? item.status === "Failed" ? "failed" : "active"
-                        : undefined);
-                    return (
-                      <li
-                        key={phase}
-                        data-phase={phase}
-                        data-state={status ?? "unavailable"}
-                        className="flex min-w-0 flex-col items-center gap-1 text-center text-[11px] leading-4 text-muted-foreground"
-                        title={`${phase}: ${status ?? "unavailable"}`}
-                      >
-                        {status ? (
-                          <SemanticIcon definition={phaseStates[status]} />
-                        ) : (
-                          <CircleHelp className="size-4 text-muted-foreground" aria-hidden="true" />
-                        )}
-                        <span>{phase}<span className="sr-only">: {status ?? "unavailable"}</span></span>
-                      </li>
-                    );
-                  })}
-                </ol>
-                {!hasPhaseData && (
-                  <p className="mt-2 text-center text-[11px] leading-4 text-muted-foreground">
-                    Phase data unavailable
-                  </p>
-                )}
-              </section>
-              <section
-                data-ui="preview-section"
-                className="pt-4.75 pr-0 pb-4.75 pl-0 border-b border-border"
-                aria-labelledby="cases-preview-entities-title"
-              >
-                <h3
-                  id="cases-preview-entities-title"
-                  className="text-xs leading-4.5 [font-weight:650] tracking-[-.005em]"
-                >
-                  Technical entities
-                </h3>
-                <dl data-ui="preview-entities" className="grid gap-2.5 mt-2.75">
-                  {usefulEntities(item).map(([key, value]) => {
-                    const Icon = entityIcons[key as keyof typeof entityIcons];
-                    const label = key === "ip" ? "IP address" : key;
-                    return (
-                      <div
-                        key={key}
-                        className="grid grid-cols-[92px_minmax(0,_1fr)] items-start gap-2"
-                      >
-                        <dt className="text-muted-foreground text-[11px] leading-4.25 inline-flex items-center gap-1.75 capitalize">
-                          <Icon
-                            aria-hidden="true"
-                            className="w-3.25 h-3.25 flex-none"
-                          />
-                          {label}
-                        </dt>
-                        <dd className="min-w-0 text-xs leading-4.75">
-                          <CopyTechnicalValue label={label} value={value} />
-                        </dd>
-                      </div>
-                    );
-                  })}
-                </dl>
-              </section>
+        <PopoverHeader className="shrink-0 gap-2 border-b p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-caption text-muted-foreground">
+              <CopyTechnicalValue label="case ID" value={item.id} />
+              <span aria-hidden="true">·</span>
+              <span className="tabular-nums">
+                {formatAge(item.ageMinutes)} ago
+              </span>
             </div>
-            <SheetFooter
-              data-ui="preview-footer"
-              className="flex-none pt-3 pr-6 pb-3 pl-6 border-t border-border bg-card"
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Close case preview"
+              onClick={() => changeOpen(false)}
             >
-              <Button
-                nativeButton={false}
-                render={<Link href={caseHref(item.id)} />}
-                onClick={onClose}
-                className="w-full justify-center h-8.5 rounded-md"
-              >
-                Open investigation <ArrowUpRight data-icon="inline-end" />
-              </Button>
-            </SheetFooter>
-          </>
-        )}
-      </SheetContent>
-    </Sheet>
+              <X />
+            </Button>
+          </div>
+          <PopoverTitle className="pr-2 text-panel-title">
+            {item.title}
+          </PopoverTitle>
+          <PopoverDescription className="sr-only">
+            Quick assessment and next action for {item.id}.
+          </PopoverDescription>
+          <div className="flex flex-wrap items-center gap-3">
+            <PriorityBadge value={item.priority} queue />
+            <CaseStatusBadge
+              value={item.status}
+              closedByOscar={item.closedByOscar}
+            />
+          </div>
+        </PopoverHeader>
+        <div className="flex min-h-0 flex-col gap-3 overflow-y-auto p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-label text-muted-foreground">
+              {verdictLabel}
+            </span>
+            <QueueVerdictBadge item={item} />
+          </div>
+          <p
+            data-ui="preview-summary"
+            className="line-clamp-3 shrink-0 text-body"
+          >
+            {item.summary}
+          </p>
+          {item.recommendedNextAction?.trim() && (
+            <div
+              data-ui="preview-next-action"
+              className="flex shrink-0 flex-col gap-1 rounded-md bg-muted p-3 ring-1 ring-inset ring-border"
+            >
+              <span className="text-label font-medium">Next action</span>
+              <p className="line-clamp-2 text-label text-muted-foreground">
+                {item.recommendedNextAction.trim()}
+              </p>
+            </div>
+          )}
+          <dl className="grid grid-cols-2 gap-x-5 gap-y-3 text-label">
+            <div className="min-w-0">
+              <dt className="text-caption text-muted-foreground">Owner</dt>
+              <dd className="mt-1">
+                <Owner name={item.owner} />
+              </dd>
+            </div>
+            {context.map(([key, value]) => (
+              <div key={key} className="min-w-0">
+                <dt className="text-caption capitalize text-muted-foreground">
+                  {key === "ip"
+                    ? "IP address"
+                    : key === "hostname"
+                      ? "Host"
+                      : key}
+                </dt>
+                <dd
+                  className="mt-1 truncate font-mono text-caption"
+                  title={value}
+                >
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <div className="flex shrink-0 items-center justify-end border-t px-4 py-3">
+          <Button
+            nativeButton={false}
+            role="link"
+            variant="outline"
+            size="sm"
+            render={<Link href={caseHref(item.id)} />}
+          >
+            Open investigation <ArrowUpRight data-icon="inline-end" />
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
-export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
+export function CaseTable({
+  initialQueue = "All",
+  initialView,
+}: {
+  initialQueue?: Queue;
+  initialView?: CaseListView;
+}) {
   const router = useRouter();
   const created = usePreviewCases();
   const tableCases = useMemo(() => [...created, ...cases], [created]);
-  const [filters, setFilters] = useState<CaseFilters>({
-    ...initialFilters,
-    queue: initialQueue,
-  });
-  const [density, setDensity] = useState("compact");
+  const entry = caseListEntry(initialQueue);
+  const [view, setView] = useState<CaseListView>(initialView ?? entry.view);
+  const [caseStatus, setCaseStatus] = useState<CaseStatus | "">(entry.status);
+  const [filters, setFilters] = useState<CaseFilters>(initialFilters);
+  const [density, setDensity] = useState("comfortable");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [columns, setColumns] = useState<Record<OptionalColumn, boolean>>({
     priority: true,
@@ -652,51 +492,58 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
   ) {
     setFilters((previous) => ({ ...previous, [key]: value }));
     setPage(0);
+    setPreview(null);
   }
   const filtered = useMemo(
     () =>
-      filterCases(tableCases, filters).sort((a, b) => {
-        if (sort.key === "attention") {
-          const rank = (item: SecurityCase) =>
-            item.status === "Needs you" || item.status === "Escalated"
-              ? 0
-              : item.status === "Failed"
-                ? 1
-                : item.status === "Running"
-                  ? 2
-                  : item.status === "Queued"
-                    ? 3
-                    : 4;
-          const result =
-            rank(a) - rank(b) ||
-            priorities.indexOf(a.priority) - priorities.indexOf(b.priority) ||
-            a.ageMinutes - b.ageMinutes;
-          return sort.descending ? -result : result;
-        }
-        const first =
-          sort.key === "age"
-            ? a.ageMinutes
-            : sort.key === "priority"
-              ? priorities.indexOf(a.priority)
-              : sort.key === "owner"
-                ? (a.owner ?? "")
-                : a[sort.key as "title" | "verdict" | "status" | "source"];
-        const second =
-          sort.key === "age"
-            ? b.ageMinutes
-            : sort.key === "priority"
-              ? priorities.indexOf(b.priority)
-              : sort.key === "owner"
-                ? (b.owner ?? "")
-                : b[sort.key as "title" | "verdict" | "status" | "source"];
-        return (
-          (typeof first === "number" && typeof second === "number"
-            ? first - second
-            : String(first).localeCompare(String(second))) *
-          (sort.descending ? -1 : 1)
-        );
-      }),
-    [tableCases, filters, sort],
+      filterCases(tableCases, filters)
+        .filter(
+          (item) =>
+            matchesCaseListView(item, view, currentAnalyst) &&
+            (!caseStatus || item.status === caseStatus),
+        )
+        .sort((a, b) => {
+          if (sort.key === "attention") {
+            const rank = (item: SecurityCase) =>
+              item.status === "Needs you" || item.status === "Escalated"
+                ? 0
+                : item.status === "Failed"
+                  ? 1
+                  : item.status === "Running"
+                    ? 2
+                    : item.status === "Queued"
+                      ? 3
+                      : 4;
+            const result =
+              rank(a) - rank(b) ||
+              priorities.indexOf(a.priority) - priorities.indexOf(b.priority) ||
+              a.ageMinutes - b.ageMinutes;
+            return sort.descending ? -result : result;
+          }
+          const first =
+            sort.key === "age"
+              ? a.ageMinutes
+              : sort.key === "priority"
+                ? priorities.indexOf(a.priority)
+                : sort.key === "owner"
+                  ? (a.owner ?? "")
+                  : a[sort.key as "title" | "verdict" | "status" | "source"];
+          const second =
+            sort.key === "age"
+              ? b.ageMinutes
+              : sort.key === "priority"
+                ? priorities.indexOf(b.priority)
+                : sort.key === "owner"
+                  ? (b.owner ?? "")
+                  : b[sort.key as "title" | "verdict" | "status" | "source"];
+          return (
+            (typeof first === "number" && typeof second === "number"
+              ? first - second
+              : String(first).localeCompare(String(second))) *
+            (sort.descending ? -1 : 1)
+          );
+        }),
+    [tableCases, filters, sort, view, caseStatus],
   );
   const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
   const currentPage = Math.min(page, pageCount - 1);
@@ -705,6 +552,7 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
     selected.has(item.id),
   ).length;
   const activeFilters = Boolean(
+    caseStatus ||
     filters.search ||
     filters.priority ||
     filters.verdict ||
@@ -712,6 +560,72 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
     filters.source ||
     filters.autonomous,
   );
+  const filterChips: {
+    key: "priority" | "assignment" | "source" | "autonomous" | "status";
+    label: string;
+  }[] = [
+    ...(filters.assignment
+      ? [
+          {
+            key: "assignment" as const,
+            label: `Owner: ${filters.assignment === currentAnalyst ? "Me" : filters.assignment === "unassigned" ? "Unassigned" : filters.assignment}`,
+          },
+        ]
+      : []),
+    ...(filters.priority
+      ? [{ key: "priority" as const, label: `Priority: ${filters.priority}` }]
+      : []),
+    ...(caseStatus
+      ? [
+          {
+            key: "status" as const,
+            label: `Status: ${queueStatusStates[caseStatus].label}`,
+          },
+        ]
+      : []),
+    ...(filters.source
+      ? [{ key: "source" as const, label: `Source: ${filters.source}` }]
+      : []),
+    ...(filters.autonomous
+      ? [{ key: "autonomous" as const, label: "Closed by OSCAR" }]
+      : []),
+  ];
+  function clearFilters() {
+    setFilters((previous) => ({
+      ...initialFilters,
+      queue: previous.queue,
+      search: previous.search,
+    }));
+    setCaseStatus("");
+    setPage(0);
+  }
+  const sortOptions: {
+    value: string;
+    label: string;
+    key: SortKey;
+    descending: boolean;
+  }[] = [
+    {
+      value: "attention",
+      label: "Action first",
+      key: "attention",
+      descending: false,
+    },
+    { value: "newest", label: "Newest first", key: "age", descending: false },
+    { value: "oldest", label: "Oldest first", key: "age", descending: true },
+    {
+      value: "priority",
+      label: "Highest priority",
+      key: "priority",
+      descending: false,
+    },
+  ];
+  const sortOption = sortOptions.find(
+    (option) =>
+      option.key === sort.key && option.descending === sort.descending,
+  );
+  const sortValue = sortOption?.value ?? "";
+  const sortLabel = sortOption?.label ?? "Custom";
   function selectCase(id: string, checked: boolean) {
     setSelected((previous) => {
       const next = new Set(previous);
@@ -758,332 +672,374 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
     const Icon =
       sort.key !== key ? ArrowUpDown : sort.descending ? ArrowDown : ArrowUp;
     return (
-      <Button variant="ghost" size="sm" onClick={() => sortBy(key)}>
-        {label}
-        <Icon data-icon="inline-end" />
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => sortBy(key)}
+        className={cn(
+          "h-8 justify-start gap-1 rounded-sm border-0 px-0",
+          // Match the semantic value text after each leading icon or badge inset.
+          key === "verdict" && "pl-6",
+          key === "priority" && "pl-5",
+          key === "status" && "pl-1.5",
+          key === "owner" && "pl-7",
+        )}
+      >
+        <span data-ui="sort-label">{label}</span>
+        <Icon
+          data-icon="inline-end"
+          className={cn(
+            sort.key !== key &&
+              "opacity-0 group-hover/button:opacity-100 group-focus-visible/button:opacity-100",
+          )}
+        />
       </Button>
     );
   }
+  const viewDefinition = caseListViews.find((option) => option.value === view)!;
   return (
     <section
       data-ui="case-section"
-      className="mt-5.75 scroll-mt-5"
+      className="mt-8 scroll-mt-5"
       aria-label="Case queue"
     >
       <Tabs
         data-ui="queue-tabs"
-        value={filters.queue}
-        onValueChange={(value) => updateFilter("queue", value as Queue)}
+        value={view}
+        onValueChange={(value) => {
+          setView(value as CaseListView);
+          setPage(0);
+          setPreview(null);
+        }}
         className="gap-0"
       >
         <div
-          data-ui="queue-top"
-          className="mb-3.75 flex min-h-13 max-w-full items-center justify-between gap-6 max-[1001px]:overflow-x-auto"
+          data-ui="table-shell"
+          className="overflow-hidden rounded-lg bg-card ring-1 ring-inset ring-border"
         >
-          <div
-            data-ui="tab-box"
-            className="pt-0 pr-2.5 pb-0 pl-2.5 border border-border rounded-lg bg-card shadow-sm"
-          >
-            <TabsList variant="line" aria-label="Case queue views">
-              {queues.map((queue) => {
-                const definition =
-                  queue === "All" ? null : queueStatusStates[queue];
-                const Icon = definition?.icon;
-                return (
-                  <TabsTrigger key={queue} value={queue}>
-                    {Icon && (
-                      <Icon
-                        data-ui="tab-icon"
-                        className={cn(
-                          "size-4 shrink-0 stroke-2",
-                          definition.label === "Needs You"
-                            ? "text-warning-foreground"
-                            : definition.label === "Closed"
-                              ? "text-success"
-                              : semanticStyles[definition.tone].foreground,
-                        )}
-                        data-tone={definition.tone}
-                        data-state={definition.label}
-                        data-semantic-icon={definition.iconName}
-                        aria-hidden="true"
-                      />
-                    )}
-                    {definition?.label ?? queue}
+          <div data-ui="queue-top" className="border-b px-5 max-md:px-3">
+            <div className="max-w-full overflow-x-auto">
+              <TabsList
+                variant="line"
+                aria-label="Case queue views"
+                className="gap-5 border-0 p-0 group-data-horizontal/tabs:h-14"
+              >
+                {caseListViews.map((option) => (
+                  <TabsTrigger
+                    key={option.value}
+                    value={option.value}
+                    title={option.description}
+                    className="h-full rounded-none px-1 group-data-horizontal/tabs:after:bottom-0 group-data-horizontal/tabs:after:h-px"
+                  >
+                    {option.label}
                     <span
                       data-ui="tab-count"
-                      className="rounded-sm border bg-muted px-1.25 text-[10px] leading-4 font-medium tabular-nums text-muted-foreground"
+                      className="text-caption tabular-nums text-muted-foreground"
                     >
                       {
-                        tableCases.filter((item) => matchesQueue(item, queue))
-                          .length
+                        tableCases.filter((item) =>
+                          matchesCaseListView(
+                            item,
+                            option.value,
+                            currentAnalyst,
+                          ),
+                        ).length
                       }
                     </span>
                   </TabsTrigger>
-                );
-              })}
-            </TabsList>
+                ))}
+              </TabsList>
+            </div>
           </div>
-          <div
-            data-ui="table-view-tools"
-            className="ml-auto flex flex-none items-center gap-2"
-          >
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={<Button variant="outline" size="sm" />}
-              >
-                <Clock3 data-icon="inline-start" />
-                {sort.key === "attention"
-                  ? "Action first"
-                  : sort.key === "age"
-                    ? sort.descending
-                      ? "Oldest first"
-                      : "Newest first"
-                    : sort.key === "priority"
-                      ? "Priority"
-                      : "Sort"}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                data-ui="preview menu"
-                align="end"
-                className="text-sm leading-5.5 text-foreground min-w-45"
-              >
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>Sort cases</DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSort({ key: "attention", descending: false });
-                      setPage(0);
-                    }}
-                  >
-                    Action first
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSort({ key: "age", descending: false });
-                      setPage(0);
-                    }}
-                  >
-                    Newest first
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSort({ key: "age", descending: true });
-                      setPage(0);
-                    }}
-                  >
-                    Oldest first
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSort({ key: "priority", descending: false });
-                      setPage(0);
-                    }}
-                  >
-                    Highest priority
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <ToggleGroup
-              aria-label="Table density"
-              value={[density]}
-              onValueChange={(value) => {
-                if (value[0]) setDensity(value[0]);
-              }}
-              spacing={0}
-              variant="outline"
-            >
-              <ToggleGroupItem
-                value="compact"
-                aria-label="Compact density"
-                title="Compact density"
-              >
-                <AlignJustify />
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="comfortable"
-                aria-label="Comfortable density"
-                title="Comfortable density"
-              >
-                <Rows3 />
-              </ToggleGroupItem>
-            </ToggleGroup>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={<Button variant="outline" size="sm" />}
-              >
-                <Columns3 data-icon="inline-start" />
-                Columns
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                data-ui="preview column-menu"
-                align="end"
-                className="text-sm leading-5.5 text-foreground min-w-46.25"
-              >
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>Visible columns</DropdownMenuLabel>
-                  {optionalColumns.map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column}
-                      checked={columns[column]}
-                      onCheckedChange={(checked) =>
-                        setColumns((previous) => ({
-                          ...previous,
-                          [column]: checked,
-                        }))
-                      }
-                    >
-                      {column[0].toUpperCase() + column.slice(1)}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <div
-          data-ui="table-shell"
-          className="overflow-hidden border border-border rounded-lg bg-card shadow-sm"
-        >
           <div
             data-ui="filter-row"
-            className="flex min-h-15.75 items-center justify-between gap-3.5 border-b bg-card px-4.5 py-3.5 max-[1260px]:flex-wrap max-[1260px]:gap-y-2"
+            className="flex flex-wrap items-center gap-3 border-b px-5 py-4 max-md:px-3"
           >
             <div
-              data-ui="filter-controls"
-              className="flex items-center min-w-0 gap-1.75 flex-none max-[1360px]:min-[1260px]:gap-1.5 max-[1260px]:w-full max-[1001px]:flex-wrap [&>_[data-slot='dropdown-menu-trigger']]:w-30 max-[1360px]:min-[1260px]:[&>_[data-slot='dropdown-menu-trigger']]:w-27 max-[1360px]:min-[1260px]:[&>_[data-slot='dropdown-menu-trigger']:not([data-ui~='filter-trigger'])]:pl-1.5 max-[1360px]:min-[1260px]:[&>_[data-slot='dropdown-menu-trigger']:not([data-ui~='filter-trigger'])]:pr-1.5 max-[1360px]:min-[1260px]:[&>_[data-slot='dropdown-menu-trigger']:not([data-ui~='filter-trigger'])]:text-[11px] max-[1360px]:min-[1260px]:[&>_[data-slot='dropdown-menu-trigger']:not([data-ui~='filter-trigger'])]:gap-1"
+              data-ui="search"
+              className="relative min-w-40 flex-1 sm:max-w-80 max-sm:basis-full"
             >
-              <FilterMenu
-                label="Owner"
-                value={filters.assignment}
-                onChange={(value) => updateFilter("assignment", value)}
-                options={[
-                  {
-                    label: "Assigned to me",
-                    value: currentAnalyst,
-                    icon: UserRound,
-                  },
-                  {
-                    label: "Unassigned",
-                    value: "unassigned",
-                    icon: assignmentStates.Unassigned.icon,
-                  },
-                  ...owners
-                    .filter((owner) => owner !== currentAnalyst)
-                    .map((owner) => ({
-                      label: owner,
-                      value: owner,
-                      icon: UserRound,
-                    })),
-                ]}
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground"
               />
-              <FilterMenu
-                label="Priority"
-                value={filters.priority}
-                onChange={(value) => updateFilter("priority", value)}
-                options={priorities.map((value) => ({
-                  label: value,
-                  value,
-                  icon: priorityStates[value].icon,
-                  tone: priorityStates[value].tone,
-                }))}
+              <Input
+                aria-label="Search titles, case IDs, IPs, hosts, or users"
+                placeholder="Search cases…"
+                value={filters.search}
+                onChange={(event) => updateFilter("search", event.target.value)}
+                className="pl-9"
               />
-              <FilterMenu
-                label="Verdict"
-                value={filters.verdict}
-                onChange={(value) => updateFilter("verdict", value)}
-                options={verdicts.map((value) => ({
-                  label: value,
-                  value,
-                  icon: verdictStates[value].icon,
-                  tone: verdictStates[value].tone,
-                }))}
-              />
-              <FilterMenu
-                label="Source"
-                value={filters.source}
-                onChange={(value) => updateFilter("source", value)}
-                options={sources.map((value) => ({
-                  label: value,
-                  value,
-                  icon: sourceOptionIcons[value],
-                }))}
-              />
+            </div>
+            <div
+              data-ui="table-view-tools"
+              className="ml-auto flex flex-wrap items-center gap-2 max-sm:w-full"
+            >
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  render={<Button variant="outline" size="sm" />}
+                  render={
+                    <Button
+                      variant="outline"
+                      aria-label={`Filter by verdict: ${filters.verdict || "All verdicts"}`}
+                    />
+                  }
                 >
-                  <ListFilter data-icon="inline-start" />
-                  More filters{filters.autonomous ? " · 1" : ""}
+                  <span className={cn(filters.verdict && "max-sm:hidden")}>
+                    Verdict{filters.verdict ? ":" : ""}
+                  </span>
+                  {filters.verdict && <span>{filters.verdict}</span>}
+                  <ChevronDown data-icon="inline-end" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  data-ui="preview menu"
-                  align="start"
-                  className="text-sm leading-5.5 text-foreground min-w-45"
-                >
+                <DropdownMenuContent align="end" className="min-w-52">
                   <DropdownMenuGroup>
-                    <DropdownMenuLabel>Investigation</DropdownMenuLabel>
+                    <DropdownMenuLabel>Verdict</DropdownMenuLabel>
+                    <DropdownMenuRadioGroup
+                      value={filters.verdict}
+                      onValueChange={(value) =>
+                        updateFilter("verdict", String(value))
+                      }
+                    >
+                      <DropdownMenuRadioItem value="" closeOnClick>
+                        All verdicts
+                      </DropdownMenuRadioItem>
+                      {verdicts.map((value) => (
+                        <DropdownMenuRadioItem
+                          key={value}
+                          value={value}
+                          closeOnClick
+                        >
+                          {value}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger render={<Button variant="outline" />}>
+                  <ListFilter data-icon="inline-start" /> More filters
+                  {filterChips.length > 0 && (
+                    <Badge variant="secondary">{filterChips.length}</Badge>
+                  )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Filter cases</DropdownMenuLabel>
+                    <CaseFilterSubmenu
+                      label="Owner"
+                      value={filters.assignment}
+                      onChange={(value) => updateFilter("assignment", value)}
+                      options={[
+                        {
+                          label: "Assigned to me",
+                          value: currentAnalyst,
+                          icon: UserRound,
+                        },
+                        {
+                          label: "Unassigned",
+                          value: "unassigned",
+                          icon: assignmentStates.Unassigned.icon,
+                        },
+                        ...owners
+                          .filter((owner) => owner !== currentAnalyst)
+                          .map((owner) => ({
+                            label: owner,
+                            value: owner,
+                            icon: UserRound,
+                          })),
+                      ]}
+                    />
+                    <CaseFilterSubmenu
+                      label="Priority"
+                      value={filters.priority}
+                      onChange={(value) => updateFilter("priority", value)}
+                      options={priorities.map((value) => ({
+                        label: value,
+                        value,
+                        icon: priorityStates[value].icon,
+                        tone: priorityStates[value].tone,
+                      }))}
+                    />
+                    <CaseFilterSubmenu
+                      label="Status"
+                      value={caseStatus}
+                      onChange={(value) => {
+                        setCaseStatus(value as CaseStatus | "");
+                        setPage(0);
+                        setPreview(null);
+                      }}
+                      options={statuses.map((value) => ({
+                        label: queueStatusStates[value].label,
+                        value,
+                      }))}
+                    />
+                    <CaseFilterSubmenu
+                      label="Source"
+                      value={filters.source}
+                      onChange={(value) => updateFilter("source", value)}
+                      options={sources.map((value) => ({
+                        label: value,
+                        value,
+                        icon: sourceOptionIcons[value],
+                      }))}
+                    />
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
                     <DropdownMenuCheckboxItem
                       checked={filters.autonomous}
                       onCheckedChange={(checked) =>
                         updateFilter("autonomous", checked)
                       }
                     >
-                      <SemanticIcon
-                        definition={queueStatusStates["Closed by OSCAR"]}
-                      />
                       Closed by OSCAR only
                     </DropdownMenuCheckboxItem>
+                    {filterChips.length > 0 && (
+                      <DropdownMenuItem onClick={clearFilters}>
+                        Clear filters
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {activeFilters && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setFilters((previous) => ({
-                      ...initialFilters,
-                      queue: previous.queue,
-                    }));
-                    setPage(0);
-                  }}
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button variant="outline" aria-label="View options" />
+                  }
                 >
+                  <SlidersHorizontal data-icon="inline-start" />
+                  <span className="max-sm:sr-only">View</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Display</DropdownMenuLabel>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        Sort{" "}
+                        <span className="ml-auto text-caption text-muted-foreground">
+                          {sortLabel}
+                        </span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="min-w-48">
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel>Sort cases</DropdownMenuLabel>
+                          <DropdownMenuRadioGroup
+                            value={sortValue}
+                            onValueChange={(value) => {
+                              const option = sortOptions.find(
+                                (option) => option.value === value,
+                              );
+                              if (option) {
+                                setSort({
+                                  key: option.key,
+                                  descending: option.descending,
+                                });
+                                setPage(0);
+                              }
+                            }}
+                          >
+                            {sortOptions.map((option) => (
+                              <DropdownMenuRadioItem
+                                key={option.value}
+                                value={option.value}
+                                closeOnClick
+                              >
+                                {option.label}
+                              </DropdownMenuRadioItem>
+                            ))}
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuGroup>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        Row density{" "}
+                        <span className="ml-auto text-caption capitalize text-muted-foreground">
+                          {density}
+                        </span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="min-w-44">
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel>Row density</DropdownMenuLabel>
+                          <DropdownMenuRadioGroup
+                            value={density}
+                            onValueChange={(value) => setDensity(String(value))}
+                          >
+                            <DropdownMenuRadioItem
+                              value="comfortable"
+                              closeOnClick
+                            >
+                              Comfortable
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="compact" closeOnClick>
+                              Compact
+                            </DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuGroup>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>Columns</DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="min-w-44">
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel>Visible columns</DropdownMenuLabel>
+                          {optionalColumns.map((column) => (
+                            <DropdownMenuCheckboxItem
+                              key={column}
+                              checked={columns[column]}
+                              onCheckedChange={(checked) =>
+                                setColumns((previous) => ({
+                                  ...previous,
+                                  [column]: checked,
+                                }))
+                              }
+                            >
+                              {column[0].toUpperCase() + column.slice(1)}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuGroup>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => exportCases("view")}>
+                      <Download />
+                      Export view
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            {filterChips.length > 0 && (
+              <div
+                data-ui="active-filters"
+                className="flex w-full flex-wrap items-center gap-2 pt-1"
+              >
+                {filterChips.map(({ key, label }) => (
+                  <Button
+                    key={key}
+                    variant="secondary"
+                    size="sm"
+                    aria-label={`Remove ${label} filter`}
+                    onClick={() => {
+                      if (key === "status") {
+                        setCaseStatus("");
+                        setPage(0);
+                      } else
+                        updateFilter(key, key === "autonomous" ? false : "");
+                    }}
+                  >
+                    {label}
+                    <X data-icon="inline-end" />
+                  </Button>
+                ))}
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
                   Clear filters
                 </Button>
-              )}
-            </div>
-            <div
-              data-ui="filter-actions"
-              className="flex items-center min-w-0 gap-1.75 flex-1 justify-end max-[1360px]:min-[1260px]:gap-1.5 max-[1260px]:w-full [&>_[data-slot='button']:hover]:text-foreground"
-            >
-              <div
-                data-ui="search"
-                className="relative w-auto max-w-91.25 [flex:1_1_245px] min-w-30 max-md:w-full max-[1260px]:max-w-110 max-[761px]:w-full"
-              >
-                <Search
-                  aria-hidden="true"
-                  className="absolute w-4 h-4 left-2.75 top-2.25 text-muted-foreground"
-                />
-                <Input
-                  aria-label="Search titles, case IDs, IPs, hosts, or users"
-                  placeholder="Search title, ID, IP, host, or user"
-                  value={filters.search}
-                  onChange={(event) =>
-                    updateFilter("search", event.target.value)
-                  }
-                  className="pl-8.5 text-[13px] h-8.5 rounded-md bg-card"
-                />
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => exportCases("view")}
-                className="flex-none text-muted-foreground"
-              >
-                <Download data-icon="inline-start" /> Export view
-              </Button>
-            </div>
+            )}
           </div>
           {selected.size > 0 && (
             <div
@@ -1116,16 +1072,16 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
           )}
           <TabsContent
             data-ui="table-panel"
-            value={filters.queue}
+            value={view}
             className="mt-0 mr-0 mb-0 ml-0"
           >
             <Table
               data-ui="case-table"
-              className="group/queue min-w-[850px] table-fixed [&_tbody_td]:h-15.5 [&_tbody_td]:py-2 data-[density=comfortable]:[&_tbody_td]:h-19 data-[density=comfortable]:[&_tbody_td]:py-3.5 max-md:min-w-0"
+              className="group/queue min-w-[660px] table-fixed [&_tbody_td]:h-16 [&_tbody_td]:py-3 data-[density=comfortable]:[&_tbody_td]:h-20 data-[density=comfortable]:[&_tbody_td]:py-4 max-[1000px]:min-w-0"
               data-density={density}
             >
               <caption className="sr-only">
-                {filters.queue} cases. Select a case title to inspect full
+                {viewDefinition.label}. Select a case title to inspect full
                 technical details. {density} density.
               </caption>
               <TableHeader>
@@ -1154,23 +1110,10 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                       }
                     />
                   </TableHead>
-                  {columns.priority && (
-                    <TableHead
-                      data-ui="col-priority"
-                      className="w-28 max-[1201px]:w-25 max-md:hidden"
-                      aria-sort={
-                        sort.key === "priority"
-                          ? sort.descending
-                            ? "descending"
-                            : "ascending"
-                          : "none"
-                      }
-                    >
-                      {sortHeader("priority", "Priority")}
-                    </TableHead>
-                  )}
                   <TableHead
                     data-ui="col-case"
+                    className="px-4 max-[1000px]:pl-2"
+                    scope="col"
                     aria-sort={
                       sort.key === "title"
                         ? sort.descending
@@ -1182,13 +1125,13 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                     {sortHeader("title", "Case")}
                   </TableHead>
                   {optionalColumns
-                    .filter(
-                      (column) => column !== "priority" && columns[column],
-                    )
+                    .filter((column) => columns[column])
                     .map((column) => (
                       <TableHead
                         key={column}
-                        className={columnClasses[column]}
+                        data-ui={`col-${column}`}
+                        scope="col"
+                        className={cn("px-4", columnClasses[column])}
                         aria-sort={
                           sort.key === column
                             ? sort.descending
@@ -1205,7 +1148,7 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                     ))}
                   <TableHead
                     data-ui="col-actions"
-                    className="w-19 pr-2.5 text-right whitespace-nowrap max-md:w-17.5"
+                    className="w-20 pl-0 pr-3 text-left whitespace-nowrap"
                   >
                     <span className="sr-only">Actions</span>
                   </TableHead>
@@ -1225,8 +1168,11 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                         event.shiftKey ||
                         event.altKey ||
                         (event.target instanceof Element &&
-                          event.target.closest("a, button, input, select, textarea, [role='checkbox'], [role^='menuitem']"))
-                      ) return;
+                          event.target.closest(
+                            "a, button, input, select, textarea, [role='checkbox'], [role^='menuitem']",
+                          ))
+                      )
+                        return;
                       router.push(caseHref(item.id));
                     }}
                   >
@@ -1242,29 +1188,21 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                         }
                       />
                     </TableCell>
-                    {columns.priority && (
-                      <TableCell
-                        data-ui="col-priority"
-                        className="w-28 max-[1201px]:w-25 max-md:hidden"
-                      >
-                        <PriorityBadge value={item.priority} queue />
-                      </TableCell>
-                    )}
                     <TableCell
                       data-ui="case-cell col-case"
-                      className="max-md:py-3.5 max-md:pr-3 max-md:pl-1.5 max-md:whitespace-normal max-md:group-data-[density=comfortable]/queue:py-6"
+                      className="px-4 max-[1000px]:py-4 max-[1000px]:pl-2"
                     >
                       <Link
                         data-ui="case-title"
                         href={caseHref(item.id)}
-                        className="block w-full truncate rounded-xs text-left text-[13px] leading-4.75 font-semibold text-foreground hover:underline hover:underline-offset-3 max-md:line-clamp-2 max-md:whitespace-normal group-data-[density=comfortable]/queue:line-clamp-2 group-data-[density=comfortable]/queue:whitespace-normal"
+                        className="block w-full truncate rounded-xs text-left text-sm leading-5 font-medium text-foreground hover:underline hover:underline-offset-3 "
                         title={item.title}
                       >
                         {item.title}
                       </Link>
                       <div
                         data-ui="case-meta"
-                        className="@container mt-0.5 flex min-w-0 items-center gap-1.5 overflow-hidden text-[11px] leading-4.25 whitespace-nowrap text-muted-foreground"
+                        className="@container mt-0.5 flex min-w-0 items-center gap-1.5 overflow-hidden text-caption leading-4.25 whitespace-nowrap text-muted-foreground"
                       >
                         <span
                           data-ui="mono"
@@ -1273,48 +1211,64 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                         >
                           {item.id}
                         </span>
-                        <span className="shrink-0" aria-hidden="true">·</span>
+                        <span className="shrink-0" aria-hidden="true">
+                          ·
+                        </span>
                         <span
                           data-ui="source-meta"
-                          className="inline-flex min-w-0 max-w-32 items-center gap-1"
+                          className="inline-flex min-w-0 max-w-32 items-center gap-1 @max-[360px]:hidden"
                           title={item.source}
                         >
                           {(() => {
                             const SourceIcon = sourceOptionIcons[item.source];
-                            return <SourceIcon className="size-3.25 shrink-0" aria-hidden="true" />;
+                            return (
+                              <SourceIcon
+                                className="size-3.25 shrink-0"
+                                aria-hidden="true"
+                              />
+                            );
                           })()}
                           <span className="truncate">{item.source}</span>
                         </span>
-                        {usefulEntities(item).slice(0, 3).map(([key, value], index) => {
-                          const Icon = entityIcons[key as keyof typeof entityIcons];
-                          const label = key === "ip" ? "IP address" : key;
-                          return (
-                            <span
-                              key={key}
-                              data-ui="entity-meta"
-                              className={cn(
-                                "inline-flex min-w-0 items-center gap-1.5",
-                                index === 1 && "@max-[360px]:hidden",
-                                index === 2 && "@max-[520px]:hidden",
-                              )}
-                              title={`${label}: ${value}`}
-                              aria-label={`${label}: ${value}`}
-                            >
-                              <span className="shrink-0" aria-hidden="true">·</span>
-                              <Icon className="size-3.25 shrink-0" aria-hidden="true" />
+                        {usefulEntities(item)
+                          .slice(0, 2)
+                          .map(([key, value], index) => {
+                            const Icon =
+                              entityIcons[key as keyof typeof entityIcons];
+                            const label = key === "ip" ? "IP address" : key;
+                            return (
                               <span
-                                data-ui="mono"
-                                className="truncate font-mono text-xs leading-4.5 font-normal"
+                                key={key}
+                                data-ui="entity-meta"
+                                className={cn(
+                                  "inline-flex min-w-0 items-center gap-1.5",
+                                  index === 1 && "@max-[520px]:hidden",
+                                )}
+                                title={`${label}: ${value}`}
+                                aria-label={`${label}: ${value}`}
                               >
-                                {key === "file" ? value.split(/[\\/]/).pop() : value}
+                                <span className="shrink-0" aria-hidden="true">
+                                  ·
+                                </span>
+                                <Icon
+                                  className="size-3.25 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span
+                                  data-ui="mono"
+                                  className="truncate font-mono text-xs leading-4.5 font-normal"
+                                >
+                                  {key === "file"
+                                    ? value.split(/[\\/]/).pop()
+                                    : value}
+                                </span>
                               </span>
-                            </span>
-                          );
-                        })}
+                            );
+                          })}
                       </div>
                       <div
                         data-ui="mobile-badges"
-                        className="mt-2.25 hidden flex-wrap items-center gap-1.5 max-md:flex"
+                        className="mt-2.5 hidden flex-wrap items-center gap-1.5 max-[1000px]:flex"
                       >
                         <PriorityBadge value={item.priority} queue />
                         <QueueVerdictBadge item={item} />
@@ -1324,15 +1278,23 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                     {columns.verdict && (
                       <TableCell
                         data-ui="col-verdict"
-                        className="w-40 max-md:hidden"
+                        className={cn("px-4", columnClasses.verdict)}
                       >
                         <QueueVerdictBadge item={item} />
+                      </TableCell>
+                    )}
+                    {columns.priority && (
+                      <TableCell
+                        data-ui="col-priority"
+                        className={cn("px-4", columnClasses.priority)}
+                      >
+                        <PriorityBadge value={item.priority} queue />
                       </TableCell>
                     )}
                     {columns.status && (
                       <TableCell
                         data-ui="col-status"
-                        className="w-[147px] max-[1201px]:w-[138px] max-md:hidden"
+                        className={cn("px-4", columnClasses.status)}
                       >
                         <QueueStatusIndicator item={item} />
                       </TableCell>
@@ -1340,7 +1302,7 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                     {columns.owner && (
                       <TableCell
                         data-ui="col-owner"
-                        className="w-31 max-[1201px]:w-[111px] max-[1101px]:hidden"
+                        className={cn("px-4", columnClasses.owner)}
                       >
                         <Owner name={item.owner} />
                       </TableCell>
@@ -1348,7 +1310,7 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                     {columns.age && (
                       <TableCell
                         data-ui="col-age"
-                        className="w-16 max-[1101px]:hidden"
+                        className={cn("px-4", columnClasses.age)}
                       >
                         <span
                           data-ui="caption"
@@ -1362,24 +1324,29 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                     {columns.source && (
                       <TableCell
                         data-ui="col-source"
-                        className="w-37.5 text-xs max-md:hidden"
+                        className={cn("px-4", columnClasses.source)}
                       >
                         {item.source}
                       </TableCell>
                     )}
                     <TableCell
                       data-ui="col-actions"
-                      className="w-19 pr-2.5 text-right whitespace-nowrap max-md:w-17.5"
+                      className="w-20 pl-0 pr-3 text-left whitespace-nowrap"
                     >
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Quick preview ${item.id}`}
-                        title="Quick preview"
-                        onClick={() => setPreview(item)}
+                      <CaseQuickPreview
+                        item={item}
+                        open={preview?.id === item.id}
+                        onOpenChange={(open) => setPreview(open ? item : null)}
                       >
-                        <Eye aria-hidden="true" />
-                      </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Quick preview ${item.id}`}
+                          title="Quick preview"
+                        >
+                          <Eye aria-hidden="true" />
+                        </Button>
+                      </CaseQuickPreview>
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           render={
@@ -1430,19 +1397,27 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
                   <EmptyTitle>
                     {activeFilters
                       ? "No matching cases"
-                      : `No ${filters.queue.toLowerCase()} cases`}
+                      : view === "mine"
+                        ? "No cases assigned to you"
+                        : view === "unassigned"
+                          ? "No unassigned cases"
+                          : view === "attention"
+                            ? "Nothing needs attention"
+                            : "No cases yet"}
                   </EmptyTitle>
                   <EmptyDescription>
                     {activeFilters
                       ? "Try a broader search or clear the active filters."
-                      : "Cases will appear here when their investigation reaches this state."}
+                      : view === "mine"
+                        ? "Open cases assigned to you will appear here."
+                        : "Cases will appear here when they match this work view."}
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
             )}
             <div
               data-ui="table-footer"
-              className="flex items-center justify-between gap-3 border-t pt-2.5 pr-4.5 pb-2.5 pl-4.5 border-border max-md:pt-3 max-md:pr-3 max-md:pb-3 max-md:pl-3 max-md:[&_[data-ui~='caption']]:text-[11px]"
+              className="flex flex-wrap items-center justify-between gap-4 border-t px-6 py-4 border-border max-md:pt-3 max-md:pr-3 max-md:pb-3 max-md:pl-3 max-md:[&_[data-ui~='caption']]:text-caption"
             >
               <span
                 data-ui="caption"
@@ -1456,7 +1431,7 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
               </span>
               <span
                 data-ui="caption preview-note"
-                className="text-xs leading-4.5 font-normal text-muted-foreground ml-auto mr-4.5"
+                className="text-caption font-normal text-muted-foreground max-md:order-3 max-md:w-full max-md:text-center"
               >
                 Local preview · no live data
               </span>
@@ -1493,7 +1468,6 @@ export function CaseTable({ initialQueue = "All" }: { initialQueue?: Queue }) {
       <span className="sr-only" role="status">
         {announcement}
       </span>
-      <CasePreview item={preview} onClose={() => setPreview(null)} />
     </section>
   );
 }

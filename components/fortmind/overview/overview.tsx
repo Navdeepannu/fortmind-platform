@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { ArrowRight, ArrowUpRight, Link2, Sparkles } from "lucide-react";
 import {
   Card,
@@ -19,10 +18,9 @@ import {
   runningCases,
   runningCaseDetails,
 } from "@/lib/overview-data";
-import { formatAge, type SecurityCase } from "@/lib/preview-data";
-import { PriorityBadge, SemanticIcon, VerdictBadge } from "../semantic";
-import { lifecycleStates } from "@/lib/semantic-states";
-import { CasePreview } from "../case-table";
+import { formatAge } from "@/lib/preview-data";
+import { PriorityBadge, VerdictBadge } from "../semantic";
+import { CaseQuickPreview } from "../case-table";
 import { NewCase } from "../new-case";
 import { PlatformImpact } from "./impact";
 import { useWorkspace } from "../workspace-shell";
@@ -37,46 +35,45 @@ import {
 
 function OverviewContent() {
   const { openPanel } = useWorkspace();
-  const [selected, setSelected] = useState<SecurityCase | null>(null);
   const metrics = [
     {
       label: "Needs you",
       value: operations.needsYou,
-      definition: lifecycleStates["Needs you"],
       detail: "Awaiting your decision",
       queue: "Needs you",
     },
     {
       label: "Running",
       value: operations.running,
-      definition: lifecycleStates.Running,
       detail: "OSCAR is investigating",
       queue: "Running",
     },
     {
       label: "Closed",
       value: operations.closed,
-      definition: lifecycleStates.Closed,
       detail: "All closed cases",
       queue: "Closed",
     },
     {
       label: "Failed",
       value: operations.failed,
-      definition: lifecycleStates.Failed,
       detail: "Investigation needs a retry",
       queue: "Failed",
     },
   ];
   return (
-    <div data-ui="main" id="preview-main" className="w-full mx-auto p-6">
+    <div
+      data-ui="main"
+      id="preview-main"
+      className="mx-auto w-full min-w-0 p-5 md:p-8"
+    >
       <div
         data-ui="page-heading"
-        className="flex justify-between items-center gap-6 max-[1101px]:items-start max-md:items-start max-md:gap-3"
+        className="flex flex-wrap justify-between items-center gap-6 max-[1101px]:items-start max-md:items-start max-md:gap-3"
       >
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Overview</h1>
-          <p className="text-muted-foreground text-sm leading-5.5 mt-1.25 max-[1360px]:text-[13px] max-[1101px]:max-w-95 max-md:text-xs max-md:leading-4.75 max-md:max-w-70">
+          <h1 className="text-page-title">Overview</h1>
+          <p className="mt-1 text-body text-muted-foreground">
             What needs you, and what OSCAR has handled.
           </p>
         </div>
@@ -99,22 +96,21 @@ function OverviewContent() {
       {/* metrics key 4 metrics */}
       <section
         data-ui="metrics"
-        className="grid md:grid-cols-4 my-10 grid-cols-2 gap-4"
+        className="grid grid-cols-2 gap-4 my-8 md:grid-cols-4 lg:gap-6"
         aria-label="Current case status"
       >
-        <h2 className="sr-only">Current operations</h2>
+        <h2 className="sr-only text-section-title">Current operations</h2>
         {metrics.map((metric) => (
           <Link
             data-ui="metric"
-            className="group/metric bg-card ring-1 ring-foreground/10 p-4 rounded-xl hover:bg-muted  transition-colors duration-150"
+            className="group/metric bg-card border border-border p-5 md:p-6 rounded-lg hover:bg-surface-hover  transition-colors duration-150"
             key={metric.label}
             href={`/platform/cases?queue=${encodeURIComponent(metric.queue)}`}
           >
             <div
               data-ui="metric-label"
-              className="flex items-center gap-2 text-[13px] font-medium leading-5 max-md:text-xs [&>_svg[data-metric-tone='warning']]:text-warning-foreground [&>_svg[data-metric-tone='information']]:text-info-foreground [&>_svg[data-metric-tone='failure']]:text-danger-foreground"
+              className="flex items-center gap-2 text-label font-medium leading-5 max-md:text-xs text-muted-foreground"
             >
-              <SemanticIcon definition={metric.definition} />
               <span>{metric.label}</span>
               <ArrowUpRight
                 data-ui="metric-arrow"
@@ -122,20 +118,20 @@ function OverviewContent() {
                 aria-hidden="true"
               />
             </div>
-            <div data-ui="metric-body" className="flex flex-col mt-3 gap-2">
-              <strong className="text-[32px] font-mono leading-9.5 font-semibold tracking-[-0.045em] tabular-nums max-[1360px]:text-[29px] max-md:text-[28px] max-md:leading-8.75">
+            <div data-ui="metric-body" className="flex flex-col mt-4 gap-3">
+              <strong className="text-metric tabular-nums">
                 {metric.value}
               </strong>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 {metric.label === "Needs you" && (
                   <span
                     data-ui="urgent-count"
-                    className="text-danger-foreground text-[13px] font-medium"
+                    className="shrink-0 whitespace-nowrap text-danger-foreground text-label font-medium"
                   >
                     {operations.urgent} urgent
                   </span>
                 )}
-                <p className="text-muted-foreground text-[13px] leading-4.75 max-[1360px]:text-xs max-[1101px]:text-xs max-[1101px]:leading-4 max-md:text-xs max-md:leading-4">
+                <p className="text-caption text-muted-foreground">
                   {metric.detail}
                 </p>
               </div>
@@ -147,25 +143,22 @@ function OverviewContent() {
       {/* section 2 needs your attenstion and OSCAR investigation */}
       <div
         data-ui="work-grid"
-        className="grid grid-cols-1 items-stretch gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]"
+        className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]"
       >
         <Card
           data-ui="card attention"
           role="region"
           aria-labelledby="cases-heading"
-          className="h-full gap-0 overflow-hidden rounded-xl ring-1 ring-foreground/10 bg-card py-0 shadow-none"
+          className="h-full gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
         >
-          <CardHeader className="flex flex-row items-center justify-between gap-3 border-b px-5 py-4 xl:px-6 xl:py-5">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 border-b px-6 py-5">
             <div className="min-w-0 space-y-1">
               <CardTitle>
-                <h2
-                  id="cases-heading"
-                  className="text-base font-semibold 2xl:text-lg"
-                >
+                <h2 id="cases-heading" className="text-section-title">
                   Needs your attention
                 </h2>
               </CardTitle>
-              <CardDescription className="text-xs lg:text-sm">
+              <CardDescription className="text-caption">
                 Urgent first, then longest waiting
               </CardDescription>
             </div>
@@ -202,16 +195,17 @@ function OverviewContent() {
               <TableBody>
                 {attentionCases.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="min-w-0 px-5 py-4 align-middle xl:px-6 xl:py-5">
-                      <button
-                        type="button"
-                        onClick={() => setSelected(item)}
-                        className="line-clamp-2 max-w-full cursor-pointer text-left text-sm font-medium leading-5.5 2xl:text-[15px] hover:underline hover:underline-offset-2 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                        aria-label={`Preview ${item.id}: ${item.title}`}
-                      >
-                        {item.title}
-                      </button>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground 2xl:text-[13px]">
+                    <TableCell className="min-w-0 whitespace-normal px-6 py-5 align-middle">
+                      <CaseQuickPreview item={item}>
+                        <button
+                          type="button"
+                          className="line-clamp-2 max-w-full cursor-pointer text-left text-body font-medium hover:underline hover:underline-offset-2 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                          aria-label={`Preview ${item.id}: ${item.title}`}
+                        >
+                          {item.title}
+                        </button>
+                      </CaseQuickPreview>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground 2xl:text-label">
                         <code className="font-mono">{item.id}</code>
                         <span aria-hidden="true">·</span>
                         <span className="min-w-0 truncate">
@@ -223,18 +217,18 @@ function OverviewContent() {
                         <VerdictBadge value={item.verdict} />
                       </div>
                     </TableCell>
-                    <TableCell className="hidden px-3 py-4 text-center align-middle sm:table-cell xl:py-5">
+                    <TableCell className="hidden px-3 py-5 text-center align-middle sm:table-cell">
                       <div className="flex justify-center">
                         <PriorityBadge value={item.priority} />
                       </div>
                     </TableCell>
-                    <TableCell className="hidden px-3 py-4 text-center align-middle sm:table-cell xl:py-5">
+                    <TableCell className="hidden px-3 py-5 text-center align-middle sm:table-cell">
                       <div className="flex justify-center">
                         <VerdictBadge value={item.verdict} />
                       </div>
                     </TableCell>
                     <TableCell
-                      className="px-3 py-4 text-center align-middle text-xs tabular-nums whitespace-nowrap text-muted-foreground xl:py-5"
+                      className="px-3 py-5 text-center align-middle text-xs tabular-nums whitespace-nowrap text-muted-foreground"
                       title={`Waiting ${item.ageMinutes} minutes`}
                     >
                       {formatAge(item.ageMinutes)}
@@ -244,7 +238,7 @@ function OverviewContent() {
               </TableBody>
             </Table>
           </CardContent>
-          <CardFooter className="mt-auto border-t px-5 py-3 text-xs text-muted-foreground">
+          <CardFooter className="mt-auto border-t px-6 py-4 text-xs text-muted-foreground">
             {attentionCases.length} highlighted cases
           </CardFooter>
         </Card>
@@ -253,14 +247,14 @@ function OverviewContent() {
           data-ui="card running"
           role="region"
           aria-labelledby="running-heading"
-          className="h-full gap-0 overflow-hidden rounded-xl ring-1 ring-foreground/10 bg-card py-0 shadow-none"
+          className="h-full gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
         >
-          <CardHeader className="flex flex-row items-center justify-between gap-3 border-b px-5 py-4 xl:px-6 xl:py-5">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 border-b px-6 py-5">
             <div className="min-w-0 space-y-1">
               <CardTitle>
                 <h2
                   id="running-heading"
-                  className="flex items-center gap-2 text-base font-semibold 2xl:text-lg"
+                  className="flex items-center gap-2 text-section-title"
                 >
                   <Sparkles
                     aria-hidden="true"
@@ -269,13 +263,13 @@ function OverviewContent() {
                   OSCAR is investigating
                 </h2>
               </CardTitle>
-              <CardDescription className="text-xs lg:text-sm">
+              <CardDescription className="text-caption">
                 From alert to evidence, automatically
               </CardDescription>
             </div>
             <Badge
-              variant="secondary"
-              className="h-6 shrink-0 rounded-sm bg-info-muted px-2 text-xs text-info-foreground"
+              variant="outline"
+              className="h-6 shrink-0 rounded-sm border-info-border px-2 text-xs text-info-foreground"
             >
               {operations.running} running
             </Badge>
@@ -296,15 +290,16 @@ function OverviewContent() {
               <TableBody>
                 {runningCases.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="min-w-0 px-5 py-4 align-middle xl:px-6 xl:py-5">
-                      <button
-                        type="button"
-                        onClick={() => setSelected(runningCaseDetails(item))}
-                        className="line-clamp-2 w-full cursor-pointer text-left text-sm font-medium leading-5.5 2xl:text-[15px] hover:underline hover:underline-offset-2 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                        aria-label={`Preview ${item.id}: ${item.title}`}
-                      >
-                        {item.title}
-                      </button>
+                    <TableCell className="min-w-0 whitespace-normal px-6 py-5 align-middle">
+                      <CaseQuickPreview item={runningCaseDetails(item)}>
+                        <button
+                          type="button"
+                          className="line-clamp-2 w-full cursor-pointer text-left text-body font-medium hover:underline hover:underline-offset-2 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                          aria-label={`Preview ${item.id}: ${item.title}`}
+                        >
+                          {item.title}
+                        </button>
+                      </CaseQuickPreview>
                       <p className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground 2xl:text-sm">
                         <span
                           aria-hidden="true"
@@ -313,7 +308,7 @@ function OverviewContent() {
                         <span className="min-w-0 truncate">{item.stage}</span>
                       </p>
                     </TableCell>
-                    <TableCell className="px-3 py-4 text-center align-middle text-xs tabular-nums whitespace-nowrap text-muted-foreground xl:py-5">
+                    <TableCell className="px-3 py-5 text-center align-middle text-xs tabular-nums whitespace-nowrap text-muted-foreground">
                       <span aria-label={`Elapsed ${item.elapsed}`}>
                         {item.elapsed}
                       </span>
@@ -323,7 +318,7 @@ function OverviewContent() {
               </TableBody>
             </Table>
           </CardContent>
-          <CardFooter className="mt-auto border-t px-5 py-3">
+          <CardFooter className="mt-auto border-t px-6 py-4">
             <Button
               variant="ghost"
               nativeButton={false}
@@ -338,8 +333,6 @@ function OverviewContent() {
       </div>
 
       <PlatformImpact />
-
-      <CasePreview item={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

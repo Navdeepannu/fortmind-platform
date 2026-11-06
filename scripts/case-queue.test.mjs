@@ -24,7 +24,7 @@ test("verdict confidence is independent of investigation confidence; absence and
 test("a supplied verdict score renders with its icon and never uses investigation confidence", () => {
   const html = markup(QueueVerdictBadge, { item: { ...base, verdictConfidence: 90 } });
   assert.match(html.replace(/<[^>]*>/g, ""), /Malicious · 90\/100/);
-  assert.match(html, /data-semantic-icon="shield-x"/);
+  assert.match(html, /data-semantic-icon="octagon-x"/);
   assert.doesNotMatch(html, /98\/100/);
 });
 
@@ -69,6 +69,7 @@ test("queue mappings retain urgency icons and scope green closure to the queue",
     const html = markup(QueueStatusIndicator, { item: { ...base, status } });
     assert.match(html, /data-treatment="badge"/);
     assert.doesNotMatch(html, /data-treatment="status"/);
+    assert.doesNotMatch(html, /<svg/);
   }
 });
 
@@ -76,4 +77,36 @@ test("autonomous filter excludes a running record even if a stale attribution fl
   const filters = { queue: "All", search: "", priority: "", verdict: "", assignment: "", source: "", autonomous: true };
   const records = [{ ...base, id: "closed", status: "Closed", closedByOscar: true }, { ...base, id: "running", status: "Running", closedByOscar: true }, { ...base, id: "manual", status: "Closed", closedByOscar: false }];
   assert.deepEqual(filterCases(records, filters).map(item => item.id), ["closed"]);
+});
+
+// Type scale extensions must coexist with the status palette when classes merge.
+test("readable compact badges retain semantic ink through shared typography", () => {
+  const html = markup(QueueVerdictBadge, { item: { ...base, verdict: "Malicious" } });
+  assert.match(html, /text-danger-foreground/);
+  assert.match(html, /text-caption/);
+  const { cn } = loadProjectModule("lib/utils.ts");
+  assert.equal(cn("text-sm text-muted-foreground", "text-caption"), "text-muted-foreground text-caption");
+});
+
+const { matchesCaseListView, caseListEntry, isCaseListView } = loadProjectModule("lib/case-list-views.ts");
+test("work views include intervention and responsibility without changing lifecycle or assignments", () => {
+  const example = { ...base, status: "Failed", owner: null };
+  assert.equal(matchesCaseListView(example, "attention", "Analyst"), true);
+  assert.equal(matchesCaseListView(example, "unassigned", "Analyst"), true);
+  assert.equal(matchesCaseListView({ ...example, status: "Running" }, "attention", "Analyst"), false);
+  assert.equal(matchesCaseListView({ ...example, owner: "Analyst" }, "mine", "Analyst"), true);
+  assert.equal(matchesCaseListView({ ...example, owner: "Other" }, "mine", "Analyst"), false);
+  for (const view of ["mine", "unassigned", "attention"]) {
+    assert.equal(matchesCaseListView({ ...example, status: "Closed", owner: view === "mine" ? "Analyst" : null }, view, "Analyst"), false);
+  }
+  assert.equal(matchesCaseListView({ ...example, status: "Closed" }, "all", "Analyst"), true);
+  assert.equal(example.owner, null);
+  assert.equal(example.status, "Failed");
+});
+test("lifecycle entry links retain exact running, failed and closed filters", () => {
+  for (const status of ["Running", "Failed", "Closed"]) assert.deepEqual(caseListEntry(status), {view: "all", status});
+  assert.deepEqual(caseListEntry("Needs you"), {view: "attention", status: ""});
+  assert.equal(isCaseListView("unassigned"), true);
+  assert.equal(isCaseListView("Closed"), false);
+  assert.equal(isCaseListView(null), false);
 });

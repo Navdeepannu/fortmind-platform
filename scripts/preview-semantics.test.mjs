@@ -7,10 +7,10 @@ const registry = loadProjectModule("lib/semantic-states.ts");
 // Product contract from the refinement brief, independent of the rendering implementation.
 const expected = {
   Verdicts: {
-    Malicious: ["danger", "shield-x"],
-    Suspicious: ["warning", "shield-alert"],
-    Benign: ["positive", "shield-check"],
-    Inconclusive: ["neutral", "shield-question"],
+    Malicious: ["danger", "octagon-x"],
+    Suspicious: ["warning", "triangle-alert"],
+    Benign: ["positive", "check"],
+    Inconclusive: ["neutral", "circle-help"],
   },
   Priorities: {
     Urgent: ["danger", "chevrons-up"],
@@ -26,7 +26,7 @@ const expected = {
   },
   Outcomes: {
     "Closed by OSCAR": ["agent", "check-check"],
-    Escalated: ["warning", "arrow-up-right"],
+    Escalated: ["escalation", "arrow-up-from-line"],
     "Investigation complete": ["neutral", "check"],
     "Human review required": ["warning", "user-round-check"],
     Unresolved: ["neutral", "circle-help"],
