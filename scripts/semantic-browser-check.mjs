@@ -48,15 +48,15 @@ try {
       await page.screenshot({ path: resolve(output,`${name}-${theme}.png`), fullPage: name==="conclusion" });
       report.routes.push({path,theme,status:200});
       if(name==="cases") {
-        await page.getByRole("button",{name:"Quick preview FM-1048",exact:true}).click();await page.getByRole("dialog").waitFor();
+        await page.getByRole("button",{name:"Quick preview FM-1048",exact:true}).click();await page.locator("[data-ui~=case-preview]").waitFor();
         await page.waitForFunction(() => {
-          const dialog = document.querySelector('[role="dialog"]');
+          const dialog = document.querySelector('[data-ui~=case-preview]');
           return dialog && !dialog.hasAttribute("data-starting-style") && getComputedStyle(dialog).opacity === "1";
         });
-        report.samples.push(...(await measure(`drawer ${theme}`)).samples);
-        await page.screenshot({path:resolve(output,`drawer-${theme}.png`)});
-        await page.keyboard.press("Escape");await page.getByRole("dialog").waitFor({state:"hidden"});
-        report.interactions.push(`${theme}: quick preview drawer and Escape`);
+        report.samples.push(...(await measure(`case preview ${theme}`)).samples);
+        await page.screenshot({path:resolve(output,`preview-${theme}.png`)});
+        await page.keyboard.press("Escape");await page.locator("[data-ui~=case-preview]").waitFor({state:"hidden"});
+        report.interactions.push(`${theme}: anchored case preview and Escape`);
       }
     }
   }

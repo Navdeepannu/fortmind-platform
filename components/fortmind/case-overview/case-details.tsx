@@ -29,7 +29,7 @@ export function CaseDetails({ id }: { id: string }) {
       <main
         data-ui="main cases-main"
         id="preview-main"
-        className="mx-auto w-full max-w-[1580px] px-8 pb-5.5 min-[1800px]:pt-9.5 max-[1360px]:px-6.5 max-[1360px]:pt-6.5 max-[1360px]:pb-5 max-md:px-4 max-md:pt-6 max-md:pb-4.5 pt-6.5"
+        className="mx-auto w-full min-w-0 p-5 md:p-8"
         aria-busy="true"
         aria-label="Loading investigation"
       >
@@ -41,7 +41,7 @@ export function CaseDetails({ id }: { id: string }) {
     <div
       data-ui="main cases-main investigation"
       id="preview-main"
-      className="mx-auto w-full px-8 pb-5.5 min-[1800px]:pt-9.5 max-[1360px]:px-6.5 max-[1360px]:pt-6.5 max-[1360px]:pb-5 max-md:px-4 max-md:pt-6 max-md:pb-4.5 pt-6.5 max-w-300"
+      className="mx-auto w-full min-w-0 p-5 md:p-8"
     >
       <Link
         data-ui="back-link"
@@ -55,7 +55,7 @@ export function CaseDetails({ id }: { id: string }) {
           data-ui="investigation-missing"
           className="max-w-117.5 mt-15 mr-auto mb-15 ml-auto text-center"
         >
-          <h1 className="text-2xl [font-weight:650]">Case unavailable</h1>
+          <h1 className="text-page-title">Case unavailable</h1>
           <p className="mt-2.25 mr-0 mb-5 ml-0 text-muted-foreground">
             This case is not in the prototype fixtures or this browser tab’s
             saved cases. Return to the case queue to continue.
@@ -72,12 +72,12 @@ export function CaseDetails({ id }: { id: string }) {
           >
             <div
               data-ui="investigation-id"
-              className="flex items-center gap-2 text-[11px] text-muted-foreground [&_code]:text-xs"
+              className="flex items-center gap-2 text-caption text-muted-foreground [&_code]:text-xs"
             >
               <span>Investigation</span>
               <CopyTechnicalValue label="case ID" value={item.id} />
             </div>
-            <h1 className="max-w-225 mt-2.25 mr-0 mb-4 ml-0 text-[28px] leading-9 [font-weight:650] tracking-[-.035em]">
+            <h1 className="max-w-225 mt-2.25 mr-0 mb-4 ml-0 text-page-title">
               {item.title}
             </h1>
             <div
@@ -115,7 +115,7 @@ export function CaseDetails({ id }: { id: string }) {
                 className="flex items-center gap-2 [&_svg]:w-4.25 [&_svg]:h-4.25 [&_svg]:text-oscar-foreground"
               >
                 <SemanticIcon definition={oscarStates.OSCAR} />
-                <h2 className="text-base leading-6 [font-weight:650]">
+                <h2 className="text-section-title">
                   OSCAR assessment
                 </h2>
               </div>
@@ -127,7 +127,7 @@ export function CaseDetails({ id }: { id: string }) {
                 This is illustrative case data. Review the underlying evidence
                 before confirming a verdict or taking action.
               </div>
-              <h3 className="pb-2.5 border-b border-border text-[13px] [font-weight:650]">
+              <h3 className="pb-2.5 border-b border-border text-panel-title">
                 Technical entities
               </h3>
               <dl
@@ -151,9 +151,9 @@ export function CaseDetails({ id }: { id: string }) {
             </section>
             <aside
               data-ui="investigation-panel investigation-facts"
-              className="min-w-0 pt-6 pr-6 pb-6 pl-6 border border-border rounded-lg bg-card [&_h3]:pb-2.5 [&_h3]:border-b [&_h3]:border-border [&_h3]:text-[13px] [&_h3]:[font-weight:650] [&_dl_>_div:last-child]:border-b-0"
+              className="min-w-0 pt-6 pr-6 pb-6 pl-6 border border-border rounded-lg bg-card [&_h3]:pb-2.5 [&_h3]:border-b [&_h3]:border-border [&_h3]:text-panel-title [&_dl_>_div:last-child]:border-b-0"
             >
-              <h2 className="text-base leading-6 [font-weight:650]">
+              <h2 className="text-section-title">
                 Case details
               </h2>
               <dl className="mt-3.75">
@@ -182,7 +182,7 @@ export function CaseDetails({ id }: { id: string }) {
                     </div>
                   )}
               </dl>
-              <p className="mt-3.5 flex gap-1.5 pt-3.75 border-t border-border text-muted-foreground text-[11px] leading-4.5">
+              <p className="mt-3.5 flex gap-1.5 pt-3.75 border-t border-border text-muted-foreground text-caption leading-4.5">
                 <ArrowUpRight
                   aria-hidden="true"
                   className="w-3.25 h-3.25 flex-none"

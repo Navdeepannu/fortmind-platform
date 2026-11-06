@@ -23,7 +23,7 @@ const processing = [
   ["Connected-tool queries", "Each connected tool’s vendor", "Set by that vendor"],
 ];
 function DocumentSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
-  return <section id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-8 border-b py-7 first:pt-0 last:border-0"><h2 id={`${id}-heading`} className="mb-3 text-base font-semibold">{title}</h2><div className="flex flex-col gap-4 text-sm leading-6 text-muted-foreground">{children}</div></section>;
+  return <section id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-8 border-b py-7 first:pt-0 last:border-0"><h2 id={`${id}-heading`} className="mb-3 text-section-title">{title}</h2><div className="flex flex-col gap-4 text-sm leading-6 text-muted-foreground">{children}</div></section>;
 }
 export function TrustData() {
   return <div className="mx-auto max-w-6xl">
@@ -54,7 +54,7 @@ export function TrustData() {
         </DocumentSection>
         <DocumentSection id="access" title="Sign-in, roles and permissions">
           <p>Clerk manages sign-in, members and roles. The source supports password or email-code sign-in and Google or Microsoft accounts. Two-step verification is optional rather than mandatory. Organization SAML single sign-on is not available in that reference.</p>
-          <div className="grid gap-4 sm:grid-cols-2"><div className="rounded-lg border p-4"><h3 className="mb-2 font-medium text-foreground">Admins</h3><p>Manage FortCases settings, rules, tools, signing secrets and organization chat integrations. Admins approve or reject proposed actions, manage response-action credentials and the never-act-on list, export audit trails, and create or revoke shared summaries.</p></div><div className="rounded-lg border p-4"><h3 className="mb-2 font-medium text-foreground">Members</h3><p>Work cases, write notes, teach facts, read rules, inspect held alerts, and manage their own preferences and Slack linkage. Other organization role names count as member. Client-organization actions require the role granted by that organization.</p></div></div>
+          <div className="grid gap-4 sm:grid-cols-2"><div className="rounded-lg border p-4"><h3 className="mb-2 text-foreground text-panel-title">Admins</h3><p>Manage FortCases settings, rules, tools, signing secrets and organization chat integrations. Admins approve or reject proposed actions, manage response-action credentials and the never-act-on list, export audit trails, and create or revoke shared summaries.</p></div><div className="rounded-lg border p-4"><h3 className="mb-2 text-foreground text-panel-title">Members</h3><p>Work cases, write notes, teach facts, read rules, inspect held alerts, and manage their own preferences and Slack linkage. Other organization role names count as member. Client-organization actions require the role granted by that organization.</p></div></div>
           <p>This local prototype does not authenticate users or enforce organization permissions. Editing local demo settings does not grant production permissions.</p>
         </DocumentSection>
         <DocumentSection id="providers" title="Connected tools, notifications and third parties">

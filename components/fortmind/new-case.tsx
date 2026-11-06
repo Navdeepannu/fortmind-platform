@@ -46,11 +46,12 @@ export function NewCase({
         render={
           <Button
             data-ui="new-case sidebar-new-case"
+            variant="brand"
             size="lg"
             className={cn(
               "max-md:[&>_svg]:hidden",
               placement === "sidebar" &&
-                "w-full justify-start gap-2.5 bg-foreground text-background hover:bg-foreground/90 hover:text-background group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 [&>span]:group-data-[collapsible=icon]:hidden",
+                "w-full justify-start gap-2.5 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 [&>span]:group-data-[collapsible=icon]:hidden",
             )}
             aria-label={placement === "sidebar" ? "Create new case" : undefined}
             title={placement === "sidebar" ? "Create new case" : undefined}
@@ -86,11 +87,12 @@ export function NewCase({
               >
                 <Check className="w-5 h-5" />
               </span>
-              <h3 className="text-base font-medium">{title}</h3>
+              <h3 className="text-panel-title">{title}</h3>
               <code>{created}</code>
               <SemanticBadge
                 definition={workflowStates.Queued}
                 treatment="status"
+                showIcon={false}
               />
             </div>
             <DialogFooter>

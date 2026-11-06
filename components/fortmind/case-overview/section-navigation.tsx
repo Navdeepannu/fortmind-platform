@@ -82,7 +82,7 @@ export function SectionNavigation({
     <nav
       data-ui="page-nav"
       ref={navRef}
-      className="sticky top-12 z-20 flex min-w-0 items-center gap-5.5 border-b bg-background px-9 @max-[641px]/case:px-5 @max-[501px]/case:px-4"
+      className="sticky top-12 z-20 flex min-w-0 items-center gap-5.5 border-b bg-background px-8 @max-[641px]/case:px-5 @max-[501px]/case:px-4"
       aria-label="Case sections"
     >
       <div
@@ -111,7 +111,7 @@ export function SectionNavigation({
                       : "smooth",
                   });
                 }}
-                className="inline-flex items-center gap-1.75 h-11.5 border-b-2 text-muted-foreground text-[13px] font-medium whitespace-nowrap"
+                className="inline-flex items-center gap-1.75 h-11.5 border-b-2 text-muted-foreground text-label font-medium whitespace-nowrap"
               >
                 {section.label}
                 {counts[section.id] !== undefined && (

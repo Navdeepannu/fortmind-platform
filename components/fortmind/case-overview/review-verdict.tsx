@@ -104,7 +104,7 @@ export function ReviewVerdict({
       className="[align-self:start] pt-5 pr-5 pb-5 pl-5 border border-border rounded-md bg-muted"
       aria-labelledby="decision-heading"
     >
-      <h3 id="decision-heading" className="text-base [font-weight:550]">
+      <h3 id="decision-heading" className="text-panel-title">
         Your decision
       </h3>
       <div data-ui="decision-body" className="flex flex-col gap-4 mt-3.25">
@@ -120,7 +120,7 @@ export function ReviewVerdict({
           </p>
           <p
             data-ui="secondary"
-            className="text-muted-foreground text-[13px] leading-5.25"
+            className="text-muted-foreground text-label leading-5.25"
           >
             {reason}
           </p>
@@ -128,7 +128,7 @@ export function ReviewVerdict({
         <dl data-ui="decision-meta" className="text-xs">
           <div>
             <dt className="text-muted-foreground">Assigned to</dt>
-            <dd className="flex items-center gap-1.5 mt-0.75 wrap-anywhere text-[13px]">
+            <dd className="flex items-center gap-1.5 mt-0.75 wrap-anywhere text-label">
               <UserRound
                 aria-hidden="true"
                 className="w-3.5 h-3.5 text-muted-foreground"
@@ -139,7 +139,7 @@ export function ReviewVerdict({
         </dl>
         <div
           data-ui="review-result"
-          className="flex flex-col gap-1.75 pt-3.25 border-t border-border text-[13px] [&:empty]:hidden [&>_p:first-child]:flex [&>_p:first-child]:items-center [&>_p:first-child]:gap-1.5"
+          className="flex flex-col gap-1.75 pt-3.25 border-t border-border text-label [&:empty]:hidden [&>_p:first-child]:flex [&>_p:first-child]:items-center [&>_p:first-child]:gap-1.5"
           role="status"
           aria-live="polite"
           aria-atomic="true"
@@ -160,7 +160,7 @@ export function ReviewVerdict({
               )}
               <p
                 data-ui="secondary"
-                className="text-muted-foreground text-[13px] leading-5.25"
+                className="text-muted-foreground text-label leading-5.25"
               >
                 Held in this page only. Case status remains Needs you.
               </p>
@@ -211,7 +211,7 @@ export function ReviewVerdict({
         ) : (
           <p
             data-ui="secondary"
-            className="text-muted-foreground text-[13px] leading-5.25"
+            className="text-muted-foreground text-label leading-5.25"
           >
             Verdict review is available when this case needs an analyst
             decision.
@@ -306,7 +306,7 @@ export function ReviewVerdict({
               </FieldGroup>
               <p
                 data-ui="secondary"
-                className="text-muted-foreground text-[13px] leading-5.25"
+                className="text-muted-foreground text-label leading-5.25"
               >
                 This preview keeps the decision in memory until you reload. It
                 does not close the case, execute a response, or change OSCAR’s

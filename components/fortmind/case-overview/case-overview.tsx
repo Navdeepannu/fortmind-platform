@@ -55,14 +55,14 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
   return (
     <header
       data-ui="header"
-      className="flex-none min-w-0 pt-4.5 pr-9 pb-5 pl-9 border-b border-border bg-background @max-[641px]/case:pl-5 @max-[641px]/case:pr-5 @max-[501px]/case:pt-3.5 @max-[501px]/case:pr-4 @max-[501px]/case:pb-4 @max-[501px]/case:pl-4"
+      className="flex-none min-w-0 pt-6 pr-8 pb-6 pl-8 border-b border-border bg-background @max-[641px]/case:pl-5 @max-[641px]/case:pr-5 @max-[501px]/case:pt-3.5 @max-[501px]/case:pr-4 @max-[501px]/case:pb-4 @max-[501px]/case:pl-4"
     >
       <div
         data-ui="breadcrumb-row"
         className="flex items-center justify-start gap-4.5 @max-[501px]/case:gap-3"
       >
-        <Breadcrumb data-ui="breadcrumb" className="text-[13px]">
-          <BreadcrumbList className="gap-2 text-[13px]">
+        <Breadcrumb data-ui="breadcrumb" className="text-label">
+          <BreadcrumbList className="gap-2 text-label">
             <BreadcrumbItem>
               <BreadcrumbLink
                 render={<Link href="/platform/cases" />}
@@ -97,7 +97,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           Case preview
         </span>
       </div>
-      <h1 className="mt-3 text-2xl leading-[1.3] font-semibold tracking-[-.03em]">
+      <h1 className="mt-3 text-page-title">
         {data.title}
       </h1>
       <p
@@ -108,7 +108,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
       </p>
       <div
         data-ui="header-states"
-        className="flex items-center flex-wrap gap-y-2 gap-x-3.5 mt-4.25 text-[13px] @max-[501px]/case:mt-3.5 @max-[501px]/case:gap-y-2 @max-[501px]/case:gap-x-0 @max-[501px]/case:[&>_:nth-child(n+3)]:basis-full @max-[501px]/case:[&>_:nth-child(n+3)]:pl-0 @max-[501px]/case:[&>_:nth-child(n+3)]:border-l-0"
+        className="flex items-center flex-wrap gap-y-2 gap-x-3.5 mt-4.25 text-label @max-[501px]/case:mt-3.5 @max-[501px]/case:gap-y-2 @max-[501px]/case:gap-x-0 @max-[501px]/case:[&>_:nth-child(n+3)]:basis-full @max-[501px]/case:[&>_:nth-child(n+3)]:pl-0 @max-[501px]/case:[&>_:nth-child(n+3)]:border-l-0"
         aria-label="Case assessment and workflow"
       >
         <CaseStatusBadge value={data.status} />
@@ -124,7 +124,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
         </span>
         <span
           data-ui="ai-state"
-          className="text-muted-foreground text-[13px] [&_svg]:w-3.75 [&_svg]:h-3.75 @max-[501px]/case:[flex-basis:50%]"
+          className="text-muted-foreground text-label [&_svg]:w-3.75 [&_svg]:h-3.75 @max-[501px]/case:[flex-basis:50%]"
         >
           <SemanticBadge
             definition={outcomeStates["Investigation complete"]}
@@ -141,7 +141,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           <dt className="mb-1 text-muted-foreground text-xs">
             Involved entities
           </dt>
-          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-[13px]">
+          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             <span className="inline-flex items-center gap-1">
               <Monitor
                 aria-hidden="true"
@@ -160,7 +160,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
         </div>
         <div>
           <dt className="mb-1 text-muted-foreground text-xs">Received</dt>
-          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-[13px]">
+          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             <time dateTime={data.investigation.receivedAt}>
               {data.investigation.dateLabel} ·{" "}
               {data.investigation.receivedLabel}
@@ -169,19 +169,19 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
         </div>
         <div>
           <dt className="mb-1 text-muted-foreground text-xs">Assigned to</dt>
-          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-[13px]">
+          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             {data.owner ?? "Unassigned"}
           </dd>
         </div>
         <div>
           <dt className="mb-1 text-muted-foreground text-xs">Source</dt>
-          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-[13px]">
+          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             {data.source}
           </dd>
         </div>
         <div>
           <dt className="mb-1 text-muted-foreground text-xs">MITRE ATT&CK</dt>
-          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-[13px]">
+          <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             <Crosshair
               aria-hidden="true"
               className="w-3.25 h-3.25 text-muted-foreground"
@@ -209,14 +209,14 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
       footer={
         <div className="grid grid-cols-1 gap-3.75 @min-[760px]/case:grid-cols-[170px_minmax(0,1fr)]">
           <div>
-            <h3 className="text-base leading-6 font-semibold tracking-[-.015em]">
+            <h3 className="text-panel-title">
               Recommended next steps
             </h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Suggestions only; no response has been approved or executed here.
             </p>
           </div>
-          <ol className="grid grid-cols-3 gap-x-6 gap-y-3.5 pl-4.5 list-decimal text-[13px] leading-5.25 marker:text-muted-foreground @max-[641px]/case:grid-cols-1">
+          <ol className="grid grid-cols-3 gap-x-6 gap-y-3.5 pl-4.5 list-decimal text-label leading-5.25 marker:text-muted-foreground @max-[641px]/case:grid-cols-1">
             {data.nextSteps.map((step) => (
               <li className="pl-0.5" key={step}>
                 {step}
@@ -269,7 +269,7 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
             data-ui="supporting"
             className="mt-6 pt-5 border-t border-border [&_li_+_li]:border-t [&_li_+_li]:border-border [&_li_span:not([data-ui~='evidence-index'])]:block [&_li_span:not([data-ui~='evidence-index'])]:mt-1 [&_li_span:not([data-ui~='evidence-index'])]:text-muted-foreground [&_li_span:not([data-ui~='evidence-index'])]:text-xs [&_a:hover]:decoration-current"
           >
-            <h3 className="text-base leading-6 [font-weight:550] tracking-[-.015em]">
+            <h3 className="text-panel-title">
               Key evidence
             </h3>
             <ul className="flex flex-col gap-0 mt-1.75">
@@ -337,7 +337,7 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
           data-ui="unresolved"
           className="grid grid-cols-2 gap-y-0 gap-x-6.25 @max-[501px]/case:grid-cols-1"
         >
-          <h3 className="col-span-full text-base leading-6 [font-weight:550] tracking-[-.015em]">
+          <h3 className="col-span-full text-panel-title">
             What remains uncertain
           </h3>
           <p
@@ -360,7 +360,7 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
               <SemanticIcon definition={outcomeStates.Unresolved} />
               <div>
                 <h4 className="text-sm font-medium">{item.question}</h4>
-                <p className="mt-0.75 text-muted-foreground text-[13px] leading-5.25">
+                <p className="mt-0.75 text-muted-foreground text-label leading-5.25">
                   {item.resolution}
                 </p>
               </div>
@@ -383,7 +383,7 @@ function EntityRow({ entity }: { entity: OverviewEntity }) {
     <TableRow
       data-ui="entity-row"
       id={`entity-${entity.id}`}
-      className="scroll-mt-34 outline-none min-h-15.5 text-[13px]"
+      className="scroll-mt-34 outline-none min-h-15.5 text-label"
       tabIndex={-1}
     >
       <TableCell>
@@ -397,7 +397,7 @@ function EntityRow({ entity }: { entity: OverviewEntity }) {
       </TableCell>
       <TableCell
         data-ui="entity-identity"
-        className="[&_code]:text-foreground [&_code]:text-[13px]"
+        className="[&_code]:text-foreground [&_code]:text-label"
       >
         <CopyIdentifier value={entity.name} label={entity.name} />
       </TableCell>
@@ -513,14 +513,14 @@ function SimilarCases({ data }: { data: CaseOverviewData }) {
           >
             <div
               data-ui="related-topline"
-              className="flex justify-between flex-wrap gap-y-0.75 gap-x-3 text-muted-foreground text-[11px]"
+              className="flex justify-between flex-wrap gap-y-0.75 gap-x-3 text-muted-foreground text-caption"
             >
               <span>
                 {item.caseId ? `Case ${item.caseId}` : "Case ID unavailable"}
               </span>
               <time dateTime={item.receivedAt}>{item.receivedLabel}</time>
             </div>
-            <h3 className="text-sm leading-5.25 [font-weight:550]">
+            <h3 className="text-panel-title">
               {item.href ? (
                 <Link href={item.href}>{item.title}</Link>
               ) : (
@@ -568,7 +568,7 @@ function FindingRow({
       <summary className="flex items-start gap-3.75 pt-4.25 pr-6 pb-4.25 pl-6 cursor-pointer list-none @max-[501px]/case:pl-3.25 @max-[501px]/case:pr-3.25">
         <span
           data-ui="finding-number"
-          className="pt-0.5 text-muted-foreground font-mono text-[11px]"
+          className="pt-0.5 text-muted-foreground font-mono text-caption"
         >
           {String(index + 1).padStart(2, "0")}
         </span>
@@ -587,13 +587,13 @@ function FindingRow({
           </span>
           <span
             data-ui="finding-summary"
-            className="text-muted-foreground text-[13px] leading-5"
+            className="text-muted-foreground text-label leading-5"
           >
             {finding.summary}
           </span>
           <span
             data-ui="finding-metadata"
-            className="flex flex-wrap gap-y-0.75 gap-x-3.75 mt-0.5 text-muted-foreground text-[11px]"
+            className="flex flex-wrap gap-y-0.75 gap-x-3.75 mt-0.5 text-muted-foreground text-caption"
           >
             <span>{finding.evidenceState}</span>
             <span>· {finding.relationship}</span>
@@ -610,16 +610,16 @@ function FindingRow({
         className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-5.5 pt-4.75 pr-6 pb-5.25 pl-12.5 border-t border-border bg-muted @max-[641px]/case:grid-cols-1 @max-[641px]/case:gap-3.25 @max-[501px]/case:pl-10.25"
       >
         <div>
-          <span className="text-muted-foreground text-[11px] font-medium uppercase tracking-[.04em]">
+          <span className="text-muted-foreground text-caption font-medium uppercase tracking-[.04em]">
             Evidence and interpretation
           </span>
-          <p className="mt-1.5 text-[13px] leading-5.5">{finding.detail}</p>
+          <p className="mt-1.5 text-label leading-5.5">{finding.detail}</p>
         </div>
         <div>
-          <span className="text-muted-foreground text-[11px] font-medium uppercase tracking-[.04em]">
+          <span className="text-muted-foreground text-caption font-medium uppercase tracking-[.04em]">
             Source / provenance
           </span>
-          <p className="mt-1.5 text-[13px] leading-5.5">
+          <p className="mt-1.5 text-label leading-5.5">
             <FileSearch
               aria-hidden="true"
               className="inline w-3.25 h-3.25 mr-1.5 [vertical-align:-2px] text-muted-foreground"
@@ -677,10 +677,10 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
         className="grid grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] gap-8.5 @max-[861px]/case:grid-cols-1 @max-[861px]/case:gap-5.75"
       >
         <div data-ui="process-summary">
-          <h3 className="text-base leading-6 [font-weight:550] tracking-[-.015em]">
+          <h3 className="text-panel-title">
             Investigation handoff
           </h3>
-          <p className="max-w-[65ch] mt-2 text-muted-foreground text-[13px] leading-5.5">
+          <p className="max-w-[65ch] mt-2 text-muted-foreground text-label leading-5.5">
             {data.reviewReason}
           </p>
           <dl
@@ -756,7 +756,7 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
         data-ui="completed-phases"
         className="mt-6 pt-5 border-t border-border [&_svg]:w-3.25 [&_svg]:h-3.25"
       >
-        <h3 className="text-base leading-6 [font-weight:550] tracking-[-.015em]">
+        <h3 className="text-panel-title">
           Investigation phases
         </h3>
         <ol className="flex flex-wrap gap-y-1.75 gap-x-4.5 mt-2.25">
@@ -858,10 +858,10 @@ function Hypotheses({ data }: { data: CaseOverviewData }) {
                 Medium · {item.score}
               </strong>
             </div>
-            <h3 className="mt-1.25 text-[15px] leading-5.75 [font-weight:550]">
+            <h3 className="mt-1.25 text-panel-title">
               {item.title}
             </h3>
-            <p className="max-w-[90ch] mt-1.5 text-muted-foreground text-[13px] leading-5.25">
+            <p className="max-w-[90ch] mt-1.5 text-muted-foreground text-label leading-5.25">
               {item.explanation}
             </p>
           </article>
@@ -888,7 +888,7 @@ function Evidence({ data }: { data: CaseOverviewData }) {
       >
         <Table
           data-ui="evidence-table"
-          className="min-w-162.5 [&_:is(th,td)]:pt-2.75 [&_:is(th,td)]:pr-3.5 [&_:is(th,td)]:pb-2.75 [&_:is(th,td)]:pl-3.5 [&_:is(th,td)]:align-top [&_:is(th,td)]:text-[13px] [&_:is(th,td)]:leading-5 [&_th:first-child]:w-32.5 [&_th:nth-child(2)]:w-38.75"
+          className="min-w-162.5 [&_:is(th,td)]:pt-2.75 [&_:is(th,td)]:pr-3.5 [&_:is(th,td)]:pb-2.75 [&_:is(th,td)]:pl-3.5 [&_:is(th,td)]:align-top [&_:is(th,td)]:text-label [&_:is(th,td)]:leading-5 [&_th:first-child]:w-32.5 [&_th:nth-child(2)]:w-38.75"
         >
           <TableHeader>
             <TableRow>
@@ -946,7 +946,7 @@ function Actions({ data }: { data: CaseOverviewData }) {
         {data.actions.map((item, index) => (
           <div
             data-ui="action-row"
-            className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-start gap-2.5 text-[13px] pt-4.25 mt-4.25 border-t border-border @max-[501px]/case:grid-cols-[22px_minmax(0,1fr)] [&>_span:last-child]:text-muted-foreground [&>_span:last-child]:text-xs [&>_span:last-child]:whitespace-nowrap @max-[501px]/case:[&>_span:last-child]:col-start-2"
+            className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-start gap-2.5 text-label pt-4.25 mt-4.25 border-t border-border @max-[501px]/case:grid-cols-[22px_minmax(0,1fr)] [&>_span:last-child]:text-muted-foreground [&>_span:last-child]:text-xs [&>_span:last-child]:whitespace-nowrap @max-[501px]/case:[&>_span:last-child]:col-start-2"
             key={item.title}
           >
             <span
@@ -988,7 +988,7 @@ function AnalystNotes() {
       title="Analyst notes"
       description="Recorded analyst context"
     >
-      <p data-ui="empty-state" className="text-muted-foreground text-[13px]">
+      <p data-ui="empty-state" className="text-muted-foreground text-label">
         No notes had been written on this case in the supplied capture.
       </p>
     </InvestigationSection>
@@ -1009,7 +1009,7 @@ function Timeline({ data }: { data: CaseOverviewData }) {
         {data.activity.map((item, index) => (
           <li
             key={`${item.event}-${index}`}
-            className="grid grid-cols-[190px_minmax(0,1fr)] gap-4 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-[13px] @max-[501px]/case:grid-cols-1 @max-[501px]/case:gap-0.5"
+            className="grid grid-cols-[190px_minmax(0,1fr)] gap-4 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-label @max-[501px]/case:grid-cols-1 @max-[501px]/case:gap-0.5"
           >
             <time className="text-muted-foreground tabular-nums">
               {item.time}
@@ -1060,11 +1060,11 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
         <div data-ui="scroll-region" className="min-w-0 overflow-visible">
           <div
             data-ui="document"
-            className="flex flex-col gap-10.5 min-w-0 max-w-370 mt-0 mr-auto mb-0 ml-auto pt-7 pr-9 pb-18 pl-9 @max-[641px]/case:pl-5 @max-[641px]/case:pr-5 @max-[501px]/case:pt-5 @max-[501px]/case:pr-4 @max-[501px]/case:pb-10 @max-[501px]/case:pl-4 @max-[501px]/case:gap-11"
+            className="flex flex-col gap-12 min-w-0 mt-0 mr-auto mb-0 ml-auto pt-8 pr-8 pb-20 pl-8 @max-[641px]/case:pl-5 @max-[641px]/case:pr-5 @max-[501px]/case:pt-5 @max-[501px]/case:pr-4 @max-[501px]/case:pb-10 @max-[501px]/case:pl-4 @max-[501px]/case:gap-11"
           >
             <div
               data-ui="section-group"
-              className="flex flex-col gap-9 min-w-0 pt-6.75 border-t border-border @max-[501px]/case:gap-9"
+              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
               role="group"
               aria-labelledby="case-decision-group"
             >
@@ -1079,7 +1079,7 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
             </div>
             <div
               data-ui="section-group"
-              className="flex flex-col gap-9 min-w-0 pt-6.75 border-t border-border @max-[501px]/case:gap-9"
+              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
               role="group"
               aria-labelledby="case-investigation-group"
             >
@@ -1097,7 +1097,7 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
             </div>
             <div
               data-ui="section-group"
-              className="flex flex-col gap-9 min-w-0 pt-6.75 border-t border-border @max-[501px]/case:gap-9"
+              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
               role="group"
               aria-labelledby="case-context-group"
             >
@@ -1114,7 +1114,7 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
             </div>
             <div
               data-ui="section-group"
-              className="flex flex-col gap-9 min-w-0 pt-6.75 border-t border-border @max-[501px]/case:gap-9"
+              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
               role="group"
               aria-labelledby="case-response-group"
             >
@@ -1131,7 +1131,7 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
             </div>
             <p
               data-ui="preview-footnote"
-              className="text-muted-foreground text-[11px]"
+              className="text-muted-foreground text-caption"
             >
               Screenshot-derived case · reconstructed before analyst
               confirmation · local preview interactions
