@@ -1,0 +1,120 @@
+{
+  "light": {
+    "badges": [
+      {
+        "role": "danger",
+        "ratio": 9.164490174983422
+      },
+      {
+        "role": "warning",
+        "ratio": 8.73487364267831
+      },
+      {
+        "role": "information",
+        "ratio": 9.528052851468976
+      },
+      {
+        "role": "neutral",
+        "ratio": 9.510257754476887
+      },
+      {
+        "role": "positive",
+        "ratio": 8.646725936259871
+      },
+      {
+        "role": "failure",
+        "ratio": 8.895046425727388
+      },
+      {
+        "role": "agent",
+        "ratio": 10.052185122016041
+      }
+    ],
+    "icons": [
+      {
+        "role": "danger",
+        "ratio": 6.420920075570489
+      },
+      {
+        "role": "warning",
+        "ratio": 5.030530556917215
+      },
+      {
+        "role": "information",
+        "ratio": 6.832214471392099
+      },
+      {
+        "role": "neutral",
+        "ratio": 7.81388303728913
+      },
+      {
+        "role": "failure",
+        "ratio": 5.223162711549741
+      },
+      {
+        "role": "agent",
+        "ratio": 7.29778246508263
+      }
+    ],
+    "primary": 4.774154587066708
+  },
+  "dark": {
+    "badges": [
+      {
+        "role": "danger",
+        "ratio": 8.204589824257694
+      },
+      {
+        "role": "warning",
+        "ratio": 10.171497268422256
+      },
+      {
+        "role": "information",
+        "ratio": 8.52165872342369
+      },
+      {
+        "role": "neutral",
+        "ratio": 10.756487990263253
+      },
+      {
+        "role": "positive",
+        "ratio": 10.671213341003941
+      },
+      {
+        "role": "failure",
+        "ratio": 9.015582079542494
+      },
+      {
+        "role": "agent",
+        "ratio": 8.376037037277975
+      }
+    ],
+    "icons": [
+      {
+        "role": "danger",
+        "ratio": 9.341138249313333
+      },
+      {
+        "role": "warning",
+        "ratio": 12.390116028707078
+      },
+      {
+        "role": "information",
+        "ratio": 9.886484686427531
+      },
+      {
+        "role": "neutral",
+        "ratio": 12.09488625090816
+      },
+      {
+        "role": "failure",
+        "ratio": 10.514522430946176
+      },
+      {
+        "role": "agent",
+        "ratio": 9.663665718635546
+      }
+    ],
+    "primary": 4.774154587066708
+  }
+}

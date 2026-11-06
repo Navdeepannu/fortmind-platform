@@ -1,0 +1,72 @@
+{
+  ".ov-sidebar": {
+    "x": 0,
+    "y": 0,
+    "width": 272,
+    "height": 1050
+  },
+  ".cases-page-heading": {
+    "x": 304,
+    "y": 90,
+    "width": 1104,
+    "height": 59
+  },
+  ".fm-queue-top": {
+    "x": 304,
+    "y": 172,
+    "width": 1104,
+    "height": 52
+  },
+  ".fm-filter-row": {
+    "x": 305,
+    "y": 240,
+    "width": 1102,
+    "height": 63
+  },
+  ".fm-case-table": {
+    "x": 305,
+    "y": 303,
+    "width": 1102,
+    "height": 534.5
+  },
+  ".fm-case-table tbody tr": {
+    "x": 305,
+    "y": 341.5,
+    "width": 1102,
+    "height": 62
+  },
+  "columns": [
+    {
+      "name": "",
+      "width": 42
+    },
+    {
+      "name": "Priority",
+      "width": 112
+    },
+    {
+      "name": "Case",
+      "width": 414
+    },
+    {
+      "name": "Verdict",
+      "width": 123
+    },
+    {
+      "name": "Status",
+      "width": 147
+    },
+    {
+      "name": "Owner",
+      "width": 124
+    },
+    {
+      "name": "Age",
+      "width": 64
+    },
+    {
+      "name": "Actions",
+      "width": 76
+    }
+  ]
+}

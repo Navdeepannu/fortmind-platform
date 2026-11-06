@@ -1,0 +1,2806 @@
+{
+  "checks": [
+    "queue filters",
+    "technical identifier search",
+    "case sheet, Escape, focus restoration",
+    "combined priority, verdict, assignment filters",
+    "autonomous closure filter",
+    "selection and JSON export",
+    "density switching",
+    "column visibility",
+    "ascending and descending sorting",
+    "pagination",
+    "empty state and reset",
+    "reporting period updates charts and KPI snapshots"
+  ],
+  "viewports": [
+    {
+      "theme": "light",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "tableWidth": 1358,
+      "containerWidth": 1358,
+      "tableScrollWidth": 1358,
+      "charts": [
+        {
+          "width": 589,
+          "svg": 1
+        },
+        {
+          "width": 309,
+          "svg": 1
+        },
+        {
+          "width": 309,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "tableWidth": 1198,
+      "containerWidth": 1198,
+      "tableScrollWidth": 1198,
+      "charts": [
+        {
+          "width": 513,
+          "svg": 1
+        },
+        {
+          "width": 266,
+          "svg": 1
+        },
+        {
+          "width": 266,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "tableWidth": 966,
+      "containerWidth": 966,
+      "tableScrollWidth": 966,
+      "charts": [
+        {
+          "width": 369,
+          "svg": 1
+        },
+        {
+          "width": 235,
+          "svg": 1
+        },
+        {
+          "width": 235,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 768,
+      "scrollWidth": 768,
+      "tableWidth": 710,
+      "containerWidth": 710,
+      "tableScrollWidth": 710,
+      "charts": [
+        {
+          "width": 678,
+          "svg": 1
+        },
+        {
+          "width": 315,
+          "svg": 1
+        },
+        {
+          "width": 315,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scrollWidth": 390,
+      "tableWidth": 356,
+      "containerWidth": 356,
+      "tableScrollWidth": 356,
+      "charts": [
+        {
+          "width": 324,
+          "svg": 1
+        },
+        {
+          "width": 324,
+          "svg": 1
+        },
+        {
+          "width": 324,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "tableWidth": 1358,
+      "containerWidth": 1358,
+      "tableScrollWidth": 1358,
+      "charts": [
+        {
+          "width": 589,
+          "svg": 1
+        },
+        {
+          "width": 309,
+          "svg": 1
+        },
+        {
+          "width": 309,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "tableWidth": 1198,
+      "containerWidth": 1198,
+      "tableScrollWidth": 1198,
+      "charts": [
+        {
+          "width": 513,
+          "svg": 1
+        },
+        {
+          "width": 266,
+          "svg": 1
+        },
+        {
+          "width": 266,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "tableWidth": 966,
+      "containerWidth": 966,
+      "tableScrollWidth": 966,
+      "charts": [
+        {
+          "width": 369,
+          "svg": 1
+        },
+        {
+          "width": 235,
+          "svg": 1
+        },
+        {
+          "width": 235,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 768,
+      "scrollWidth": 768,
+      "tableWidth": 710,
+      "containerWidth": 710,
+      "tableScrollWidth": 710,
+      "charts": [
+        {
+          "width": 678,
+          "svg": 1
+        },
+        {
+          "width": 315,
+          "svg": 1
+        },
+        {
+          "width": 315,
+          "svg": 1
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scrollWidth": 390,
+      "tableWidth": 356,
+      "containerWidth": 356,
+      "tableScrollWidth": 356,
+      "charts": [
+        {
+          "width": 324,
+          "svg": 1
+        },
+        {
+          "width": 324,
+          "svg": 1
+        },
+        {
+          "width": 324,
+          "svg": 1
+        }
+      ]
+    }
+  ],
+  "contrast": [
+    {
+      "theme": "light",
+      "values": [
+        {
+          "tone": "danger",
+          "surface": "canvas",
+          "fg": "lab(28.5139 44.5539 29.0463)",
+          "bg": [
+            254,
+            242,
+            242,
+            255
+          ],
+          "ratio": 9.164490174983422
+        },
+        {
+          "tone": "warning",
+          "surface": "canvas",
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "positive",
+          "surface": "canvas",
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "information",
+          "surface": "canvas",
+          "fg": "lab(26.1542 15.7545 -51.5504)",
+          "bg": [
+            239,
+            246,
+            255,
+            255
+          ],
+          "ratio": 9.528052851468976
+        },
+        {
+          "tone": "failure",
+          "surface": "canvas",
+          "fg": "lab(30.2951 36.0434 37.671)",
+          "bg": [
+            255,
+            247,
+            237,
+            255
+          ],
+          "ratio": 8.895046425727388
+        },
+        {
+          "tone": "neutral",
+          "surface": "canvas",
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "agent",
+          "surface": "canvas",
+          "fg": "lab(24.3783 45.7525 -61.4902)",
+          "bg": [
+            245,
+            243,
+            255,
+            255
+          ],
+          "ratio": 10.052185122016041
+        },
+        {
+          "tone": "danger",
+          "surface": "card",
+          "fg": "lab(28.5139 44.5539 29.0463)",
+          "bg": [
+            254,
+            242,
+            242,
+            255
+          ],
+          "ratio": 9.164490174983422
+        },
+        {
+          "tone": "warning",
+          "surface": "card",
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "positive",
+          "surface": "card",
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "information",
+          "surface": "card",
+          "fg": "lab(26.1542 15.7545 -51.5504)",
+          "bg": [
+            239,
+            246,
+            255,
+            255
+          ],
+          "ratio": 9.528052851468976
+        },
+        {
+          "tone": "failure",
+          "surface": "card",
+          "fg": "lab(30.2951 36.0434 37.671)",
+          "bg": [
+            255,
+            247,
+            237,
+            255
+          ],
+          "ratio": 8.895046425727388
+        },
+        {
+          "tone": "neutral",
+          "surface": "card",
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "agent",
+          "surface": "card",
+          "fg": "lab(24.3783 45.7525 -61.4902)",
+          "bg": [
+            245,
+            243,
+            255,
+            255
+          ],
+          "ratio": 10.052185122016041
+        },
+        {
+          "tone": "danger",
+          "surface": "popover",
+          "fg": "lab(28.5139 44.5539 29.0463)",
+          "bg": [
+            254,
+            242,
+            242,
+            255
+          ],
+          "ratio": 9.164490174983422
+        },
+        {
+          "tone": "warning",
+          "surface": "popover",
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "positive",
+          "surface": "popover",
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "information",
+          "surface": "popover",
+          "fg": "lab(26.1542 15.7545 -51.5504)",
+          "bg": [
+            239,
+            246,
+            255,
+            255
+          ],
+          "ratio": 9.528052851468976
+        },
+        {
+          "tone": "failure",
+          "surface": "popover",
+          "fg": "lab(30.2951 36.0434 37.671)",
+          "bg": [
+            255,
+            247,
+            237,
+            255
+          ],
+          "ratio": 8.895046425727388
+        },
+        {
+          "tone": "neutral",
+          "surface": "popover",
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "agent",
+          "surface": "popover",
+          "fg": "lab(24.3783 45.7525 -61.4902)",
+          "bg": [
+            245,
+            243,
+            255,
+            255
+          ],
+          "ratio": 10.052185122016041
+        },
+        {
+          "tone": "danger",
+          "state": "Urgent",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "danger",
+          "state": "Malicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(28.5139 44.5539 29.0463)",
+          "bg": [
+            254,
+            242,
+            242,
+            255
+          ],
+          "ratio": 9.164490174983422
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "danger",
+          "state": "Urgent",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "danger",
+          "state": "Malicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(28.5139 44.5539 29.0463)",
+          "bg": [
+            254,
+            242,
+            242,
+            255
+          ],
+          "ratio": 9.164490174983422
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Suspicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Suspicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "warning",
+          "state": "Escalated",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Informational",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "positive",
+          "state": "Benign",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "agent",
+          "state": "Closed by OSCAR",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Informational",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "neutral",
+          "state": "Closed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "information",
+          "state": "Running",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "failure",
+          "state": "Failed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "danger",
+          "state": "Malicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(28.5139 44.5539 29.0463)",
+          "bg": [
+            254,
+            242,
+            242,
+            255
+          ],
+          "ratio": 9.164490174983422
+        },
+        {
+          "tone": "warning",
+          "state": "Suspicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "positive",
+          "state": "Benign",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "danger",
+          "state": "Urgent",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Informational",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "information",
+          "state": "Running",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Closed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "failure",
+          "state": "Failed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Queued",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "warning",
+          "state": "Escalated",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "agent",
+          "state": "Closed by OSCAR",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "neutral",
+          "state": "Completed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "neutral",
+          "state": "Completed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "information",
+          "state": "Active",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(26.1542 15.7545 -51.5504)",
+          "bg": [
+            239,
+            246,
+            255,
+            255
+          ],
+          "ratio": 9.528052851468976
+        },
+        {
+          "tone": "neutral",
+          "state": "Pending",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "neutral",
+          "state": "Pending",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "failure",
+          "state": "Failed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.2951 36.0434 37.671)",
+          "bg": [
+            255,
+            247,
+            237,
+            255
+          ],
+          "ratio": 8.895046425727388
+        },
+        {
+          "tone": "positive",
+          "state": "OK",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "failure",
+          "state": "Error",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.2951 36.0434 37.671)",
+          "bg": [
+            255,
+            247,
+            237,
+            255
+          ],
+          "ratio": 8.895046425727388
+        },
+        {
+          "tone": "warning",
+          "state": "Timed out",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "neutral",
+          "state": "Skipped",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "neutral",
+          "state": "Proposed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "positive",
+          "state": "Approved",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "neutral",
+          "state": "Rejected",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "positive",
+          "state": "Done",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "neutral",
+          "state": "Pending",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "neutral",
+          "state": "Containment",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "neutral",
+          "state": "Recommended",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "positive",
+          "state": "Connected",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "neutral",
+          "state": "Not connected",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "information",
+          "state": "Testing",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(26.1542 15.7545 -51.5504)",
+          "bg": [
+            239,
+            246,
+            255,
+            255
+          ],
+          "ratio": 9.528052851468976
+        },
+        {
+          "tone": "failure",
+          "state": "Error",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.2951 36.0434 37.671)",
+          "bg": [
+            255,
+            247,
+            237,
+            255
+          ],
+          "ratio": 8.895046425727388
+        },
+        {
+          "tone": "warning",
+          "state": "Key expired",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(31.2288 30.2627 40.0378)",
+          "bg": [
+            255,
+            251,
+            235,
+            255
+          ],
+          "ratio": 8.73487364267831
+        },
+        {
+          "tone": "positive",
+          "state": "Key accepted",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "positive",
+          "state": "Confirmed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(30.797 -29.6927 17.382)",
+          "bg": [
+            240,
+            253,
+            244,
+            255
+          ],
+          "ratio": 8.646725936259871
+        },
+        {
+          "tone": "neutral",
+          "state": "Refuted",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(27.036 0 0)",
+          "bg": [
+            245,
+            245,
+            245,
+            255
+          ],
+          "ratio": 9.510257754476887
+        },
+        {
+          "tone": "agent",
+          "state": "Primary",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(24.3783 45.7525 -61.4902)",
+          "bg": [
+            245,
+            243,
+            255,
+            255
+          ],
+          "ratio": 10.052185122016041
+        },
+        {
+          "tone": "chart-axis",
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "muted-case-metadata",
+          "fg": "lab(34.924 0 0)",
+          "bg": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "ratio": 7.81388303728913
+        },
+        {
+          "tone": "destructive-button",
+          "fg": "lab(40.4273 67.2623 53.7441)",
+          "bg": [
+            248,
+            229,
+            230,
+            255
+          ],
+          "ratio": 5.302350091616716
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "values": [
+        {
+          "tone": "danger",
+          "surface": "canvas",
+          "fg": "lab(76.5514 36.422 15.5335)",
+          "bg": [
+            35,
+            19,
+            19,
+            255
+          ],
+          "ratio": 9.320014738199548
+        },
+        {
+          "tone": "warning",
+          "surface": "canvas",
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            35,
+            28,
+            9,
+            255
+          ],
+          "ratio": 11.69004192973403
+        },
+        {
+          "tone": "positive",
+          "surface": "canvas",
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            9,
+            31,
+            20,
+            255
+          ],
+          "ratio": 12.309764795475628
+        },
+        {
+          "tone": "information",
+          "surface": "canvas",
+          "fg": "lab(77.5052 -6.4629 -36.42)",
+          "bg": [
+            17,
+            25,
+            35,
+            255
+          ],
+          "ratio": 9.75495631850162
+        },
+        {
+          "tone": "failure",
+          "surface": "canvas",
+          "fg": "lab(80.8059 21.7313 50.4455)",
+          "bg": [
+            35,
+            23,
+            9,
+            255
+          ],
+          "ratio": 10.281006437484558
+        },
+        {
+          "tone": "neutral",
+          "surface": "canvas",
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            22,
+            22,
+            22,
+            255
+          ],
+          "ratio": 12.208477004322658
+        },
+        {
+          "tone": "agent",
+          "surface": "canvas",
+          "fg": "lab(76.7419 18.3911 -37.0706)",
+          "bg": [
+            26,
+            22,
+            35,
+            255
+          ],
+          "ratio": 9.568957470639358
+        },
+        {
+          "tone": "danger",
+          "surface": "card",
+          "fg": "lab(76.5514 36.422 15.5335)",
+          "bg": [
+            46,
+            31,
+            31,
+            255
+          ],
+          "ratio": 8.214924537540073
+        },
+        {
+          "tone": "warning",
+          "surface": "card",
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            46,
+            39,
+            21,
+            255
+          ],
+          "ratio": 10.240805763336269
+        },
+        {
+          "tone": "positive",
+          "surface": "card",
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "information",
+          "surface": "card",
+          "fg": "lab(77.5052 -6.4629 -36.42)",
+          "bg": [
+            29,
+            37,
+            47,
+            255
+          ],
+          "ratio": 8.528254539659555
+        },
+        {
+          "tone": "failure",
+          "surface": "card",
+          "fg": "lab(80.8059 21.7313 50.4455)",
+          "bg": [
+            47,
+            34,
+            21,
+            255
+          ],
+          "ratio": 9.052740252489626
+        },
+        {
+          "tone": "neutral",
+          "surface": "card",
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "agent",
+          "surface": "card",
+          "fg": "lab(76.7419 18.3911 -37.0706)",
+          "bg": [
+            37,
+            34,
+            47,
+            255
+          ],
+          "ratio": 8.394125690229917
+        },
+        {
+          "tone": "danger",
+          "surface": "popover",
+          "fg": "lab(76.5514 36.422 15.5335)",
+          "bg": [
+            46,
+            31,
+            31,
+            255
+          ],
+          "ratio": 8.214924537540073
+        },
+        {
+          "tone": "warning",
+          "surface": "popover",
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            46,
+            39,
+            21,
+            255
+          ],
+          "ratio": 10.240805763336269
+        },
+        {
+          "tone": "positive",
+          "surface": "popover",
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "information",
+          "surface": "popover",
+          "fg": "lab(77.5052 -6.4629 -36.42)",
+          "bg": [
+            29,
+            37,
+            47,
+            255
+          ],
+          "ratio": 8.528254539659555
+        },
+        {
+          "tone": "failure",
+          "surface": "popover",
+          "fg": "lab(80.8059 21.7313 50.4455)",
+          "bg": [
+            47,
+            34,
+            21,
+            255
+          ],
+          "ratio": 9.052740252489626
+        },
+        {
+          "tone": "neutral",
+          "surface": "popover",
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "agent",
+          "surface": "popover",
+          "fg": "lab(76.7419 18.3911 -37.0706)",
+          "bg": [
+            37,
+            34,
+            47,
+            255
+          ],
+          "ratio": 8.394125690229917
+        },
+        {
+          "tone": "danger",
+          "state": "Urgent",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "danger",
+          "state": "Malicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(76.5514 36.422 15.5335)",
+          "bg": [
+            46,
+            31,
+            31,
+            255
+          ],
+          "ratio": 8.214924537540073
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "danger",
+          "state": "Urgent",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "danger",
+          "state": "Malicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(76.5514 36.422 15.5335)",
+          "bg": [
+            46,
+            31,
+            31,
+            255
+          ],
+          "ratio": 8.214924537540073
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Suspicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            46,
+            39,
+            21,
+            255
+          ],
+          "ratio": 10.240805763336269
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Suspicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            46,
+            39,
+            21,
+            255
+          ],
+          "ratio": 10.240805763336269
+        },
+        {
+          "tone": "warning",
+          "state": "Escalated",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Informational",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "positive",
+          "state": "Benign",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "agent",
+          "state": "Closed by OSCAR",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Informational",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "neutral",
+          "state": "Closed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "information",
+          "state": "Running",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "failure",
+          "state": "Failed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "danger",
+          "state": "Malicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(76.5514 36.422 15.5335)",
+          "bg": [
+            46,
+            31,
+            31,
+            255
+          ],
+          "ratio": 8.214924537540073
+        },
+        {
+          "tone": "warning",
+          "state": "Suspicious",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            46,
+            39,
+            21,
+            255
+          ],
+          "ratio": 10.240805763336269
+        },
+        {
+          "tone": "positive",
+          "state": "Benign",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "danger",
+          "state": "Urgent",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Notable",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Informational",
+          "treatment": "priority",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Needs you",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "information",
+          "state": "Running",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Closed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "failure",
+          "state": "Failed",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Queued",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "warning",
+          "state": "Escalated",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "agent",
+          "state": "Closed by OSCAR",
+          "treatment": "status",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "neutral",
+          "state": "Completed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "neutral",
+          "state": "Completed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "information",
+          "state": "Active",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(77.5052 -6.4629 -36.42)",
+          "bg": [
+            29,
+            37,
+            47,
+            255
+          ],
+          "ratio": 8.528254539659555
+        },
+        {
+          "tone": "neutral",
+          "state": "Pending",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "neutral",
+          "state": "Pending",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "failure",
+          "state": "Failed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(80.8059 21.7313 50.4455)",
+          "bg": [
+            47,
+            34,
+            21,
+            255
+          ],
+          "ratio": 9.052740252489626
+        },
+        {
+          "tone": "positive",
+          "state": "OK",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "failure",
+          "state": "Error",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(80.8059 21.7313 50.4455)",
+          "bg": [
+            47,
+            34,
+            21,
+            255
+          ],
+          "ratio": 9.052740252489626
+        },
+        {
+          "tone": "warning",
+          "state": "Timed out",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            46,
+            39,
+            21,
+            255
+          ],
+          "ratio": 10.240805763336269
+        },
+        {
+          "tone": "neutral",
+          "state": "Skipped",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "neutral",
+          "state": "Proposed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "positive",
+          "state": "Approved",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "neutral",
+          "state": "Rejected",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "positive",
+          "state": "Done",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "neutral",
+          "state": "Pending",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "neutral",
+          "state": "Containment",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "neutral",
+          "state": "Recommended",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "positive",
+          "state": "Connected",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "neutral",
+          "state": "Not connected",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "information",
+          "state": "Testing",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(77.5052 -6.4629 -36.42)",
+          "bg": [
+            29,
+            37,
+            47,
+            255
+          ],
+          "ratio": 8.528254539659555
+        },
+        {
+          "tone": "failure",
+          "state": "Error",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(80.8059 21.7313 50.4455)",
+          "bg": [
+            47,
+            34,
+            21,
+            255
+          ],
+          "ratio": 9.052740252489626
+        },
+        {
+          "tone": "warning",
+          "state": "Key expired",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.4156 6.13147 78.3961)",
+          "bg": [
+            46,
+            39,
+            21,
+            255
+          ],
+          "ratio": 10.240805763336269
+        },
+        {
+          "tone": "positive",
+          "state": "Key accepted",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "positive",
+          "state": "Confirmed",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(86.9953 -47.2691 25.0054)",
+          "bg": [
+            21,
+            43,
+            32,
+            255
+          ],
+          "ratio": 10.720023679322034
+        },
+        {
+          "tone": "neutral",
+          "state": "Refuted",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "neutral",
+          "state": "Inconclusive",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(84.92 0 -0.0000119209)",
+          "bg": [
+            34,
+            34,
+            34,
+            255
+          ],
+          "ratio": 10.733554585501203
+        },
+        {
+          "tone": "agent",
+          "state": "Primary",
+          "treatment": "badge",
+          "height": 24,
+          "iconSize": 16,
+          "fg": "lab(76.7419 18.3911 -37.0706)",
+          "bg": [
+            37,
+            34,
+            47,
+            255
+          ],
+          "ratio": 8.394125690229917
+        },
+        {
+          "tone": "chart-axis",
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "muted-case-metadata",
+          "fg": "lab(66.128 -0.0000298023 0.0000119209)",
+          "bg": [
+            23,
+            23,
+            23,
+            255
+          ],
+          "ratio": 6.938930345767489
+        },
+        {
+          "tone": "destructive-button",
+          "fg": "lab(63.7053 60.745 31.3109)",
+          "bg": [
+            70,
+            38,
+            39,
+            255
+          ],
+          "ratio": 4.640017732843023
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "focusedChecks": {
+    "noNestedButtons": true,
+    "selectionDoesNotOpenSheet": true,
+    "mobileSheetFits": true,
+    "reducedMotionRespected": true,
+    "keyboardFocusTrapped": true,
+    "escapeDismissesSheet": true,
+    "sheet": {
+      "width": 390,
+      "scrollWidth": 389,
+      "clientWidth": 389,
+      "transition": "0s"
+    }
+  },
+  "existingRoutes": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/dashboard",
+      "status": 200
+    },
+    {
+      "route": "/design",
+      "status": 200
+    },
+    {
+      "route": "/design-preview",
+      "status": 200
+    }
+  ],
+  "verifiedOn": "2026-10-26",
+  "build": "Next.js 16.4.3 production",
+  "scope": "Semantic and icon refinement; layout and neutral foundation retained"
+}

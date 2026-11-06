@@ -1,0 +1,209 @@
+{
+  "checks": [
+    "copy control: case ID copied",
+    "one main landmark, five real section anchors, five expandable findings, decision inside Conclusion, identifier copy",
+    "anchor navigation, sticky offsets, URL hashes, automatic active-section tracking on a long page",
+    "confirmation/correction, rationale validation, original AI assessment and case state preserved, cancel/Escape/focus, reload reset",
+    "workspace container queries, same-viewport sidebar adaptation, inspector space reservation, five layouts in both themes"
+  ],
+  "layouts": [
+    {
+      "name": "1440-expanded",
+      "width": 1440,
+      "height": 1050,
+      "collapsed": false,
+      "mode": "0",
+      "theme": "light",
+      "viewport": 1440,
+      "page": 1440,
+      "workspace": 1184,
+      "content": 930,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "1280-expanded",
+      "width": 1280,
+      "height": 1000,
+      "collapsed": false,
+      "mode": "0",
+      "theme": "light",
+      "viewport": 1280,
+      "page": 1280,
+      "workspace": 1024,
+      "content": 770,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "1920-collapsed",
+      "width": 1920,
+      "height": 1080,
+      "collapsed": true,
+      "mode": "0",
+      "theme": "light",
+      "viewport": 1920,
+      "page": 1920,
+      "workspace": 1872,
+      "content": 1226,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "1100-horizontal",
+      "width": 1100,
+      "height": 1000,
+      "collapsed": false,
+      "mode": "1",
+      "theme": "light",
+      "viewport": 1100,
+      "page": 1100,
+      "workspace": 844,
+      "content": 772,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "390-mobile",
+      "width": 390,
+      "height": 850,
+      "collapsed": false,
+      "mode": "1",
+      "theme": "light",
+      "viewport": 390,
+      "page": 390,
+      "workspace": 390,
+      "content": 358,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "27px"
+    },
+    {
+      "name": "1440-expanded",
+      "width": 1440,
+      "height": 1050,
+      "collapsed": false,
+      "mode": "0",
+      "theme": "dark",
+      "viewport": 1440,
+      "page": 1440,
+      "workspace": 1184,
+      "content": 930,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "1280-expanded",
+      "width": 1280,
+      "height": 1000,
+      "collapsed": false,
+      "mode": "0",
+      "theme": "dark",
+      "viewport": 1280,
+      "page": 1280,
+      "workspace": 1024,
+      "content": 770,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "1920-collapsed",
+      "width": 1920,
+      "height": 1080,
+      "collapsed": true,
+      "mode": "0",
+      "theme": "dark",
+      "viewport": 1920,
+      "page": 1920,
+      "workspace": 1872,
+      "content": 1226,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "1100-horizontal",
+      "width": 1100,
+      "height": 1000,
+      "collapsed": false,
+      "mode": "1",
+      "theme": "dark",
+      "viewport": 1100,
+      "page": 1100,
+      "workspace": 844,
+      "content": 772,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "29px"
+    },
+    {
+      "name": "390-mobile",
+      "width": 390,
+      "height": 850,
+      "collapsed": false,
+      "mode": "1",
+      "theme": "dark",
+      "viewport": 390,
+      "page": 390,
+      "workspace": 390,
+      "content": 358,
+      "proseFont": "15px",
+      "headingFont": "20px",
+      "titleFont": "27px"
+    }
+  ],
+  "accessibility": [
+    {
+      "state": "1440-expanded-light",
+      "violations": []
+    },
+    {
+      "state": "1280-expanded-light",
+      "violations": []
+    },
+    {
+      "state": "1920-collapsed-light",
+      "violations": []
+    },
+    {
+      "state": "1100-horizontal-light",
+      "violations": []
+    },
+    {
+      "state": "390-mobile-light",
+      "violations": []
+    },
+    {
+      "state": "1440-expanded-dark",
+      "violations": []
+    },
+    {
+      "state": "1280-expanded-dark",
+      "violations": []
+    },
+    {
+      "state": "1920-collapsed-dark",
+      "violations": []
+    },
+    {
+      "state": "1100-horizontal-dark",
+      "violations": []
+    },
+    {
+      "state": "390-mobile-dark",
+      "violations": []
+    },
+    {
+      "state": "mobile review validation",
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "mutations": []
+}

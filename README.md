@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FortMind platform prototype
 
-## Getting Started
-
-First, run the development server:
+Next.js App Router, TypeScript, Tailwind v4 and shadcn/ui with Base UI. The marketing page stays at `/`; the application starts at `/platform` and redirects to `/platform/overview`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [the platform](http://localhost:3000/platform). See [platform structure and validation](docs/platform-structure.md) for the route map, fixture boundaries and cleanup record.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+pnpm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Browser suites use an externally available Playwright installation. Set `PLAYWRIGHT_MODULE` to its absolute `index.mjs` path and, if necessary, `PLAYWRIGHT_EXECUTABLE` to the Chromium executable. No browser dependency is added to the application.
 
-## Learn More
+```bash
+PLATFORM_ORIGIN=http://localhost:3000 node scripts/platform-browser-check.mjs
+PLATFORM_ORIGIN=http://localhost:3000 node scripts/sections-browser-check.mjs
+PREVIEW_ORIGIN=http://localhost:3000 node scripts/case-queue-browser-check.mjs
+CASE_PREVIEW_URL=http://localhost:3000/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c node scripts/case-overview-browser-check.mjs
+PREVIEW_ORIGIN=http://localhost:3000 node scripts/semantic-browser-check.mjs
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The platform uses local demonstration data. Newly created cases are stored in the current browser tab's session storage; they survive refresh but are not shared or saved to a server. Knowledge facts and the seven Settings forms persist in this browser's local storage with explicit save feedback. Reports use illustrative events attached to existing case IDs and support CSV export. Integration tests and verdict reviews remain illustrative local interactions. Notification delivery, organization policy enforcement, secret management, response execution and PDF export require backend services and are shown as unavailable.

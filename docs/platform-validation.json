@@ -1,0 +1,220 @@
+{
+  "date": "2026-11-04",
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "unitTests": {
+      "passed": 43,
+      "failed": 0
+    },
+    "productionBuild": {
+      "passed": true,
+      "generatedPages": 46
+    }
+  },
+  "productionBrowser": {
+    "origin": "http://localhost:3001",
+    "routeVisits": 81,
+    "routes": [
+      "/platform/cases",
+      "/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c",
+      "/platform/cases/FM-1037",
+      "/platform/cases/FM-1038",
+      "/platform/cases/FM-1039",
+      "/platform/cases/FM-1040",
+      "/platform/cases/FM-1041",
+      "/platform/cases/FM-1042",
+      "/platform/cases/FM-1043",
+      "/platform/cases/FM-1044",
+      "/platform/cases/FM-1045",
+      "/platform/cases/FM-1046",
+      "/platform/cases/FM-1047",
+      "/platform/cases/FM-1048",
+      "/platform/cases/FM-1049",
+      "/platform/cases/FM-1050",
+      "/platform/cases/FM-1051",
+      "/platform/cases?queue=All",
+      "/platform/integrations",
+      "/platform/integrations/abuse-ch",
+      "/platform/integrations/alienvault-otx",
+      "/platform/integrations/aws-cloudtrail",
+      "/platform/integrations/censys",
+      "/platform/integrations/cloudflare-zero-trust",
+      "/platform/integrations/crowdstrike-falcon",
+      "/platform/integrations/datadog",
+      "/platform/integrations/elastic-security",
+      "/platform/integrations/greynoise",
+      "/platform/integrations/microsoft-365",
+      "/platform/integrations/microsoft-defender",
+      "/platform/integrations/microsoft-entra-id",
+      "/platform/integrations/microsoft-sentinel",
+      "/platform/integrations/okta",
+      "/platform/integrations/securitytrails",
+      "/platform/integrations/shodan",
+      "/platform/integrations/splunk",
+      "/platform/integrations/urlscan",
+      "/platform/integrations/virustotal",
+      "/platform/integrations/wazuh",
+      "/platform/overview"
+    ],
+    "checks": [
+      "Every fixture route loads directly and after refresh in both themes",
+      "Legacy redirects preserve IDs and query parameters; retired and undesigned pages return 404",
+      "Expanded/collapsed navigation retains state and active section; existing panels work",
+      "Search reaches the UUID investigation; queue links and browser back retain the right case",
+      "New draft cases keep the same ID and content after refresh in the same browser tab",
+      "Integration search, card detail links, sample connection test, and back link work",
+      "Mobile sidebar navigates and closes without horizontal page overflow"
+    ],
+    "errors": [],
+    "warnings": []
+  },
+  "queue": {
+    "summary": {
+      "samples": 554,
+      "minTextContrast": 5.721379238070055,
+      "minIconContrast": 4.601135897537336
+    },
+    "checks": [
+      "light: requested hand/alert and escalation icons; status badges use semantic foreground ink",
+      "light: missing queue aliases retain semantic red/amber instead of inheriting gray",
+      "light: every queue status has a subtle tinted background with coordinated icon and text",
+      "light: Escalated violet and Needs You amber have distinct foregrounds and backgrounds",
+      "light: priority and verdict filters share row icon colors; active and selected states persist",
+      "light: explicit score, phase and outcome props render without changing columns or fixture data; reduced motion works",
+      "dark: requested hand/alert and escalation icons; status badges use semantic foreground ink",
+      "dark: missing queue aliases retain semantic red/amber instead of inheriting gray",
+      "dark: every queue status has a subtle tinted background with coordinated icon and text",
+      "dark: Escalated violet and Needs You amber have distinct foregrounds and backgrounds",
+      "dark: priority and verdict filters share row icon colors; active and selected states persist",
+      "dark: explicit score, phase and outcome props render without changing columns or fixture data; reduced motion works"
+    ],
+    "errors": [],
+    "warnings": []
+  },
+  "semantics": {
+    "summary": {
+      "samples": 202,
+      "minTextContrast": 5.721379238070055,
+      "minIconContrast": 4.601135897537336,
+      "failures": []
+    },
+    "routes": [
+      {
+        "path": "/platform/overview",
+        "theme": "light",
+        "status": 200
+      },
+      {
+        "path": "/platform/cases?queue=All",
+        "theme": "light",
+        "status": 200
+      },
+      {
+        "path": "/platform/cases/FM-1048",
+        "theme": "light",
+        "status": 200
+      },
+      {
+        "path": "/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c",
+        "theme": "light",
+        "status": 200
+      },
+      {
+        "path": "/platform/overview",
+        "theme": "dark",
+        "status": 200
+      },
+      {
+        "path": "/platform/cases?queue=All",
+        "theme": "dark",
+        "status": 200
+      },
+      {
+        "path": "/platform/cases/FM-1048",
+        "theme": "dark",
+        "status": 200
+      },
+      {
+        "path": "/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c",
+        "theme": "dark",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "warnings": []
+  },
+  "detailedInvestigation": {
+    "passed": true,
+    "viewports": [
+      1440,
+      900,
+      390,
+      1920
+    ],
+    "sectionNavigation": true,
+    "verdictDialogs": true,
+    "browserErrors": [],
+    "networkMutations": []
+  },
+  "visualComparison": [
+    {
+      "screen": "overview",
+      "theme": "light",
+      "changed": 0,
+      "bounds": null
+    },
+    {
+      "screen": "overview",
+      "theme": "dark",
+      "changed": 0,
+      "bounds": null
+    },
+    {
+      "screen": "cases",
+      "theme": "light",
+      "changed": 0,
+      "bounds": null
+    },
+    {
+      "screen": "cases",
+      "theme": "dark",
+      "changed": 0,
+      "bounds": null
+    },
+    {
+      "screen": "detail",
+      "theme": "light",
+      "changed": 0,
+      "bounds": null
+    },
+    {
+      "screen": "detail",
+      "theme": "dark",
+      "changed": 0,
+      "bounds": null
+    },
+    {
+      "screen": "integrations",
+      "theme": "light",
+      "changed": 6,
+      "bounds": [
+        571,
+        32,
+        1387,
+        958
+      ]
+    },
+    {
+      "screen": "integrations",
+      "theme": "dark",
+      "changed": 0,
+      "bounds": null
+    }
+  ],
+  "boundaries": [
+    "Context, Reports and Settings remain working panels without standalone routes.",
+    "Demonstration data and local actions only; drafts use tab session storage.",
+    "Streamed integration not-found responses can carry initial HTTP 200 headers and noindex."
+  ]
+}
