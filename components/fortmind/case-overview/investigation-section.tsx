@@ -12,6 +12,7 @@ export function InvestigationSection({
   actions,
   footer,
   className,
+  contentClassName,
   children,
 }: {
   id: CaseSectionId;
@@ -22,6 +23,7 @@ export function InvestigationSection({
   actions?: ReactNode;
   footer?: ReactNode;
   className?: string;
+  contentClassName?: string;
   children: ReactNode;
 }) {
   return (
@@ -31,7 +33,7 @@ export function InvestigationSection({
       aria-labelledby={`${id}-heading`}
       tabIndex={-1}
       className={cn(
-        "scroll-mt-34 outline-none [&:focus-visible]:outline-2 [&:focus-visible]:outline-ring [&:focus-visible]:outline-offset-5 [&:focus-visible]:rounded-lg",
+        "scroll-mt-40 outline-none [&:focus-visible]:outline-2 [&:focus-visible]:outline-ring [&:focus-visible]:outline-offset-5 [&:focus-visible]:rounded-lg",
         className,
       )}
     >
@@ -48,7 +50,7 @@ export function InvestigationSection({
             {count !== undefined && (
               <span
                 data-ui="section-count"
-                className="ml-2.25 text-muted-foreground text-label font-normal [vertical-align:1px]"
+                className="ml-2.25 text-muted-foreground text-label font-normal align-baseline"
               >
                 {count}
               </span>
@@ -57,7 +59,7 @@ export function InvestigationSection({
           {description && (
             <p
               data-ui="section-description"
-              className="mt-1 text-muted-foreground text-sm leading-5.25"
+              className="mt-1 text-muted-foreground text-prose"
             >
               {description}
             </p>
@@ -79,7 +81,7 @@ export function InvestigationSection({
       >
         <CardContent
           data-ui="section-body"
-          className="px-7 py-7 @max-[501px]/case:px-5"
+          className={cn("px-7 py-7 @max-[501px]/case:px-5", contentClassName)}
         >
           {children}
         </CardContent>

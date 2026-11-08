@@ -29,7 +29,7 @@ export function CaseDetails({ id }: { id: string }) {
       <main
         data-ui="main cases-main"
         id="preview-main"
-        className="mx-auto w-full min-w-0 p-5 md:p-8"
+        className="min-w-0 py-5 md:py-8"
         aria-busy="true"
         aria-label="Loading investigation"
       >
@@ -41,12 +41,12 @@ export function CaseDetails({ id }: { id: string }) {
     <div
       data-ui="main cases-main investigation"
       id="preview-main"
-      className="mx-auto w-full min-w-0 p-5 md:p-8"
+      className="min-w-0 py-5 md:py-8"
     >
       <Link
         data-ui="back-link"
         href="/platform/cases"
-        className="inline-flex items-center gap-1.75 text-muted-foreground text-xs [&:hover]:text-foreground"
+        className="inline-flex items-center gap-1.75 text-muted-foreground text-caption [&:hover]:text-foreground"
       >
         <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" /> Cases
       </Link>
@@ -72,7 +72,7 @@ export function CaseDetails({ id }: { id: string }) {
           >
             <div
               data-ui="investigation-id"
-              className="flex items-center gap-2 text-caption text-muted-foreground [&_code]:text-xs"
+              className="flex items-center gap-2 text-caption text-muted-foreground [&_code]:text-caption"
             >
               <span>Investigation</span>
               <CopyTechnicalValue label="case ID" value={item.id} />
@@ -91,7 +91,7 @@ export function CaseDetails({ id }: { id: string }) {
               />
               <span
                 data-ui="investigation-proposal"
-                className="inline-flex items-center gap-1.75 text-xs text-muted-foreground"
+                className="inline-flex items-center gap-1.75 text-caption text-muted-foreground"
               >
                 {item.status === "Closed"
                   ? "Final verdict"
@@ -119,10 +119,10 @@ export function CaseDetails({ id }: { id: string }) {
                   OSCAR assessment
                 </h2>
               </div>
-              <p className="mt-3.5 text-sm leading-5.75">{item.summary}</p>
+              <p className="mt-3.5 text-prose">{item.summary}</p>
               <div
                 data-ui="investigation-limitation"
-                className="mt-4.5 mr-0 mb-6.25 ml-0 pt-2.75 pr-3.25 pb-2.75 pl-3.25 border border-border rounded-md bg-muted text-muted-foreground text-xs leading-4.75"
+                className="mt-4.5 mr-0 mb-6.25 ml-0 pt-2.75 pr-3.25 pb-2.75 pl-3.25 border border-border rounded-md bg-muted text-muted-foreground text-caption"
               >
                 This is illustrative case data. Review the underlying evidence
                 before confirming a verdict or taking action.
@@ -137,7 +137,7 @@ export function CaseDetails({ id }: { id: string }) {
                 {Object.entries(item.entities).map(([name, value]) => (
                   <div
                     key={name}
-                    className="grid grid-cols-[110px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-xs"
+                    className="grid grid-cols-[110px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-caption"
                   >
                     <dt className="text-muted-foreground capitalize">
                       {name === "ip" ? "IP address" : name}
@@ -157,22 +157,22 @@ export function CaseDetails({ id }: { id: string }) {
                 Case details
               </h2>
               <dl className="mt-3.75">
-                <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-xs">
+                <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-caption">
                   <dt className="text-muted-foreground capitalize">Owner</dt>
                   <dd>{item.owner ?? "Unassigned"}</dd>
                 </div>
-                <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-xs">
+                <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-caption">
                   <dt className="text-muted-foreground capitalize">Source</dt>
                   <dd>{item.source}</dd>
                 </div>
-                <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-xs">
+                <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-caption">
                   <dt className="text-muted-foreground capitalize">Age</dt>
                   <dd>{formatAge(item.ageMinutes)} ago</dd>
                 </div>
                 {item.status !== "Queued" &&
                   item.status !== "Running" &&
                   item.status !== "Failed" && (
-                    <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-xs">
+                    <div className="grid grid-cols-[86px_minmax(0,_1fr)] gap-3 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-caption">
                       <dt className="text-muted-foreground capitalize">
                         Illustrative confidence
                       </dt>
@@ -182,7 +182,7 @@ export function CaseDetails({ id }: { id: string }) {
                     </div>
                   )}
               </dl>
-              <p className="mt-3.5 flex gap-1.5 pt-3.75 border-t border-border text-muted-foreground text-caption leading-4.5">
+              <p className="mt-3.5 flex gap-1.5 pt-3.75 border-t border-border text-muted-foreground text-caption">
                 <ArrowUpRight
                   aria-hidden="true"
                   className="w-3.25 h-3.25 flex-none"

@@ -64,7 +64,15 @@ export interface CaseOverviewData {
   relatedCases: RelatedCaseSummary[];
   nextSteps: string[];
   source: string;
-  hypotheses: { title: string; score: number; result: string; explanation: string }[];
+  hypotheses: {
+    title: string;
+    score?: number;
+    level?: ConfidenceLevel;
+    result: string;
+    explanation: string;
+    supportingEvidence?: string;
+    limitations?: string;
+  }[];
   actions: { title: string; condition?: string }[];
   evidence: { source: string; result: string; context: string }[];
   activity: { actor: string; event: string; time: string }[];
@@ -189,8 +197,24 @@ export const caseOverview: CaseOverviewData = {
   ],
   source: "SIEM security alert",
   hypotheses: [
-    { title: "Authorized adversary emulation or synthetic smoke testing activity", score: 40, result: "Inconclusive", explanation: "Alert metadata suggests synthetic testing, but these fields are untrusted and no external authorization source was found in the logs." },
-    { title: "Compromised local user executing procdump.exe for LSASS credential dumping", score: 75, result: "Inconclusive", explanation: "The reported LSASS access and six active host alerts support concern, but Entra logs supplied no direct evidence of account compromise." },
+    {
+      title: "Authorized adversary emulation or synthetic smoke testing activity",
+      score: 40,
+      level: "Medium",
+      result: "Inconclusive",
+      explanation: "Alert metadata suggests synthetic testing, but these fields are untrusted and no external authorization source was found in the logs.",
+      supportingEvidence: "Alert metadata suggests synthetic testing.",
+      limitations: "These fields are untrusted and no external authorization source was found in the logs.",
+    },
+    {
+      title: "Compromised local user executing procdump.exe for LSASS credential dumping",
+      score: 75,
+      level: "Medium",
+      result: "Inconclusive",
+      explanation: "The reported LSASS access and six active host alerts support concern, but Entra logs supplied no direct evidence of account compromise.",
+      supportingEvidence: "The reported LSASS access and six active host alerts support concern.",
+      limitations: "Entra logs supplied no direct evidence of account compromise.",
+    },
   ],
   actions: [
     { title: "Confirm authorization with the penetration testing or emulation team regarding procdump.exe execution on fmlab-ws1." },

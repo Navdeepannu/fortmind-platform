@@ -1,106 +1,229 @@
-import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
-
-const output=process.env.CASE_SCREENSHOT_DIR || join(tmpdir(),'fortmind-case-investigation');
-await mkdir(output,{recursive:true});
-const browser = await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE}:{})});
-const errors=[];
-const mutations=[];
+import assert from "node:assert/strict";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || "playwright");
+const output = process.env.CASE_SCREENSHOT_DIR || join(tmpdir(), "fortmind-contextual-navigation");
+await mkdir(output, { recursive: true });
+const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE } : {}) });
+const errors = [];
+const mutations = [];
+const categories = {
+  Decision: [["conclusion", "Conclusion"], ["how-oscar-decided", "How OSCAR decided"]],
+  Investigation: [["findings", "Findings (5)"], ["hypotheses", "Hypotheses (2)"], ["attack-path", "Attack path"]],
+  Evidence: [["entities", "Entities (4)"], ["evidence", "Evidence (5)"], ["similar-cases", "Similar past cases (2)"]],
+  Response: [["actions", "Actions (4)"], ["analyst-notes", "Analyst notes"]],
+  Timeline: [["timeline", "Timeline"]],
+};
+const base = process.env.CASE_PREVIEW_URL || "http://localhost:3000/platform/cases/case-detail";
+const urlFor = (category, view, hash = "") => `${base}?tab=${category.toLowerCase()}&view=${view}${hash ? `#${hash}` : ""}`;
+let page;
+const primary = () => page.getByRole("tablist", { name: "Case categories", exact: true });
+async function expectView(category, view) {
+  await page.waitForFunction(({ category, view }) => {
+    const visible = [...document.querySelectorAll("[data-case-view]")].filter(node => node.getClientRects().length);
+    const params = new URL(location.href).searchParams;
+    return visible.length === 1 && visible[0].dataset.caseView === view && params.get("tab") === category.toLowerCase() && params.get("view") === view;
+  }, { category, view });
+}
+async function selectPrimary(category) {
+  await primary().getByRole("tab", { name: category, exact: true }).click();
+  await expectView(category, categories[category][0][0]);
+}
+async function selectView(category, view) {
+  if (await primary().getByRole("tab", { selected: true }).innerText() !== category) await selectPrimary(category);
+  if (categories[category].length > 1) {
+    const label = categories[category].find(([id]) => id === view)[1];
+    await page.getByRole("tablist", { name: `${category} views`, exact: true }).getByRole("tab", { name: label, exact: true }).click();
+  }
+  await expectView(category, view);
+}
+function observe(target) {
+  target.on("pageerror", error => errors.push(error.message));
+  target.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
+  target.on("request", request => { if (!["GET", "HEAD"].includes(request.method())) mutations.push(`${request.method()} ${request.url()}`); });
+}
 try {
-  const page=await browser.newPage({viewport:{width:1440,height:900},permissions:['clipboard-read','clipboard-write']});
-  page.on('pageerror', e=>errors.push(e.message));
-  page.on('console', m=>{if(m.type()==='error') errors.push(m.text())});
-  page.on('request', request=>{if(!['GET','HEAD'].includes(request.method())) mutations.push(`${request.method()} ${request.url()}`)});
-  const base=process.env.CASE_PREVIEW_URL || 'http://localhost:3000/platform/cases/case-detail';
-  await page.goto(base,{waitUntil:'networkidle'});
-  await page.getByRole('heading',{level:1,name:'FortMind smoke: LSASS memory access'}).waitFor();
-  assert.equal(await page.locator('[data-slot="sidebar-wrapper"]').count(),1);
-  const ids=['conclusion','attack-path','hypotheses','findings','how-oscar-decided','entities','similar-cases','evidence','actions','analyst-notes','timeline'];
-  assert.equal(await page.locator('[data-ui~=page-nav] a[href^="#"]').count(),12);
-  for (const id of ids) assert.equal(await page.locator(`section#${id}`).count(),1);
-  assert.equal(await page.locator('#findings details').count(),5);
-  assert.equal(await page.locator('#hypotheses [data-ui~=record]').count(),2);
-  assert.equal(await page.locator('#evidence tbody tr').count(),5);
-  await page.screenshot({path:join(output,'client-review-initial.png')});
-  await page.evaluate(()=>localStorage.setItem('theme','dark'));
-  await page.reload({waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.documentElement.classList.contains('dark'));
-  await page.screenshot({path:join(output,'client-review-dark.png')});
-  await page.evaluate(()=>localStorage.setItem('theme','light'));
-  await page.reload({waitUntil:'networkidle'});
-  await page.waitForFunction(()=>!document.documentElement.classList.contains('dark'));
-  await page.getByRole('button',{name:'Copy case ID'}).click();
-  await page.waitForFunction(()=>/copied/i.test(document.querySelector('[data-ui~=header-id] [role="status"]')?.textContent||''));
-  assert.match(await page.locator('[data-ui~=header-id] [role="status"]').innerText(),/copied/i);
-  await page.getByRole('button',{name:'More actions'}).click();
-  for (const action of ['Escalate case','Teach OSCAR','Rerun investigation']) {
-    assert.equal(await page.getByRole('menuitem',{name:action}).getAttribute('data-disabled'),'');
+  page = await browser.newPage({ viewport: { width: 1440, height: 900 }, permissions: ["clipboard-read", "clipboard-write"], reducedMotion: "reduce" });
+  observe(page);
+  await page.goto(base, { waitUntil: "networkidle" });
+  await expectView("Decision", "conclusion");
+  assert.deepEqual(await primary().getByRole("tab").allTextContents(), Object.keys(categories));
+  assert.equal(await page.locator("section[data-ui='section']").count(), 11, "All existing content stays mounted");
+  assert.equal(await page.locator('[data-slot="sidebar-wrapper"]').count(), 1);
+  const header = await page.locator('[data-ui="header"]').innerText();
+  for (const [category, views] of Object.entries(categories)) {
+    await selectPrimary(category);
+    if (views.length > 1) {
+      assert.deepEqual(await page.getByRole("tablist", { name: `${category} views`, exact: true }).getByRole("tab").allTextContents(), views.map(([, label]) => label));
+    } else assert.equal(await page.getByRole("tablist").count(), 1, "Timeline has no redundant second navigation level");
+    for (const [view] of views) {
+      await selectView(category, view);
+      assert.equal(await page.locator("section[data-ui='section']:visible").count(), 1);
+      assert.equal(await page.getByRole("tabpanel").count(), views.length > 1 ? 2 : 1);
+      assert.equal(await page.locator('[data-ui="header"]').innerText(), header, "The shared case header is consistent");
+      await page.reload({ waitUntil: "networkidle" });
+      await expectView(category, view);
+    }
   }
-  await page.keyboard.press('Escape');
-  await page.getByRole('button',{name:'Confirm verdict'}).click();
-  await page.getByRole('dialog',{name:'Confirm OSCAR’s verdict'}).getByRole('button',{name:'Confirm in preview'}).click();
-  assert.match(await page.locator('[data-ui~=review-result]').innerText(),/Suspicious/);
-  await page.getByRole('button',{name:'Override verdict'}).click();
-  const dialog=page.getByRole('dialog',{name:'Override OSCAR’s verdict'});
-  await dialog.getByRole('button',{name:'Apply correction in preview'}).click();
-  assert.match(await dialog.innerText(),/Choose a different verdict/);
-  await dialog.getByLabel('Your verdict').selectOption('Malicious');
-  await dialog.getByRole('button',{name:'Apply correction in preview'}).click();
-  assert.match(await dialog.innerText(),/Add a rationale/);
-  await dialog.locator('#review-rationale').fill('Review test only.');
-  await dialog.getByRole('button',{name:'Apply correction in preview'}).click();
-  assert.match(await page.locator('[data-ui~=review-result]').innerText(),/Malicious/);
-  assert.match(await page.locator('[data-ui~=proposed-verdict]').innerText(),/Suspicious/);
-  for (const id of ids) {
-    await page.locator(`[data-ui~=page-nav] a[href="#${id}"]`).first().click();
-    await page.waitForFunction(id=>document.querySelector('[data-ui~=page-nav] a[aria-current="location"]')?.getAttribute('href')===`#${id}`,id);
-    await page.waitForFunction(id=>{
-      const section=document.getElementById(id).getBoundingClientRect();
-      const nav=document.querySelector('[data-ui~=page-nav]').getBoundingClientRect();
-      const atEnd=innerHeight+scrollY>=document.documentElement.scrollHeight-3;
-      return section.top>=nav.bottom-1 || atEnd;
-    },id);
-    assert.equal(new URL(page.url()).hash,`#${id}`);
+  assert.equal(await page.locator("#findings details").count(), 5);
+  assert.equal(await page.locator("#hypotheses article").count(), 2);
+  assert.equal(await page.locator("#entities tbody tr").count(), 4);
+  assert.equal(await page.locator("#evidence tbody tr").count(), 5);
+  assert.equal(await page.locator("#timeline ol > li").count(), 12);
+
+  // Each tablist owns its own keyboard focus and panel selection.
+  await selectPrimary("Decision");
+  await primary().getByRole("tab", { name: "Decision", exact: true }).focus();
+  await page.keyboard.press("ArrowRight");
+  await expectView("Investigation", "findings");
+  await page.getByRole("tablist", { name: "Investigation views" }).getByRole("tab", { name: "Findings (5)", exact: true }).focus();
+  await page.keyboard.press("ArrowRight");
+  await expectView("Investigation", "hypotheses");
+  await page.keyboard.press("End");
+  await expectView("Investigation", "attack-path");
+  await page.keyboard.press("Home");
+  await expectView("Investigation", "findings");
+  await page.keyboard.press("Tab");
+  assert.equal(await page.evaluate(() => document.activeElement?.closest("[data-case-view]")?.dataset.caseView), "findings");
+  await primary().getByRole("tab", { name: "Investigation", exact: true }).focus();
+  await page.keyboard.press("End");
+  await expectView("Timeline", "timeline");
+  await page.keyboard.press("Home");
+  await expectView("Decision", "conclusion");
+
+  await selectView("Investigation", "findings");
+  await selectView("Investigation", "hypotheses");
+  await selectView("Evidence", "entities");
+  await page.goBack(); await expectView("Investigation", "hypotheses");
+  await page.goBack(); await expectView("Investigation", "findings");
+  await page.goForward(); await expectView("Investigation", "hypotheses");
+
+  await page.goto(`${base}?tab=evidence&view=hypotheses&source=search`, { waitUntil: "networkidle" });
+  await expectView("Evidence", "entities");
+  await selectView("Evidence", "evidence");
+  assert.equal(new URL(page.url()).searchParams.get("source"), "search");
+  await page.goto(`${base}?tab=unknown&view=hypotheses`, { waitUntil: "networkidle" });
+  await expectView("Decision", "conclusion");
+
+  // Old anchors select their containing workspace, rather than scrolling a report.
+  for (const [category, views] of Object.entries(categories)) {
+    for (const [view] of views) {
+      await page.goto(`${base}#${view}`, { waitUntil: "networkidle" });
+      await expectView(category, view);
+    }
   }
-  const cases=[];
-  for (const [name,width,collapsed] of [['desktop',1440,false],['laptop',1280,false],['tablet',900,false],['mobile',390,false],['wide-collapsed',1920,true]]) {
-    await page.setViewportSize({width,height:900});
-    await page.goto(base,{waitUntil:'networkidle'});
-    if (collapsed) await page.getByRole('button',{name:'Toggle sidebar'}).click();
-    await page.locator('[data-ui~=page-nav] a[href="#findings"]').first().click();
-    await page.waitForFunction(()=>document.querySelector('#findings').getBoundingClientRect().top<=145);
-    await page.waitForTimeout(100);
-    const check=await page.evaluate(()=>{
-      const rect=s=>document.querySelector(s).getBoundingClientRect();
-      return {viewport:innerWidth,page:document.documentElement.scrollWidth,scrollY,topbar:rect('[data-ui~=utility-bar]').top,nav:rect('[data-ui~=page-nav]').top,navBottom:rect('[data-ui~=page-nav]').bottom,finding:rect('#findings').top,header:rect('[data-ui~=header]').bottom,active:document.querySelector('[data-ui~=page-nav] a[aria-current="location"]')?.getAttribute('href'),workspace:rect('[data-case-workspace]').width};
-    });
-    assert.ok(check.page<=check.viewport,`${name} horizontal overflow ${JSON.stringify(check)}`);
-    assert.ok(check.scrollY>0,`${name} did not window scroll`);
-    assert.ok(check.header<0,`${name} case header did not scroll`);
-    assert.ok(Math.abs(check.topbar)<2,`${name} global header not sticky`);
-    assert.ok(Math.abs(check.nav-48)<2,`${name} section nav not directly below the top bar`);
-    assert.equal(check.active,'#findings',`${name} active section`);
-    assert.ok(check.finding>=check.navBottom-1,`${name} anchor hidden`);
-    await page.screenshot({path:join(output,`${name}.png`)});
-    cases.push({name,...check});
+  await page.goto(`${base}#entity-host-fmlab-ws1`, { waitUntil: "networkidle" });
+  await expectView("Evidence", "entities");
+  await page.goto(`${base}#finding-host-alerts`, { waitUntil: "networkidle" });
+  await expectView("Investigation", "findings");
+  await page.waitForFunction(() => document.getElementById("finding-host-alerts").open);
+  await selectView("Investigation", "hypotheses");
+  await selectView("Investigation", "findings");
+  assert.equal(await page.locator("#finding-host-alerts").getAttribute("open"), "", "Finding disclosures survive view changes");
+  await selectPrimary("Decision");
+  await page.getByRole("link", { name: "View finding", exact: true }).first().click();
+  await expectView("Investigation", "findings");
+  await page.waitForFunction(() => document.activeElement === document.querySelector("#finding-memory-access > summary"));
+  await page.getByRole("button", { name: "Review verdict", exact: true }).click();
+  await expectView("Decision", "conclusion");
+  await page.waitForFunction(() => document.activeElement === document.getElementById("decision-heading"));
+  assert.equal(await page.locator("#decision-heading").evaluate(node => node.getBoundingClientRect().top >= document.querySelector('[data-ui="page-nav"]').getBoundingClientRect().bottom), true);
+
+  await page.getByRole("button", { name: "Copy case ID", exact: true }).click();
+  await page.waitForFunction(() => /copied/i.test(document.querySelector('[data-ui="header-id"] [role="status"]')?.textContent || ""));
+  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "13845102-e81a-479e-87db-2cdb8ff21c1c");
+  await page.getByRole("button", { name: "More actions", exact: true }).click();
+  for (const label of ["Escalate case", "Teach OSCAR", "Rerun investigation"]) assert.equal(await page.getByRole("menuitem", { name: label }).getAttribute("data-disabled"), "");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Confirm verdict", exact: true }).click();
+  await page.getByRole("dialog", { name: "Confirm OSCAR’s verdict" }).getByRole("button", { name: "Confirm in preview" }).click();
+  assert.match(await page.locator('[data-ui="review-result"]').innerText(), /Suspicious/);
+  await page.getByRole("button", { name: "Override verdict", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Override OSCAR’s verdict" });
+  await dialog.getByRole("button", { name: "Apply correction in preview" }).click();
+  assert.match(await dialog.innerText(), /Choose a different verdict/);
+  await dialog.getByLabel("Your verdict").selectOption("Malicious");
+  await dialog.getByRole("button", { name: "Apply correction in preview" }).click();
+  assert.match(await dialog.innerText(), /Add a rationale/);
+  await dialog.locator("#review-rationale").fill("Unsaved analyst rationale.");
+  await page.evaluate(() => history.pushState(null, "", "?tab=investigation&view=hypotheses"));
+  await expectView("Investigation", "hypotheses");
+  assert.equal(await dialog.locator("#review-rationale").inputValue(), "Unsaved analyst rationale.");
+  await page.goBack(); await expectView("Decision", "conclusion");
+  assert.equal(await dialog.getByLabel("Your verdict").inputValue(), "Malicious");
+  assert.equal(await dialog.locator("#review-rationale").inputValue(), "Unsaved analyst rationale.");
+  await dialog.getByRole("button", { name: "Apply correction in preview" }).click();
+  await selectView("Decision", "how-oscar-decided");
+  await selectView("Decision", "conclusion");
+  assert.match(await page.locator('[data-ui="review-result"]').innerText(), /Malicious/);
+  assert.match(await page.locator('[data-ui="proposed-verdict"]').innerText(), /Suspicious/);
+  await selectView("Investigation", "attack-path");
+  await page.getByRole("button", { name: "Copy attack path process procdump.exe", exact: true }).click();
+  await page.waitForFunction(() => /copied/i.test(document.querySelector('[data-ui="attack-path"]')?.textContent || ""));
+  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "procdump.exe");
+
+  const layouts = [];
+  await page.close();
+  for (const theme of ["light", "dark"]) {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    await context.addInitScript(theme => localStorage.setItem("theme", theme), theme);
+    page = await context.newPage(); observe(page);
+    for (const [name, width, collapsed] of [["desktop", 1440, false], ["laptop", 1280, false], ["tablet", 900, false], ["mobile", 390, false], ["narrow", 320, false], ["wide-collapsed", 1920, true]]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(urlFor("Investigation", "findings"), { waitUntil: "networkidle" });
+      await expectView("Investigation", "findings");
+      if (width >= 768) {
+        const button = page.getByRole("button", { name: collapsed ? "Collapse sidebar" : "Expand sidebar", exact: true });
+        if (await button.isVisible()) await button.click();
+      }
+      for (const [category, views] of Object.entries(categories)) {
+        for (const [view] of views) {
+          await selectView(category, view);
+          await page.waitForFunction(() => [...document.querySelectorAll("[data-case-tab-scroll]")].filter(track => track.getClientRects().length).every(track => {
+            const tab = track.querySelector('[role="tab"][aria-selected="true"]');
+            if (!tab) return false;
+            const selected = tab.getBoundingClientRect();
+            const viewport = track.getBoundingClientRect();
+            return selected.left >= viewport.left - 1 && selected.right <= viewport.right + 1;
+          }));
+          assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} ${theme} ${view} page overflow`);
+          assert.equal(await page.locator("section[data-ui='section']:visible").count(), 1);
+        }
+      }
+      await selectView("Investigation", "findings");
+      await page.locator("#findings details").evaluateAll(nodes => nodes.forEach(node => { node.open = true; }));
+      await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
+      const nav = await page.locator('[data-ui="page-nav"]').evaluate(node => node.getBoundingClientRect().top);
+      const secondary = await page.locator('[data-case-category="investigation"] [data-ui="secondary-nav"]').evaluate(node => node.getBoundingClientRect().top);
+      assert.ok(Math.abs(nav - 48) < 2, `${name} ${theme} primary nav ${nav}`);
+      assert.ok(Math.abs(secondary - 97) < 2, `${name} ${theme} secondary nav ${secondary}`);
+      await selectView("Investigation", "hypotheses");
+      await page.waitForFunction(() => document.getElementById("hypotheses").getBoundingClientRect().top >= 138 || scrollY === 0);
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+      await page.screenshot({ path: join(output, `${name}-${theme}-hypotheses.png`) });
+      await selectView("Decision", "conclusion");
+      await page.screenshot({ path: join(output, `${name}-${theme}-conclusion.png`) });
+      await selectView("Investigation", "findings");
+      await page.screenshot({ path: join(output, `${name}-${theme}-findings.png`) });
+      layouts.push({ name, theme, width, nav, secondary });
+    }
+    await context.close();
   }
-  await page.locator('[data-ui~=page-nav] a[href="#timeline"]').first().click();
-  await page.waitForFunction(()=>document.querySelector('[data-ui~=page-nav] a[aria-current="location"]')?.getAttribute('href')==='#timeline');
-  assert.equal(await page.locator('[data-ui~=page-nav] a[aria-current="location"]').first().getAttribute('href'),'#timeline');
-  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
-  await page.waitForTimeout(300);
-  assert.equal(await page.locator('[data-ui~=page-nav] a[aria-current="location"]').getAttribute('href'),'#conclusion');
-  const origin=new URL(base).origin;
-  await page.goto(`${origin}/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c`,{waitUntil:'networkidle'});
-  assert.equal(await page.locator('[data-ui~=page-nav] a[href^="#"]').count(),12);
-  await page.getByRole('link',{name:'← Back to Cases'}).click();
+  page = await browser.newPage(); observe(page);
+  const origin = new URL(base).origin;
+  await page.goto(`${origin}/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c?tab=decision&view=how-oscar-decided`, { waitUntil: "networkidle" });
+  await expectView("Decision", "how-oscar-decided");
+  await page.getByRole("link", { name: "← Back to Cases" }).click();
   await page.waitForURL(`${origin}/platform/cases`);
-  await page.goto(`${origin}/platform/cases/FM-1048`,{waitUntil:'networkidle'});
-  await page.getByRole('heading',{level:1,name:'LSASS process accessed by mimikatz.exe'}).waitFor();
-  assert.deepEqual(errors,[]);
-  assert.deepEqual(mutations,[]);
-  console.log(JSON.stringify({cases,errors,mutations,output},null,2));
-} finally {await browser.close()}
+  await page.goto(`${origin}/platform/cases/FM-1048`, { waitUntil: "networkidle" });
+  await page.getByRole("heading", { level: 1, name: "LSASS process accessed by mimikatz.exe" }).waitFor();
+  assert.deepEqual(errors, []);
+  assert.deepEqual(mutations, []);
+  const report = { layouts, errors, mutations, output };
+  await writeFile(join(output, "browser-report.json"), JSON.stringify(report, null, 2));
+  console.log(JSON.stringify(report, null, 2));
+} catch (error) {
+  console.error(JSON.stringify({ url: page?.url(), errors, mutations }));
+  throw error;
+} finally { await browser.close(); }

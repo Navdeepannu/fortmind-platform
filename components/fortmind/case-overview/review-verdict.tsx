@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Check, ChevronDown, UserRound } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -40,12 +40,10 @@ import type { PreviewVerdictReview } from "@/lib/case-overview-data";
 
 export function ReviewVerdict({
   proposedVerdict,
-  owner,
   reason,
   status,
 }: {
   proposedVerdict: Verdict;
-  owner: string | null;
   reason: string;
   status: string;
 }) {
@@ -101,17 +99,17 @@ export function ReviewVerdict({
   return (
     <aside
       data-ui="decision"
-      className="[align-self:start] pt-5 pr-5 pb-5 pl-5 border border-border rounded-md bg-muted"
+      className="rounded-md border border-border bg-muted p-5 [align-self:start]"
       aria-labelledby="decision-heading"
     >
-      <h3 id="decision-heading" className="text-panel-title">
+      <h3 id="decision-heading" tabIndex={-1} className="scroll-mt-40 text-panel-title outline-none">
         Your decision
       </h3>
       <div data-ui="decision-body" className="flex flex-col gap-4 mt-3.25">
         <div>
           <p
             data-ui="decision-title"
-            className="text-sm font-medium [&_+_p]:mt-1.25"
+            className="text-prose font-medium [&_+_p]:mt-1.25"
           >
             <SemanticBadge
               definition={outcomeStates["Human review required"]}
@@ -120,23 +118,11 @@ export function ReviewVerdict({
           </p>
           <p
             data-ui="secondary"
-            className="text-muted-foreground text-label leading-5.25"
+            className="text-muted-foreground text-label"
           >
             {reason}
           </p>
         </div>
-        <dl data-ui="decision-meta" className="text-xs">
-          <div>
-            <dt className="text-muted-foreground">Assigned to</dt>
-            <dd className="flex items-center gap-1.5 mt-0.75 wrap-anywhere text-label">
-              <UserRound
-                aria-hidden="true"
-                className="w-3.5 h-3.5 text-muted-foreground"
-              />
-              {owner ?? "Unassigned"}
-            </dd>
-          </div>
-        </dl>
         <div
           data-ui="review-result"
           className="flex flex-col gap-1.75 pt-3.25 border-t border-border text-label [&:empty]:hidden [&>_p:first-child]:flex [&>_p:first-child]:items-center [&>_p:first-child]:gap-1.5"
@@ -160,7 +146,7 @@ export function ReviewVerdict({
               )}
               <p
                 data-ui="secondary"
-                className="text-muted-foreground text-label leading-5.25"
+                className="text-muted-foreground text-label"
               >
                 Held in this page only. Case status remains Needs you.
               </p>
@@ -211,7 +197,7 @@ export function ReviewVerdict({
         ) : (
           <p
             data-ui="secondary"
-            className="text-muted-foreground text-label leading-5.25"
+            className="text-muted-foreground text-label"
           >
             Verdict review is available when this case needs an analyst
             decision.
@@ -220,7 +206,7 @@ export function ReviewVerdict({
         <Dialog open={open} onOpenChange={changeOpen}>
           <DialogContent
             data-ui="preview case review-dialog"
-            className="text-foreground max-h-[calc(100dvh-2rem)] max-w-[min(560px,calc(100%-2rem))] gap-6 overflow-y-auto p-6 text-sm sm:max-w-[560px]"
+            className="text-foreground max-h-[calc(100dvh-2rem)] max-w-[min(560px,calc(100%-2rem))] gap-6 overflow-y-auto p-6 text-body sm:max-w-[560px]"
           >
             <DialogHeader className="pr-7">
               <Badge variant="outline">Local preview</Badge>
@@ -306,7 +292,7 @@ export function ReviewVerdict({
               </FieldGroup>
               <p
                 data-ui="secondary"
-                className="text-muted-foreground text-label leading-5.25"
+                className="text-muted-foreground text-label"
               >
                 This preview keeps the decision in memory until you reload. It
                 does not close the case, execute a response, or change OSCAR’s
@@ -325,7 +311,7 @@ export function ReviewVerdict({
             </form>
           </DialogContent>
         </Dialog>
-        <p data-ui="fine-print" className="text-muted-foreground text-xs">
+        <p data-ui="fine-print" className="text-muted-foreground text-caption">
           Local preview · no case changes are persisted
         </p>
       </div>

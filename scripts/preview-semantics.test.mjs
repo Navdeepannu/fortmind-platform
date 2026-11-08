@@ -7,27 +7,27 @@ const registry = loadProjectModule("lib/semantic-states.ts");
 // Product contract from the refinement brief, independent of the rendering implementation.
 const expected = {
   Verdicts: {
-    Malicious: ["danger", "octagon-x"],
-    Suspicious: ["warning", "triangle-alert"],
-    Benign: ["positive", "check"],
-    Inconclusive: ["neutral", "circle-help"],
+    Malicious: ["danger", "shield-alert"],
+    Suspicious: ["warning", "circle-help"],
+    Benign: ["positive", "circle-check"],
+    Inconclusive: ["neutral", "circle-dashed"],
   },
   Priorities: {
-    Urgent: ["danger", "chevrons-up"],
-    Notable: ["warning", "chevron-up"],
-    Informational: ["neutral", "minus"],
+    Urgent: ["danger", "alert-triangle"],
+    Notable: ["warning", "bell"],
+    Informational: ["information", "info"],
   },
   Workflow: {
-    "Needs you": ["warning", "hand"],
-    Running: ["information", "loader-circle"],
-    Closed: ["neutral", "check-circle-2"],
+    "Needs you": ["warning", "user-round-pen"],
+    Running: ["information", "circle-dashed"],
+    Closed: ["positive", "circle-check"],
     Failed: ["failure", "circle-x"],
     Queued: ["neutral", "clock-3"],
   },
   Outcomes: {
-    "Closed by OSCAR": ["agent", "check-check"],
+    "Closed by OSCAR": ["positive", "check-circle-2"],
     Escalated: ["escalation", "arrow-up-from-line"],
-    "Investigation complete": ["neutral", "check"],
+    "Investigation complete": ["positive", "check"],
     "Human review required": ["warning", "user-round-check"],
     Unresolved: ["neutral", "circle-help"],
   },
@@ -56,7 +56,7 @@ const expected = {
     Confirmed: ["positive", "check"],
     Refuted: ["neutral", "x"],
     Inconclusive: ["neutral", "circle-help"],
-    Primary: ["agent", "sparkles"],
+    Primary: ["agent", "target"],
   },
 };
 for (const [category, states] of Object.entries(expected)) {
@@ -124,6 +124,6 @@ test("outcomes remain distinct from lifecycle while legacy case statuses are sup
   assert.ok(!Object.hasOwn(registry.lifecycleStates, "Closed by OSCAR"));
   assert.equal(registry.workflowStates.Escalated, registry.outcomeStates.Escalated);
   assert.equal(registry.workflowStates["Closed by OSCAR"], registry.outcomeStates["Closed by OSCAR"]);
-  assert.equal(registry.lifecycleStates.Closed.tone, "neutral");
-  assert.equal(registry.outcomeStates["Investigation complete"].tone, "neutral");
+  assert.equal(registry.lifecycleStates.Closed.tone, "positive");
+  assert.equal(registry.outcomeStates["Investigation complete"].tone, "positive");
 });

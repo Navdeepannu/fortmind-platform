@@ -10,7 +10,7 @@ export default function CasesPage() {
   return (
     <Suspense
       fallback={
-        <p className="p-8 text-sm text-muted-foreground">
+        <p className="py-8 text-sm text-muted-foreground">
           Loading case workspace…
         </p>
       }

@@ -4,10 +4,9 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  CheckCircle2,
   CircleX,
   Clock3,
-  Sparkles,
+  ScanLine,
 } from "lucide-react";
 import {
   Bar,
@@ -27,13 +26,12 @@ import {
   type ImpactPeriod,
   type OutcomeDay,
 } from "@/lib/overview-data";
-import { priorityStates, verdictStates } from "@/lib/semantic-states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SemanticBadge } from "../semantic";
+import { PriorityBadge, VerdictBadge } from "../semantic";
 
 // The chart and KPI group deliberately use independent reporting periods.
 // Changing one must not silently change the other.
@@ -107,9 +105,9 @@ function OutcomeTooltip({
         ];
 
   return (
-    <div className="min-w-44 rounded-lg  border-border border bg-popover p-3 text-xs text-popover-foreground shadow-none">
+    <div className="min-w-44 rounded-lg border-border border bg-popover p-3 text-caption text-popover-foreground shadow-none">
       <p className="mb-2 font-semibold">{bucket.label}</p>
-      <dl className="space-y-1.5">
+      <dl className="flex flex-col gap-1.5">
         {entries.map((entry) => (
           <div className="flex justify-between gap-6" key={entry.label}>
             <dt>{entry.label}</dt>
@@ -137,7 +135,7 @@ function PeriodSelector({
     >
       <TabsList aria-label={label}>
         {(["7d", "30d", "90d"] as const).map((key) => (
-          <TabsTrigger key={key} value={key} className="px-2.5 text-xs sm:px-3">
+          <TabsTrigger key={key} value={key} className="px-2.5 text-caption sm:px-3">
             {impactReports[key].label}
           </TabsTrigger>
         ))}
@@ -153,6 +151,7 @@ function ResolutionChart() {
   const report = impactReports[period];
   const buckets = outcomeBuckets(report.daily);
   const selectedTotal = mode === "closed" ? report.closed : report[mode];
+  const summary = impactSummary(report);
   const grouping = report.daily.length > 7 ? "7-day interval" : "day";
 
   return (
@@ -161,7 +160,7 @@ function ResolutionChart() {
         <div className="flex flex-wrap items-start justify-between gap-3 w-full">
           <div>
             <h3 className="text-panel-title">Investigation outcomes</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-prose text-muted-foreground">
               {report.dates} · grouped by {grouping}
             </p>
           </div>
@@ -186,7 +185,7 @@ function ResolutionChart() {
                 <TabsTrigger
                   key={item.value}
                   value={item.value}
-                  className="text-xs sm:text-sm"
+                  className="text-caption"
                 >
                   {item.label}
                 </TabsTrigger>
@@ -197,11 +196,16 @@ function ResolutionChart() {
             <strong className="text-2xl font-semibold tabular-nums">
               {selectedTotal}
             </strong>
-            <span className="text-xs text-muted-foreground">
-              {mode === "failed" ? "failed runs" : "cases"}
+            <span className="text-caption text-muted-foreground">
+              {mode === "failed" ? "failed runs" : "closed cases"}
             </span>
           </div>
         </div>
+
+        <p className="text-caption text-muted-foreground">
+          {report.oscar} closed by OSCAR + {report.analyst} by analysts = {report.closed} closures.
+          {summary.share !== null && ` OSCAR closed ${summary.share}% of these cases.`} Failed runs are counted separately.
+        </p>
 
         {buckets.length > 0 ? (
           <ChartContainer
@@ -263,7 +267,7 @@ function ResolutionChart() {
                         dataKey="closed"
                         position="top"
                         offset={5}
-                        fontSize={11}
+                        fontSize={12}
                         fill="var(--muted-foreground)"
                       />
                     )}
@@ -287,13 +291,13 @@ function ResolutionChart() {
             </BarChart>
           </ChartContainer>
         ) : (
-          <p className="rounded-lg border border-dashed border-border p-8 text-sm text-muted-foreground">
+          <p className="rounded-lg border border-dashed border-border p-8 text-prose text-muted-foreground">
             No investigation outcomes for this period.
           </p>
         )}
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground sm:text-sm">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-caption text-muted-foreground">
             {mode === "closed" ? (
               <>
                 <span className="inline-flex items-center gap-2">
@@ -322,6 +326,7 @@ function ResolutionChart() {
             variant="ghost"
             size="sm"
             nativeButton={false}
+            role="link"
             render={<Link href={impactReportHref(period)} />}
           >
             View report <ArrowRight aria-hidden="true" className="size-4" />
@@ -349,23 +354,23 @@ function DataBarRow({
     percentage === undefined ? null : Math.min(100, Math.max(0, percentage));
 
   return (
-    <div className="space-y-1">
+    <div className="flex flex-col gap-1">
       <div className="relative isolate flex min-h-13 items-center overflow-hidden rounded-md bg-muted/60 px-3 py-2">
         {bounded !== null && (
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-0 -z-10 bg-foreground/[0.08] dark:bg-foreground/[0.12]"
+            className="pointer-events-none absolute inset-y-0 left-0 -z-10 bg-foreground/10"
             style={{ width: `${bounded}%` }}
           />
         )}
         <div className="relative flex w-full min-w-0 items-center justify-between gap-3">
-          <div className="min-w-0 text-sm leading-5">{label}</div>
+          <div className="min-w-0 text-body">{label}</div>
           <div className="flex shrink-0 items-baseline gap-2 tabular-nums">
-            <span className="text-sm font-semibold text-foreground">
+            <span className="text-body font-semibold text-foreground">
               {count}
             </span>
             {bounded !== null && (
-              <span className="w-9 text-right text-xs text-muted-foreground">
+              <span className="w-9 text-right text-caption text-muted-foreground">
                 {Math.round(bounded)}%
               </span>
             )}
@@ -373,7 +378,7 @@ function DataBarRow({
         </div>
       </div>
       {description && (
-        <p className="px-1 text-xs leading-4 text-muted-foreground">
+        <p className="px-1 text-caption text-muted-foreground">
           {description}
         </p>
       )}
@@ -393,17 +398,14 @@ function ImpactMetrics() {
   const analystMinutes = assumptions.value.analystMinutes;
   const summary = impactSummary(report, analystMinutes);
   const oscarPct = report.closed ? (report.oscar / report.closed) * 100 : 0;
-  const analystPct = report.closed ? (report.analyst / report.closed) * 100 : 0;
-  const finishedRuns = report.closed + report.failed;
-  const failurePct = finishedRuns ? (report.failed / finishedRuns) * 100 : 0;
 
   return (
     <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none">
       <CardHeader className="flex flex-col gap-3 border-b border-border px-5 py-5">
-        <div className="flex items-start justify-between w-full">
+        <div className="flex w-full flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="text-panel-title">Performance</h3>
-            <p className="mt-1 text-xs text-muted-foreground">{report.dates}</p>
+            <p className="mt-1 text-caption text-muted-foreground">{report.dates}</p>
           </div>
 
           <PeriodSelector
@@ -417,28 +419,16 @@ function ImpactMetrics() {
         <DataBarRow
           label={
             <span className="inline-flex items-center gap-2">
-              <Sparkles
+              <ScanLine
                 aria-hidden="true"
                 className="size-4 shrink-0 text-oscar-foreground"
               />
-              Closed by OSCAR
+              Autonomous closures
             </span>
           }
           count={report.oscar}
           percentage={oscarPct}
-        />
-        <DataBarRow
-          label={
-            <span className="inline-flex items-center gap-2">
-              <CheckCircle2
-                aria-hidden="true"
-                className="size-4 shrink-0 text-success-foreground"
-              />
-              Closed by analysts
-            </span>
-          }
-          count={report.analyst}
-          percentage={analystPct}
+          description={`Share of ${report.closed} closed cases`}
         />
         <DataBarRow
           label={
@@ -463,13 +453,11 @@ function ImpactMetrics() {
             </span>
           }
           count={report.failed}
-          percentage={failurePct}
+          description="Recorded failures; retry history unavailable"
         />
-        {/* <p className="border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
-          Closures: {report.closed}. Failed runs: {report.failed} of{" "}
-          {finishedRuns} finished runs. Time saved assumes {analystMinutes}{" "}
-          analyst minutes per OSCAR closure, not measured time.
-        </p> */}
+        <p className="mt-auto border-t pt-3 text-caption text-muted-foreground">
+          Time saved is an estimate: {report.oscar} OSCAR closures × {analystMinutes} analyst minutes per case. This assumption is configurable in Settings; it is not measured time.
+        </p>
       </CardContent>
     </Card>
   );
@@ -487,8 +475,8 @@ function CaseDistribution() {
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none">
         <CardHeader className="border-b border-border px-5 py-5">
           <h3 className="text-panel-title">Priority mix</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {openTotal} open cases · current snapshot
+          <p className="mt-1 text-caption text-muted-foreground">
+            {openTotal} awaiting decisions or running · current snapshot
           </p>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col gap-3 px-5 py-5">
@@ -498,28 +486,24 @@ function CaseDistribution() {
               <DataBarRow
                 key={item.name}
                 label={
-                  <SemanticBadge
-                    definition={priorityStates[item.name]}
-                    treatment="inline"
-                  />
+                  <PriorityBadge value={item.name} />
                 }
                 count={item.value}
                 percentage={share}
               />
             );
           })}
-          {/* <p className="border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
-            Current open-case snapshot. Not affected by the chart or performance
-            period.
-          </p> */}
+          <p className="mt-auto border-t pt-3 text-caption text-muted-foreground">
+            Needs you + Running. Failed and queued cases are excluded.
+          </p>
         </CardContent>
       </Card>
 
       <Card className="min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none">
         <CardHeader className="border-b border-border px-5 py-5">
           <h3 className="text-panel-title">Verdict mix</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {verdictTotal} closed cases · 7-day sample
+          <p className="mt-1 text-caption text-muted-foreground">
+            {verdictTotal} closed cases · {impactReports["7d"].dates}
           </p>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col gap-3 px-5 py-5">
@@ -529,20 +513,16 @@ function CaseDistribution() {
               <DataBarRow
                 key={item.name}
                 label={
-                  <SemanticBadge
-                    definition={verdictStates[item.name]}
-                    treatment="inline"
-                  />
+                  <VerdictBadge value={item.name} />
                 }
                 count={item.value}
                 percentage={share}
               />
             );
           })}
-          {/* <p className="border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
-            Verdict data is available only for Oct 28 - Nov 3 in the current
-            fixtures.
-          </p> */}
+          <p className="mt-auto border-t pt-3 text-caption text-muted-foreground">
+            Fixed 7-day sample; verdicts for other periods are unavailable.
+          </p>
         </CardContent>
       </Card>
     </>
@@ -566,7 +546,7 @@ export function PlatformImpact() {
         </h2>
         <Badge
           variant="outline"
-          className="text-xs font-normal text-muted-foreground"
+          className="text-caption font-normal text-muted-foreground"
         >
           Illustrative data
         </Badge>
@@ -580,11 +560,9 @@ export function PlatformImpact() {
         <CaseDistribution />
       </div>
 
-      {/* <p className="text-xs leading-5 text-muted-foreground">
-        Demo metrics are generated from local fixtures. Chart and performance
-        periods are independent. Estimated time saved is not measured; priority
-        and verdict distributions have the scopes shown on their cards.
-      </p> */}
+      <p className="text-caption text-muted-foreground">
+        Chart and Performance periods are independent. Operations and Priority mix remain current snapshots.
+      </p>
     </section>
   );
 }

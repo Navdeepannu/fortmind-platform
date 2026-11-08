@@ -4,9 +4,16 @@ import { cn } from "@/lib/utils";
 import { queueIconClass } from "@/lib/semantic-styles";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { caseHref } from "@/lib/platform-routes";
-import { useMemo, useState, type ReactElement } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+  type MouseEvent,
+} from "react";
 import {
   ChevronDown,
   ArrowDown,
@@ -18,7 +25,6 @@ import {
   ChevronRight,
   Search,
   Copy,
-  Check,
   Network,
   Server,
   UserRound,
@@ -40,6 +46,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { CopyTechnicalValue } from "./copy-technical-value";
+import { usefulEntities } from "@/lib/case-context";
+import { InvestigationInspector } from "./investigation-inspector";
+import {
+  CaseTitleTooltip,
+  CaseMetadataPreview,
+  CaseVerdictTooltip,
+  CasePriorityTooltip,
+  CaseWorkflowTooltip,
+  CaseTimestampTooltip,
+  IconTooltip,
+} from "./case-contextual-preview";
 import {
   Popover,
   PopoverTrigger,
@@ -78,13 +97,13 @@ import {
   EmptyDescription,
 } from "@/components/ui/empty";
 import {
-  cases,
   priorities,
   verdicts,
   sources,
   filterCases,
   statuses,
   formatAge,
+  type Priority,
   type SecurityCase,
   type Queue,
   type CaseStatus,
@@ -92,7 +111,8 @@ import {
   type Source,
   type Tone,
 } from "@/lib/preview-data";
-import { priorityStates, queueStatusStates } from "@/lib/semantic-states";
+import { platformCases } from "@/lib/platform-cases";
+import { queueStatusStates, type SemanticState } from "@/lib/semantic-states";
 import {
   caseListViews,
   caseListEntry,
@@ -100,7 +120,12 @@ import {
   type CaseListView,
 } from "@/lib/case-list-views";
 import { QueueStatusIndicator, QueueVerdictBadge } from "./case-queue-semantic";
-import { PriorityBadge, CaseStatusBadge } from "./semantic";
+import {
+  PriorityBadge,
+  PriorityBars,
+  CaseStatusBadge,
+  VerdictMarker,
+} from "./semantic";
 
 const initialFilters: CaseFilters = {
   queue: "All",
@@ -122,12 +147,12 @@ const optionalColumns = [
 type OptionalColumn = (typeof optionalColumns)[number];
 type SortKey = OptionalColumn | "title" | "attention";
 const columnClasses: Record<OptionalColumn, string> = {
-  priority: "w-34 max-[1200px]:hidden",
-  verdict: "w-46 max-[1000px]:hidden",
-  status: "w-36 max-[1000px]:hidden",
-  owner: "w-28 max-[1399px]:hidden",
-  age: "w-16 max-[1100px]:hidden",
-  source: "w-40 text-xs max-[1000px]:hidden",
+  priority: "w-28 @max-[680px]/case-grid:hidden",
+  verdict: "w-43 @max-[520px]/case-grid:hidden",
+  status: "w-37 @max-[600px]/case-grid:hidden",
+  owner: "w-28 @max-[1080px]/case-grid:hidden",
+  age: "w-17 @max-[960px]/case-grid:hidden",
+  source: "w-36 text-caption @max-[1200px]/case-grid:hidden",
 };
 const currentAnalyst = "Navdeep Annu";
 const sourceOptionIcons: Record<Source, LucideIcon> = {
@@ -142,13 +167,13 @@ function Owner({ name }: { name: string | null }) {
   return (
     <span
       data-ui="owner"
-      className="inline-flex items-center gap-1.5 text-xs leading-4.5 whitespace-nowrap"
+      className="inline-flex items-center gap-1.5 text-caption whitespace-nowrap"
     >
       {name ? (
         <>
           <span
             data-ui="avatar"
-            className="inline-flex items-center justify-center shrink-0 bg-secondary border border-border rounded-full font-medium w-5.5 h-5.5 text-[8px]"
+            className="inline-flex items-center justify-center shrink-0 bg-secondary border border-border rounded-full font-medium size-6 text-caption"
             aria-hidden="true"
           >
             {name
@@ -162,7 +187,7 @@ function Owner({ name }: { name: string | null }) {
         </>
       ) : (
         <>
-          <span className="inline-flex size-5.5 shrink-0 items-center justify-center">
+          <span className="inline-flex size-6 shrink-0 items-center justify-center">
             <UnassignedIcon
               aria-hidden="true"
               className="size-4 text-muted-foreground"
@@ -184,6 +209,8 @@ type FilterOption = {
   label: string;
   icon?: LucideIcon;
   tone?: Tone;
+  priority?: Priority;
+  iconClassName?: string;
 };
 
 function CaseFilterSubmenu({
@@ -230,15 +257,18 @@ function CaseFilterSubmenu({
                   value={option.value}
                   closeOnClick
                 >
-                  {Icon && (
-                    <Icon
-                      className={queueIconClass(
-                        option.tone,
-                        option.label,
-                        label,
-                      )}
-                      aria-hidden="true"
-                    />
+                  {option.priority ? (
+                    <PriorityBars value={option.priority} />
+                  ) : (
+                    Icon && (
+                      <Icon
+                        className={cn(
+                          "size-3.5 stroke-[1.75]",
+                          option.iconClassName ?? queueIconClass(option.tone),
+                        )}
+                        aria-hidden="true"
+                      />
+                    )
                   )}
                   {option.label}
                 </DropdownMenuRadioItem>
@@ -251,50 +281,7 @@ function CaseFilterSubmenu({
   );
 }
 
-export function CopyTechnicalValue({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  const [copied, setCopied] = useState(false);
-  const [failed, setFailed] = useState(false);
-  return (
-    <span
-      data-ui="copy-value"
-      className="inline-flex items-start gap-0.75 max-w-full min-w-0"
-    >
-      <code
-        title={value}
-        className="min-w-0 font-mono text-caption leading-4.5 wrap-anywhere whitespace-normal select-all tracking-normal font-medium text-foreground"
-      >
-        {value}
-      </code>
-      <Button
-        variant="ghost"
-        size="icon-xs"
-        aria-label={`Copy ${label}`}
-        title={`Copy ${label}`}
-        onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(value);
-            setCopied(true);
-            setFailed(false);
-          } catch {
-            setFailed(true);
-          }
-        }}
-        className="flex-none text-muted-foreground"
-      >
-        {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-      </Button>
-      <span className="sr-only" role="status">
-        {copied ? `${label} copied` : failed ? `Could not copy ${label}` : ""}
-      </span>
-    </span>
-  );
-}
+export { CopyTechnicalValue } from "./copy-technical-value";
 
 const entityIcons = {
   hostname: Server,
@@ -306,14 +293,6 @@ const entityIcons = {
   domain: Globe,
   process: Terminal,
 };
-
-function usefulEntities(item: SecurityCase) {
-  return Object.entries(item.entities).filter(
-    ([, value]) =>
-      value?.trim() &&
-      !/^(?:not supplied|not available|unknown|n\/a|-|—)$/i.test(value.trim()),
-  );
-}
 
 /** A nonmodal preview stays anchored to the case that opened it. */
 export function CaseQuickPreview({
@@ -350,7 +329,7 @@ export function CaseQuickPreview({
       >
         <PopoverHeader className="shrink-0 gap-2 border-b p-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-caption text-muted-foreground">
+            <div className="flex items-baseline gap-2 text-caption text-muted-foreground">
               <CopyTechnicalValue label="case ID" value={item.id} />
               <span aria-hidden="true">·</span>
               <span className="tabular-nums">
@@ -389,14 +368,14 @@ export function CaseQuickPreview({
           </div>
           <p
             data-ui="preview-summary"
-            className="line-clamp-3 shrink-0 text-body"
+            className="line-clamp-3 shrink-0 text-prose"
           >
             {item.summary}
           </p>
           {item.recommendedNextAction?.trim() && (
             <div
               data-ui="preview-next-action"
-              className="flex shrink-0 flex-col gap-1 rounded-md bg-muted p-3 ring-1 ring-inset ring-border"
+              className="flex shrink-0 flex-col gap-1 rounded-md bg-surface p-3 border border-border"
             >
               <span className="text-label font-medium">Next action</span>
               <p className="line-clamp-2 text-label text-muted-foreground">
@@ -453,9 +432,14 @@ export function CaseTable({
   initialQueue?: Queue;
   initialView?: CaseListView;
 }) {
-  const router = useRouter();
+  const sectionRef = useRef<HTMLElement>(null);
+  const previewRegionRef = useRef<HTMLElement>(null);
+  const previewTriggerRef = useRef<HTMLElement | null>(null);
+  const focusPreviewRef = useRef(false);
+  const previewRegionId = useId();
+  const previewHeadingId = useId();
   const created = usePreviewCases();
-  const tableCases = useMemo(() => [...created, ...cases], [created]);
+  const tableCases = useMemo(() => [...created, ...platformCases], [created]);
   const entry = caseListEntry(initialQueue);
   const [view, setView] = useState<CaseListView>(initialView ?? entry.view);
   const [caseStatus, setCaseStatus] = useState<CaseStatus | "">(entry.status);
@@ -477,6 +461,65 @@ export function CaseTable({
   const [page, setPage] = useState(0);
   const [preview, setPreview] = useState<SecurityCase | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  function previewFocusTarget() {
+    return previewTriggerRef.current?.isConnected
+      ? previewTriggerRef.current
+      : (sectionRef.current?.querySelector<HTMLInputElement>(
+          '[data-ui="search"] input',
+        ) ?? null);
+  }
+  useEffect(() => {
+    if (!preview) return;
+    if (focusPreviewRef.current || document.activeElement === document.body) {
+      previewRegionRef.current?.focus({ preventScroll: true });
+      focusPreviewRef.current = false;
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (
+        event.key !== "Escape" ||
+        event.defaultPrevented ||
+        (event.target instanceof Element &&
+          event.target.closest('[role="menu"], [role="dialog"]')) ||
+        document.querySelector(
+          '[role="menu"], [role="dialog"], [data-slot="tooltip-content"][data-open], [data-slot="hover-card-content"][data-open], [aria-haspopup="menu"][aria-expanded="true"]',
+        )
+      )
+        return;
+      event.preventDefault();
+      setPreview(null);
+      previewFocusTarget()?.focus({ preventScroll: true });
+    };
+    window.addEventListener("keydown", closeOnEscape, true);
+    return () => window.removeEventListener("keydown", closeOnEscape, true);
+  }, [preview]);
+  function openPreview(
+    item: SecurityCase,
+    trigger?: HTMLElement | null,
+    keyboard = false,
+  ) {
+    previewTriggerRef.current =
+      trigger ??
+      sectionRef.current?.querySelector<HTMLElement>(
+        `[data-case-id="${item.id}"] [data-ui="case-title"]`,
+      ) ??
+      null;
+    focusPreviewRef.current = keyboard;
+    setPreview(item);
+    setAnnouncement(`Previewing ${item.id}: ${item.title}.`);
+  }
+  function closePreview() {
+    setPreview(null);
+    previewFocusTarget()?.focus({ preventScroll: true });
+  }
+  function previewFromTitle(
+    event: MouseEvent<HTMLAnchorElement>,
+    item: SecurityCase,
+  ) {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return;
+    event.preventDefault();
+    openPreview(item, event.currentTarget, event.detail === 0);
+  }
   const owners = useMemo(
     () =>
       [
@@ -492,7 +535,6 @@ export function CaseTable({
   ) {
     setFilters((previous) => ({ ...previous, [key]: value }));
     setPage(0);
-    setPreview(null);
   }
   const filtered = useMemo(
     () =>
@@ -548,6 +590,19 @@ export function CaseTable({
   const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
   const currentPage = Math.min(page, pageCount - 1);
   const visible = filtered.slice(currentPage * 8, currentPage * 8 + 8);
+  const previewIndex = preview
+    ? filtered.findIndex((item) => item.id === preview.id)
+    : -1;
+  function navigatePreview(offset: -1 | 1) {
+    if (previewIndex < 0) return;
+    const next = filtered[previewIndex + offset];
+    if (!next) return;
+    // Inspector navigation follows the entire result order without paging or scrolling the table.
+    setPreview(next);
+    setAnnouncement(
+      `Previewing ${next.id}: ${next.title}. ${previewIndex + offset + 1} of ${filtered.length}.`,
+    );
+  }
   const visibleSelected = visible.filter((item) =>
     selected.has(item.id),
   ).length;
@@ -679,10 +734,10 @@ export function CaseTable({
         className={cn(
           "h-8 justify-start gap-1 rounded-sm border-0 px-0",
           // Match the semantic value text after each leading icon or badge inset.
-          key === "verdict" && "pl-6",
-          key === "priority" && "pl-5",
-          key === "status" && "pl-1.5",
-          key === "owner" && "pl-7",
+          key === "verdict" && "pl-4",
+          key === "priority" && "pl-6",
+          key === "status" && "pl-4.5",
+          key === "owner" && "pl-7.5",
         )}
       >
         <span data-ui="sort-label">{label}</span>
@@ -698,776 +753,900 @@ export function CaseTable({
   }
   const viewDefinition = caseListViews.find((option) => option.value === view)!;
   return (
-    <section
-      data-ui="case-section"
-      className="mt-8 scroll-mt-5"
-      aria-label="Case queue"
-    >
-      <Tabs
-        data-ui="queue-tabs"
-        value={view}
-        onValueChange={(value) => {
-          setView(value as CaseListView);
-          setPage(0);
-          setPreview(null);
-        }}
-        className="gap-0"
+    <TooltipProvider delay={500} closeDelay={100} timeout={0}>
+      <section
+        ref={sectionRef}
+        data-ui="case-section"
+        className="mt-8 scroll-mt-5"
+        aria-label="Case queue"
       >
-        <div
-          data-ui="table-shell"
-          className="overflow-hidden rounded-lg bg-card ring-1 ring-inset ring-border"
+        <Tabs
+          data-ui="queue-tabs"
+          value={view}
+          onValueChange={(value) => {
+            setView(value as CaseListView);
+            setPage(0);
+            setPreview(null);
+          }}
+          className="gap-0"
         >
-          <div data-ui="queue-top" className="border-b px-5 max-md:px-3">
-            <div className="max-w-full overflow-x-auto">
-              <TabsList
-                variant="line"
-                aria-label="Case queue views"
-                className="gap-5 border-0 p-0 group-data-horizontal/tabs:h-14"
-              >
-                {caseListViews.map((option) => (
-                  <TabsTrigger
-                    key={option.value}
-                    value={option.value}
-                    title={option.description}
-                    className="h-full rounded-none px-1 group-data-horizontal/tabs:after:bottom-0 group-data-horizontal/tabs:after:h-px"
-                  >
-                    {option.label}
-                    <span
-                      data-ui="tab-count"
-                      className="text-caption tabular-nums text-muted-foreground"
-                    >
-                      {
-                        tableCases.filter((item) =>
-                          matchesCaseListView(
-                            item,
-                            option.value,
-                            currentAnalyst,
-                          ),
-                        ).length
-                      }
-                    </span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-          </div>
           <div
-            data-ui="filter-row"
-            className="flex flex-wrap items-center gap-3 border-b px-5 py-4 max-md:px-3"
+            data-ui="table-shell"
+            className="overflow-hidden rounded-lg bg-surface border border-border"
           >
-            <div
-              data-ui="search"
-              className="relative min-w-40 flex-1 sm:max-w-80 max-sm:basis-full"
-            >
-              <Search
-                aria-hidden="true"
-                className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground"
-              />
-              <Input
-                aria-label="Search titles, case IDs, IPs, hosts, or users"
-                placeholder="Search cases…"
-                value={filters.search}
-                onChange={(event) => updateFilter("search", event.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <div
-              data-ui="table-view-tools"
-              className="ml-auto flex flex-wrap items-center gap-2 max-sm:w-full"
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      aria-label={`Filter by verdict: ${filters.verdict || "All verdicts"}`}
-                    />
-                  }
+            <div data-ui="queue-top" className="border-b bg-surface px-5 max-md:px-3">
+              <div className="max-w-full overflow-x-auto">
+                <TabsList
+                  variant="line"
+                  aria-label="Case queue views"
+                  className="gap-5 border-0 p-0 group-data-horizontal/tabs:h-14"
                 >
-                  <span className={cn(filters.verdict && "max-sm:hidden")}>
-                    Verdict{filters.verdict ? ":" : ""}
-                  </span>
-                  {filters.verdict && <span>{filters.verdict}</span>}
-                  <ChevronDown data-icon="inline-end" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-52">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Verdict</DropdownMenuLabel>
-                    <DropdownMenuRadioGroup
-                      value={filters.verdict}
-                      onValueChange={(value) =>
-                        updateFilter("verdict", String(value))
-                      }
+                  {caseListViews.map((option) => (
+                    <TabsTrigger
+                      key={option.value}
+                      value={option.value}
+                      title={option.description}
+                      className="h-full rounded-none px-1 group-data-horizontal/tabs:after:bottom-0 group-data-horizontal/tabs:after:h-px"
                     >
-                      <DropdownMenuRadioItem value="" closeOnClick>
-                        All verdicts
-                      </DropdownMenuRadioItem>
-                      {verdicts.map((value) => (
-                        <DropdownMenuRadioItem
-                          key={value}
-                          value={value}
-                          closeOnClick
-                        >
-                          {value}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="outline" />}>
-                  <ListFilter data-icon="inline-start" /> More filters
-                  {filterChips.length > 0 && (
-                    <Badge variant="secondary">{filterChips.length}</Badge>
-                  )}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-60">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Filter cases</DropdownMenuLabel>
-                    <CaseFilterSubmenu
-                      label="Owner"
-                      value={filters.assignment}
-                      onChange={(value) => updateFilter("assignment", value)}
-                      options={[
+                      {option.label}
+                      <span
+                        data-ui="tab-count"
+                        className="text-caption tabular-nums text-muted-foreground"
+                      >
                         {
-                          label: "Assigned to me",
-                          value: currentAnalyst,
-                          icon: UserRound,
-                        },
-                        {
-                          label: "Unassigned",
-                          value: "unassigned",
-                          icon: assignmentStates.Unassigned.icon,
-                        },
-                        ...owners
-                          .filter((owner) => owner !== currentAnalyst)
-                          .map((owner) => ({
-                            label: owner,
-                            value: owner,
-                            icon: UserRound,
-                          })),
-                      ]}
-                    />
-                    <CaseFilterSubmenu
-                      label="Priority"
-                      value={filters.priority}
-                      onChange={(value) => updateFilter("priority", value)}
-                      options={priorities.map((value) => ({
-                        label: value,
-                        value,
-                        icon: priorityStates[value].icon,
-                        tone: priorityStates[value].tone,
-                      }))}
-                    />
-                    <CaseFilterSubmenu
-                      label="Status"
-                      value={caseStatus}
-                      onChange={(value) => {
-                        setCaseStatus(value as CaseStatus | "");
-                        setPage(0);
-                        setPreview(null);
-                      }}
-                      options={statuses.map((value) => ({
-                        label: queueStatusStates[value].label,
-                        value,
-                      }))}
-                    />
-                    <CaseFilterSubmenu
-                      label="Source"
-                      value={filters.source}
-                      onChange={(value) => updateFilter("source", value)}
-                      options={sources.map((value) => ({
-                        label: value,
-                        value,
-                        icon: sourceOptionIcons[value],
-                      }))}
-                    />
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuCheckboxItem
-                      checked={filters.autonomous}
-                      onCheckedChange={(checked) =>
-                        updateFilter("autonomous", checked)
-                      }
-                    >
-                      Closed by OSCAR only
-                    </DropdownMenuCheckboxItem>
-                    {filterChips.length > 0 && (
-                      <DropdownMenuItem onClick={clearFilters}>
-                        Clear filters
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button variant="outline" aria-label="View options" />
-                  }
-                >
-                  <SlidersHorizontal data-icon="inline-start" />
-                  <span className="max-sm:sr-only">View</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Display</DropdownMenuLabel>
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>
-                        Sort{" "}
-                        <span className="ml-auto text-caption text-muted-foreground">
-                          {sortLabel}
-                        </span>
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent className="min-w-48">
-                        <DropdownMenuGroup>
-                          <DropdownMenuLabel>Sort cases</DropdownMenuLabel>
-                          <DropdownMenuRadioGroup
-                            value={sortValue}
-                            onValueChange={(value) => {
-                              const option = sortOptions.find(
-                                (option) => option.value === value,
-                              );
-                              if (option) {
-                                setSort({
-                                  key: option.key,
-                                  descending: option.descending,
-                                });
-                                setPage(0);
-                              }
-                            }}
-                          >
-                            {sortOptions.map((option) => (
-                              <DropdownMenuRadioItem
-                                key={option.value}
-                                value={option.value}
-                                closeOnClick
-                              >
-                                {option.label}
-                              </DropdownMenuRadioItem>
-                            ))}
-                          </DropdownMenuRadioGroup>
-                        </DropdownMenuGroup>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>
-                        Row density{" "}
-                        <span className="ml-auto text-caption capitalize text-muted-foreground">
-                          {density}
-                        </span>
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent className="min-w-44">
-                        <DropdownMenuGroup>
-                          <DropdownMenuLabel>Row density</DropdownMenuLabel>
-                          <DropdownMenuRadioGroup
-                            value={density}
-                            onValueChange={(value) => setDensity(String(value))}
-                          >
-                            <DropdownMenuRadioItem
-                              value="comfortable"
-                              closeOnClick
-                            >
-                              Comfortable
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="compact" closeOnClick>
-                              Compact
-                            </DropdownMenuRadioItem>
-                          </DropdownMenuRadioGroup>
-                        </DropdownMenuGroup>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>Columns</DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent className="min-w-44">
-                        <DropdownMenuGroup>
-                          <DropdownMenuLabel>Visible columns</DropdownMenuLabel>
-                          {optionalColumns.map((column) => (
-                            <DropdownMenuCheckboxItem
-                              key={column}
-                              checked={columns[column]}
-                              onCheckedChange={(checked) =>
-                                setColumns((previous) => ({
-                                  ...previous,
-                                  [column]: checked,
-                                }))
-                              }
-                            >
-                              {column[0].toUpperCase() + column.slice(1)}
-                            </DropdownMenuCheckboxItem>
-                          ))}
-                        </DropdownMenuGroup>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => exportCases("view")}>
-                      <Download />
-                      Export view
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            {filterChips.length > 0 && (
-              <div
-                data-ui="active-filters"
-                className="flex w-full flex-wrap items-center gap-2 pt-1"
-              >
-                {filterChips.map(({ key, label }) => (
-                  <Button
-                    key={key}
-                    variant="secondary"
-                    size="sm"
-                    aria-label={`Remove ${label} filter`}
-                    onClick={() => {
-                      if (key === "status") {
-                        setCaseStatus("");
-                        setPage(0);
-                      } else
-                        updateFilter(key, key === "autonomous" ? false : "");
-                    }}
-                  >
-                    {label}
-                    <X data-icon="inline-end" />
-                  </Button>
-                ))}
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  Clear filters
-                </Button>
+                          tableCases.filter((item) =>
+                            matchesCaseListView(
+                              item,
+                              option.value,
+                              currentAnalyst,
+                            ),
+                          ).length
+                        }
+                      </span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
               </div>
-            )}
-          </div>
-          {selected.size > 0 && (
-            <div
-              data-ui="selection-toolbar"
-              className="flex items-center gap-2.25 mt-3 mr-4.5 mb-3 ml-4.5 pt-1.75 pr-2.5 pb-1.75 pl-2.5 border border-border rounded-md bg-muted"
-              role="toolbar"
-              aria-label="Selected case actions"
-            >
-              <strong className="text-xs font-semibold mr-1">
-                {selected.size} selected
-              </strong>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => exportCases("selection")}
-                className="h-6.75"
-              >
-                <Download data-icon="inline-start" />
-                Export selection
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelected(new Set())}
-                className="h-6.75"
-              >
-                Clear selection
-              </Button>
             </div>
-          )}
-          <TabsContent
-            data-ui="table-panel"
-            value={view}
-            className="mt-0 mr-0 mb-0 ml-0"
-          >
-            <Table
-              data-ui="case-table"
-              className="group/queue min-w-[660px] table-fixed [&_tbody_td]:h-16 [&_tbody_td]:py-3 data-[density=comfortable]:[&_tbody_td]:h-20 data-[density=comfortable]:[&_tbody_td]:py-4 max-[1000px]:min-w-0"
-              data-density={density}
+            <div
+              data-ui="filter-row"
+              className="flex flex-wrap items-center gap-3 border-b bg-surface px-5 py-4 max-md:px-3"
             >
-              <caption className="sr-only">
-                {viewDefinition.label}. Select a case title to inspect full
-                technical details. {density} density.
-              </caption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead
-                    data-ui="col-select"
-                    className="w-10.5 pl-4.5 max-md:w-8.5 max-md:pl-3"
-                  >
-                    <Checkbox
-                      aria-label="Select all cases on this page"
-                      checked={
-                        visible.length > 0 && visibleSelected === visible.length
-                      }
-                      indeterminate={
-                        visibleSelected > 0 && visibleSelected < visible.length
-                      }
-                      onCheckedChange={(checked) =>
-                        setSelected((previous) => {
-                          const next = new Set(previous);
-                          visible.forEach((item) => {
-                            if (checked) next.add(item.id);
-                            else next.delete(item.id);
-                          });
-                          return next;
-                        })
-                      }
-                    />
-                  </TableHead>
-                  <TableHead
-                    data-ui="col-case"
-                    className="px-4 max-[1000px]:pl-2"
-                    scope="col"
-                    aria-sort={
-                      sort.key === "title"
-                        ? sort.descending
-                          ? "descending"
-                          : "ascending"
-                        : "none"
+              <div
+                data-ui="search"
+                className="relative min-w-40 flex-1 sm:max-w-80 max-sm:basis-full"
+              >
+                <Search
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground"
+                />
+                <Input
+                  aria-label="Search titles, case IDs, IPs, hosts, or users"
+                  placeholder="Search cases…"
+                  value={filters.search}
+                  onChange={(event) =>
+                    updateFilter("search", event.target.value)
+                  }
+                  className="pl-9"
+                />
+              </div>
+              <div
+                data-ui="table-view-tools"
+                className="ml-auto flex flex-wrap items-center gap-2 max-sm:w-full"
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        variant="outline"
+                        aria-label={`Filter by verdict: ${filters.verdict || "All verdicts"}`}
+                      />
                     }
                   >
-                    {sortHeader("title", "Case")}
-                  </TableHead>
-                  {optionalColumns
-                    .filter((column) => columns[column])
-                    .map((column) => (
-                      <TableHead
-                        key={column}
-                        data-ui={`col-${column}`}
-                        scope="col"
-                        className={cn("px-4", columnClasses[column])}
-                        aria-sort={
-                          sort.key === column
-                            ? sort.descending
-                              ? "descending"
-                              : "ascending"
-                            : "none"
+                    <span className={cn(filters.verdict && "max-sm:hidden")}>
+                      Verdict{filters.verdict ? ":" : ""}
+                    </span>
+                    {filters.verdict && <span>{filters.verdict}</span>}
+                    <ChevronDown data-icon="inline-end" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-52">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Verdict</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup
+                        value={filters.verdict}
+                        onValueChange={(value) =>
+                          updateFilter("verdict", String(value))
                         }
                       >
-                        {sortHeader(
-                          column,
-                          column[0].toUpperCase() + column.slice(1),
-                        )}
-                      </TableHead>
-                    ))}
-                  <TableHead
-                    data-ui="col-actions"
-                    className="w-20 pl-0 pr-3 text-left whitespace-nowrap"
+                        <DropdownMenuRadioItem value="" closeOnClick>
+                          All verdicts
+                        </DropdownMenuRadioItem>
+                        {verdicts.map((value) => (
+                          <DropdownMenuRadioItem
+                            key={value}
+                            value={value}
+                            closeOnClick
+                          >
+                            <VerdictMarker value={value} />
+                            {value}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button variant="outline" aria-label="More filters" />
+                    }
                   >
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visible.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    data-state={selected.has(item.id) ? "selected" : undefined}
-                    onClick={(event) => {
-                      if (
-                        event.defaultPrevented ||
-                        event.button !== 0 ||
-                        event.metaKey ||
-                        event.ctrlKey ||
-                        event.shiftKey ||
-                        event.altKey ||
-                        (event.target instanceof Element &&
-                          event.target.closest(
-                            "a, button, input, select, textarea, [role='checkbox'], [role^='menuitem']",
-                          ))
-                      )
-                        return;
-                      router.push(caseHref(item.id));
-                    }}
-                  >
-                    <TableCell
-                      data-ui="col-select"
-                      className="w-10.5 pl-4.5 max-md:w-8.5 max-md:pl-3"
-                    >
-                      <Checkbox
-                        aria-label={`Select ${item.id}`}
-                        checked={selected.has(item.id)}
-                        onCheckedChange={(checked) =>
-                          selectCase(item.id, checked)
-                        }
+                    <ListFilter data-icon="inline-start" />
+                    <span className="max-sm:hidden">More filters</span>
+                    <span className="sm:hidden">Filters</span>
+                    {filterChips.length > 0 && (
+                      <Badge variant="secondary">{filterChips.length}</Badge>
+                    )}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Filter cases</DropdownMenuLabel>
+                      <CaseFilterSubmenu
+                        label="Owner"
+                        value={filters.assignment}
+                        onChange={(value) => updateFilter("assignment", value)}
+                        options={[
+                          {
+                            label: "Assigned to me",
+                            value: currentAnalyst,
+                            icon: UserRound,
+                          },
+                          {
+                            label: "Unassigned",
+                            value: "unassigned",
+                            icon: assignmentStates.Unassigned.icon,
+                          },
+                          ...owners
+                            .filter((owner) => owner !== currentAnalyst)
+                            .map((owner) => ({
+                              label: owner,
+                              value: owner,
+                              icon: UserRound,
+                            })),
+                        ]}
                       />
-                    </TableCell>
-                    <TableCell
-                      data-ui="case-cell col-case"
-                      className="px-4 max-[1000px]:py-4 max-[1000px]:pl-2"
-                    >
-                      <Link
-                        data-ui="case-title"
-                        href={caseHref(item.id)}
-                        className="block w-full truncate rounded-xs text-left text-sm leading-5 font-medium text-foreground hover:underline hover:underline-offset-3 "
-                        title={item.title}
+                      <CaseFilterSubmenu
+                        label="Priority"
+                        value={filters.priority}
+                        onChange={(value) => updateFilter("priority", value)}
+                        options={priorities.map((value) => ({
+                          label: value,
+                          value,
+                          priority: value,
+                        }))}
+                      />
+                      <CaseFilterSubmenu
+                        label="Status"
+                        value={caseStatus}
+                        onChange={(value) => {
+                          setCaseStatus(value as CaseStatus | "");
+                          setPage(0);
+                        }}
+                        options={statuses.map((value) => ({
+                          label: queueStatusStates[value].label,
+                          value,
+                          icon: queueStatusStates[value].icon,
+                          tone: queueStatusStates[value].tone,
+                          iconClassName: (
+                            queueStatusStates[value] as SemanticState
+                          ).iconClassName,
+                        }))}
+                      />
+                      <CaseFilterSubmenu
+                        label="Source"
+                        value={filters.source}
+                        onChange={(value) => updateFilter("source", value)}
+                        options={sources.map((value) => ({
+                          label: value,
+                          value,
+                          icon: sourceOptionIcons[value],
+                        }))}
+                      />
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuCheckboxItem
+                        checked={filters.autonomous}
+                        onCheckedChange={(checked) =>
+                          updateFilter("autonomous", checked)
+                        }
                       >
-                        {item.title}
-                      </Link>
-                      <div
-                        data-ui="case-meta"
-                        className="@container mt-0.5 flex min-w-0 items-center gap-1.5 overflow-hidden text-caption leading-4.25 whitespace-nowrap text-muted-foreground"
-                      >
-                        <span
-                          data-ui="mono"
-                          className="shrink-0 font-mono text-xs leading-4.5 font-normal"
-                          title={item.id}
-                        >
-                          {item.id}
-                        </span>
-                        <span className="shrink-0" aria-hidden="true">
-                          ·
-                        </span>
-                        <span
-                          data-ui="source-meta"
-                          className="inline-flex min-w-0 max-w-32 items-center gap-1 @max-[360px]:hidden"
-                          title={item.source}
-                        >
-                          {(() => {
-                            const SourceIcon = sourceOptionIcons[item.source];
-                            return (
-                              <SourceIcon
-                                className="size-3.25 shrink-0"
-                                aria-hidden="true"
-                              />
-                            );
-                          })()}
-                          <span className="truncate">{item.source}</span>
-                        </span>
-                        {usefulEntities(item)
-                          .slice(0, 2)
-                          .map(([key, value], index) => {
-                            const Icon =
-                              entityIcons[key as keyof typeof entityIcons];
-                            const label = key === "ip" ? "IP address" : key;
-                            return (
-                              <span
-                                key={key}
-                                data-ui="entity-meta"
-                                className={cn(
-                                  "inline-flex min-w-0 items-center gap-1.5",
-                                  index === 1 && "@max-[520px]:hidden",
-                                )}
-                                title={`${label}: ${value}`}
-                                aria-label={`${label}: ${value}`}
-                              >
-                                <span className="shrink-0" aria-hidden="true">
-                                  ·
-                                </span>
-                                <Icon
-                                  className="size-3.25 shrink-0"
-                                  aria-hidden="true"
-                                />
-                                <span
-                                  data-ui="mono"
-                                  className="truncate font-mono text-xs leading-4.5 font-normal"
-                                >
-                                  {key === "file"
-                                    ? value.split(/[\\/]/).pop()
-                                    : value}
-                                </span>
-                              </span>
-                            );
-                          })}
-                      </div>
-                      <div
-                        data-ui="mobile-badges"
-                        className="mt-2.5 hidden flex-wrap items-center gap-1.5 max-[1000px]:flex"
-                      >
-                        <PriorityBadge value={item.priority} queue />
-                        <QueueVerdictBadge item={item} />
-                        <QueueStatusIndicator item={item} />
-                      </div>
-                    </TableCell>
-                    {columns.verdict && (
-                      <TableCell
-                        data-ui="col-verdict"
-                        className={cn("px-4", columnClasses.verdict)}
-                      >
-                        <QueueVerdictBadge item={item} />
-                      </TableCell>
-                    )}
-                    {columns.priority && (
-                      <TableCell
-                        data-ui="col-priority"
-                        className={cn("px-4", columnClasses.priority)}
-                      >
-                        <PriorityBadge value={item.priority} queue />
-                      </TableCell>
-                    )}
-                    {columns.status && (
-                      <TableCell
-                        data-ui="col-status"
-                        className={cn("px-4", columnClasses.status)}
-                      >
-                        <QueueStatusIndicator item={item} />
-                      </TableCell>
-                    )}
-                    {columns.owner && (
-                      <TableCell
-                        data-ui="col-owner"
-                        className={cn("px-4", columnClasses.owner)}
-                      >
-                        <Owner name={item.owner} />
-                      </TableCell>
-                    )}
-                    {columns.age && (
-                      <TableCell
-                        data-ui="col-age"
-                        className={cn("px-4", columnClasses.age)}
-                      >
-                        <span
-                          data-ui="caption"
-                          title={`${item.ageMinutes} minutes ago`}
-                          className="text-xs leading-4.5 font-normal text-muted-foreground tabular-nums"
-                        >
-                          {formatAge(item.ageMinutes)}
-                        </span>
-                      </TableCell>
-                    )}
-                    {columns.source && (
-                      <TableCell
-                        data-ui="col-source"
-                        className={cn("px-4", columnClasses.source)}
-                      >
-                        {item.source}
-                      </TableCell>
-                    )}
-                    <TableCell
-                      data-ui="col-actions"
-                      className="w-20 pl-0 pr-3 text-left whitespace-nowrap"
-                    >
-                      <CaseQuickPreview
-                        item={item}
-                        open={preview?.id === item.id}
-                        onOpenChange={(open) => setPreview(open ? item : null)}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Quick preview ${item.id}`}
-                          title="Quick preview"
-                        >
-                          <Eye aria-hidden="true" />
-                        </Button>
-                      </CaseQuickPreview>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              aria-label={`More actions for ${item.id}`}
-                              title="More actions"
-                            />
-                          }
-                        >
-                          <MoreHorizontal aria-hidden="true" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          data-ui="preview menu"
-                          align="end"
-                          className="text-sm leading-5.5 text-foreground min-w-45"
-                        >
+                        Closed by OSCAR only
+                      </DropdownMenuCheckboxItem>
+                      {filterChips.length > 0 && (
+                        <DropdownMenuItem onClick={clearFilters}>
+                          Clear filters
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        variant="outline"
+                        aria-label="Display preferences"
+                      />
+                    }
+                  >
+                    <SlidersHorizontal data-icon="inline-start" />
+                    <span>Display</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Display</DropdownMenuLabel>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          Sort{" "}
+                          <span className="ml-auto text-caption text-muted-foreground">
+                            {sortLabel}
+                          </span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="min-w-48">
                           <DropdownMenuGroup>
-                            <DropdownMenuItem
-                              render={<Link href={caseHref(item.id)} />}
+                            <DropdownMenuLabel>Sort cases</DropdownMenuLabel>
+                            <DropdownMenuRadioGroup
+                              value={sortValue}
+                              onValueChange={(value) => {
+                                const option = sortOptions.find(
+                                  (option) => option.value === value,
+                                );
+                                if (option) {
+                                  setSort({
+                                    key: option.key,
+                                    descending: option.descending,
+                                  });
+                                  setPage(0);
+                                }
+                              }}
                             >
-                              <ArrowUpRight aria-hidden="true" />
-                              Open investigation
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setPreview(item)}>
-                              <Eye aria-hidden="true" />
-                              Quick preview
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => copyCaseId(item.id)}
-                            >
-                              <Copy aria-hidden="true" />
-                              Copy case ID
-                            </DropdownMenuItem>
+                              {sortOptions.map((option) => (
+                                <DropdownMenuRadioItem
+                                  key={option.value}
+                                  value={option.value}
+                                  closeOnClick
+                                >
+                                  {option.label}
+                                </DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
                           </DropdownMenuGroup>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {!filtered.length && (
-              <Empty className="py-14">
-                <EmptyHeader>
-                  <Search aria-hidden="true" />
-                  <EmptyTitle>
-                    {activeFilters
-                      ? "No matching cases"
-                      : view === "mine"
-                        ? "No cases assigned to you"
-                        : view === "unassigned"
-                          ? "No unassigned cases"
-                          : view === "attention"
-                            ? "Nothing needs attention"
-                            : "No cases yet"}
-                  </EmptyTitle>
-                  <EmptyDescription>
-                    {activeFilters
-                      ? "Try a broader search or clear the active filters."
-                      : view === "mine"
-                        ? "Open cases assigned to you will appear here."
-                        : "Cases will appear here when they match this work view."}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
-            <div
-              data-ui="table-footer"
-              className="flex flex-wrap items-center justify-between gap-4 border-t px-6 py-4 border-border max-md:pt-3 max-md:pr-3 max-md:pb-3 max-md:pl-3 max-md:[&_[data-ui~='caption']]:text-caption"
-            >
-              <span
-                data-ui="caption"
-                role="status"
-                className="text-xs leading-4.5 font-normal text-muted-foreground"
-              >
-                {selected.size ? `${selected.size} selected · ` : ""}
-                {filtered.length
-                  ? `${currentPage * 8 + 1}–${Math.min(currentPage * 8 + 8, filtered.length)} of ${filtered.length} cases`
-                  : "0 cases"}
-              </span>
-              <span
-                data-ui="caption preview-note"
-                className="text-caption font-normal text-muted-foreground max-md:order-3 max-md:w-full max-md:text-center"
-              >
-                Local preview · no live data
-              </span>
-              <div className="flex items-center gap-3 max-md:gap-1.75">
-                <span
-                  data-ui="caption"
-                  className="text-xs leading-4.5 font-normal text-muted-foreground"
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          Row density{" "}
+                          <span className="ml-auto text-caption capitalize text-muted-foreground">
+                            {density}
+                          </span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="min-w-44">
+                          <DropdownMenuGroup>
+                            <DropdownMenuLabel>Row density</DropdownMenuLabel>
+                            <DropdownMenuRadioGroup
+                              value={density}
+                              onValueChange={(value) =>
+                                setDensity(String(value))
+                              }
+                            >
+                              <DropdownMenuRadioItem
+                                value="comfortable"
+                                closeOnClick
+                              >
+                                Comfortable
+                              </DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem
+                                value="compact"
+                                closeOnClick
+                              >
+                                Compact
+                              </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuGroup>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>Columns</DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="min-w-44">
+                          <DropdownMenuGroup>
+                            <DropdownMenuLabel>
+                              Visible columns
+                            </DropdownMenuLabel>
+                            {optionalColumns.map((column) => (
+                              <DropdownMenuCheckboxItem
+                                key={column}
+                                checked={columns[column]}
+                                onCheckedChange={(checked) =>
+                                  setColumns((previous) => ({
+                                    ...previous,
+                                    [column]: checked,
+                                  }))
+                                }
+                              >
+                                {column[0].toUpperCase() + column.slice(1)}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuGroup>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem onClick={() => exportCases("view")}>
+                        <Download />
+                        Export view
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              {filterChips.length > 0 && (
+                <div
+                  data-ui="active-filters"
+                  className="flex w-full flex-wrap items-center gap-2 pt-1"
                 >
-                  Page {currentPage + 1} of {pageCount}
-                </span>
+                  {filterChips.map(({ key, label }) => (
+                    <Button
+                      key={key}
+                      variant="outline"
+                      size="sm"
+                      aria-label={`Remove ${label} filter`}
+                      onClick={() => {
+                        if (key === "status") {
+                          setCaseStatus("");
+                          setPage(0);
+                        } else
+                          updateFilter(key, key === "autonomous" ? false : "");
+                      }}
+                    >
+                      {label}
+                      <X data-icon="inline-end" />
+                    </Button>
+                  ))}
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    Clear filters
+                  </Button>
+                </div>
+              )}
+            </div>
+            {selected.size > 0 && (
+              <div
+                data-ui="selection-toolbar"
+                className="flex items-center gap-2.25 mt-3 mr-4.5 mb-3 ml-4.5 pt-1.75 pr-2.5 pb-1.75 pl-2.5 border border-border rounded-md bg-surface"
+                role="toolbar"
+                aria-label="Selected case actions"
+              >
+                <strong className="text-caption font-semibold mr-1">
+                  {selected.size} selected
+                </strong>
                 <Button
                   variant="outline"
-                  size="icon"
-                  aria-label="Previous page"
-                  disabled={currentPage === 0}
-                  onClick={() => setPage(currentPage - 1)}
+                  size="sm"
+                  onClick={() => exportCases("selection")}
                 >
-                  <ChevronLeft />
+                  <Download data-icon="inline-start" />
+                  Export selection
                 </Button>
                 <Button
-                  variant="outline"
-                  size="icon"
-                  aria-label="Next page"
-                  disabled={currentPage >= pageCount - 1}
-                  onClick={() => setPage(currentPage + 1)}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelected(new Set())}
                 >
-                  <ChevronRight />
+                  Clear selection
                 </Button>
               </div>
-            </div>
-          </TabsContent>
-        </div>
-      </Tabs>
-      <span className="sr-only" role="status">
-        {announcement}
-      </span>
-    </section>
+            )}
+            <TabsContent data-ui="table-panel" value={view} className="m-0">
+              <div data-ui="investigation-workspace" className="min-w-0">
+                <div
+                  data-ui="case-grid"
+                  className="@container/case-grid flex min-h-0 min-w-0 flex-col"
+                >
+                  <div
+                    data-ui="case-table-scroll"
+                    className="min-h-0 flex-1 overflow-y-auto overscroll-contain [&>[data-slot=table-container]]:overflow-visible"
+                  >
+                    <Table
+                      data-ui="case-table"
+                      className="group/queue min-w-0 table-fixed [&_tbody_td]:h-16 [&_tbody_td]:py-3 data-[density=comfortable]:[&_tbody_td]:h-20 data-[density=comfortable]:[&_tbody_td]:py-4"
+                      data-density={density}
+                    >
+                      <caption className="sr-only">
+                        {viewDefinition.label}. Select a case to preview its
+                        investigation. Use Open investigation for full technical
+                        details. {density} density.
+                      </caption>
+                      <TableHeader className="sticky top-0 z-10">
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead data-ui="col-select" className="w-9 pl-3">
+                            <Checkbox
+                              aria-label="Select all cases on this page"
+                              checked={
+                                visible.length > 0 &&
+                                visibleSelected === visible.length
+                              }
+                              indeterminate={
+                                visibleSelected > 0 &&
+                                visibleSelected < visible.length
+                              }
+                              onCheckedChange={(checked) =>
+                                setSelected((previous) => {
+                                  const next = new Set(previous);
+                                  visible.forEach((item) => {
+                                    if (checked) next.add(item.id);
+                                    else next.delete(item.id);
+                                  });
+                                  return next;
+                                })
+                              }
+                            />
+                          </TableHead>
+                          <TableHead
+                            data-ui="col-case"
+                            className="px-3"
+                            scope="col"
+                            aria-sort={
+                              sort.key === "title"
+                                ? sort.descending
+                                  ? "descending"
+                                  : "ascending"
+                                : "none"
+                            }
+                          >
+                            {sortHeader("title", "Case")}
+                          </TableHead>
+                          {optionalColumns
+                            .filter((column) => columns[column])
+                            .map((column) => (
+                              <TableHead
+                                key={column}
+                                data-ui={`col-${column}`}
+                                scope="col"
+                                className={cn("px-3", columnClasses[column])}
+                                aria-sort={
+                                  sort.key === column
+                                    ? sort.descending
+                                      ? "descending"
+                                      : "ascending"
+                                    : "none"
+                                }
+                              >
+                                {sortHeader(
+                                  column,
+                                  column[0].toUpperCase() + column.slice(1),
+                                )}
+                              </TableHead>
+                            ))}
+                          <TableHead
+                            data-ui="col-actions"
+                            className="w-18 pl-0 pr-2 text-left whitespace-nowrap"
+                          >
+                            <span className="sr-only">Actions</span>
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {visible.map((item) => (
+                          <TableRow
+                            key={item.id}
+                            data-case-id={item.id}
+                            data-preview-selected={preview?.id === item.id}
+                            data-state={
+                              selected.has(item.id) ? "selected" : undefined
+                            }
+                            className="cursor-pointer"
+                            onClick={(event) => {
+                              if (
+                                event.defaultPrevented ||
+                                event.button !== 0 ||
+                                event.metaKey ||
+                                event.ctrlKey ||
+                                event.shiftKey ||
+                                event.altKey ||
+                                (event.target instanceof Element &&
+                                  event.target.closest(
+                                    "a, button, input, select, textarea, [role='checkbox'], [role^='menuitem']",
+                                  ))
+                              )
+                                return;
+                              openPreview(item);
+                            }}
+                          >
+                            <TableCell
+                              data-ui="col-select"
+                              className="w-9 pl-3"
+                            >
+                              <Checkbox
+                                aria-label={`Select ${item.id}`}
+                                checked={selected.has(item.id)}
+                                onCheckedChange={(checked) =>
+                                  selectCase(item.id, checked)
+                                }
+                              />
+                            </TableCell>
+                            <TableCell
+                              data-ui="case-cell col-case"
+                              className="px-3"
+                            >
+                              <CaseTitleTooltip title={item.title}>
+                                <Link
+                                  data-ui="case-title"
+                                  href={caseHref(item.id)}
+                                  prefetch={false}
+                                  onClick={(event) =>
+                                    previewFromTitle(event, item)
+                                  }
+                                  aria-label={`Preview investigation ${item.id}: ${item.title}`}
+                                  aria-expanded={preview?.id === item.id}
+                                  aria-controls={
+                                    preview?.id === item.id
+                                      ? previewRegionId
+                                      : undefined
+                                  }
+                                  className="block w-full truncate rounded-xs text-left text-body font-medium text-foreground outline-none hover:underline hover:underline-offset-3 focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  {item.title}
+                                </Link>
+                              </CaseTitleTooltip>
+                              <div
+                                data-ui="case-meta"
+                                className="@container mt-1 flex min-w-0 items-baseline gap-1.5 overflow-hidden text-caption whitespace-nowrap text-muted-foreground"
+                              >
+                                <CaseMetadataPreview item={item}>
+                                  <span
+                                    data-ui="mono"
+                                    className="shrink-0 font-mono text-caption font-normal"
+                                  >
+                                    {item.id}
+                                  </span>
+                                  <span
+                                    data-ui="source-meta"
+                                    className="inline-flex min-w-0 max-w-32 items-baseline gap-1 @max-[360px]:hidden"
+                                  >
+                                    <span
+                                      className="shrink-0"
+                                      aria-hidden="true"
+                                    >
+                                      ·
+                                    </span>
+                                    {(() => {
+                                      const SourceIcon =
+                                        sourceOptionIcons[item.source];
+                                      return (
+                                        <SourceIcon
+                                          className="size-3.25 shrink-0 self-center"
+                                          aria-hidden="true"
+                                        />
+                                      );
+                                    })()}
+                                    <span className="truncate">
+                                      {item.source}
+                                    </span>
+                                  </span>
+                                  {usefulEntities(item)
+                                    .slice(0, 2)
+                                    .map(([key, value], index) => {
+                                      const Icon =
+                                        entityIcons[
+                                          key as keyof typeof entityIcons
+                                        ];
+                                      const label =
+                                        key === "ip" ? "IP address" : key;
+                                      return (
+                                        <span
+                                          key={key}
+                                          data-ui="entity-meta"
+                                          className={cn(
+                                            "inline-flex min-w-0 items-baseline gap-1.5 @min-[520px]/case-grid:@max-[680px]/case-grid:hidden",
+                                            index === 1 &&
+                                              "@max-[520px]:hidden",
+                                          )}
+                                          aria-label={`${label}: ${value}`}
+                                        >
+                                          <span
+                                            className="shrink-0"
+                                            aria-hidden="true"
+                                          >
+                                            ·
+                                          </span>
+                                          <Icon
+                                            className="size-3.25 shrink-0 self-center"
+                                            aria-hidden="true"
+                                          />
+                                          <span
+                                            data-ui="mono"
+                                            className="truncate font-mono text-caption font-normal"
+                                          >
+                                            {key === "file"
+                                              ? value.split(/[\\/]/).pop()
+                                              : value}
+                                          </span>
+                                        </span>
+                                      );
+                                    })}
+                                </CaseMetadataPreview>
+                                {columns.priority && (
+                                  <span className="ml-auto hidden @min-[520px]/case-grid:inline-flex @min-[680px]/case-grid:hidden">
+                                    <CasePriorityTooltip item={item}>
+                                      <PriorityBadge
+                                        value={item.priority}
+                                        queue
+                                      />
+                                    </CasePriorityTooltip>
+                                  </span>
+                                )}
+                              </div>
+                              <div
+                                data-ui="mobile-badges"
+                                className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 @min-[600px]/case-grid:hidden"
+                              >
+                                {columns.priority && (
+                                  <span className="@min-[520px]/case-grid:hidden">
+                                    <CasePriorityTooltip item={item}>
+                                      <PriorityBadge
+                                        value={item.priority}
+                                        queue
+                                      />
+                                    </CasePriorityTooltip>
+                                  </span>
+                                )}
+                                {columns.verdict && (
+                                  <span className="@min-[520px]/case-grid:hidden">
+                                    <CaseVerdictTooltip item={item}>
+                                      <QueueVerdictBadge item={item} />
+                                    </CaseVerdictTooltip>
+                                  </span>
+                                )}
+                                {columns.status && (
+                                  <span className="@min-[600px]/case-grid:hidden">
+                                    <CaseWorkflowTooltip item={item}>
+                                      <QueueStatusIndicator item={item} />
+                                    </CaseWorkflowTooltip>
+                                  </span>
+                                )}
+                              </div>
+                            </TableCell>
+                            {columns.verdict && (
+                              <TableCell
+                                data-ui="col-verdict"
+                                className={cn("px-3", columnClasses.verdict)}
+                              >
+                                <CaseVerdictTooltip item={item}>
+                                  <QueueVerdictBadge item={item} />
+                                </CaseVerdictTooltip>
+                              </TableCell>
+                            )}
+                            {columns.priority && (
+                              <TableCell
+                                data-ui="col-priority"
+                                className={cn("px-3", columnClasses.priority)}
+                              >
+                                <CasePriorityTooltip item={item}>
+                                  <PriorityBadge value={item.priority} queue />
+                                </CasePriorityTooltip>
+                              </TableCell>
+                            )}
+                            {columns.status && (
+                              <TableCell
+                                data-ui="col-status"
+                                className={cn("px-3", columnClasses.status)}
+                              >
+                                <CaseWorkflowTooltip item={item}>
+                                  <QueueStatusIndicator item={item} />
+                                </CaseWorkflowTooltip>
+                              </TableCell>
+                            )}
+                            {columns.owner && (
+                              <TableCell
+                                data-ui="col-owner"
+                                className={cn("px-3", columnClasses.owner)}
+                              >
+                                <Owner name={item.owner} />
+                              </TableCell>
+                            )}
+                            {columns.age && (
+                              <TableCell
+                                data-ui="col-age"
+                                className={cn("px-3", columnClasses.age)}
+                              >
+                                <CaseTimestampTooltip
+                                  ageMinutes={item.ageMinutes}
+                                />
+                              </TableCell>
+                            )}
+                            {columns.source && (
+                              <TableCell
+                                data-ui="col-source"
+                                className={cn("px-3", columnClasses.source)}
+                              >
+                                {item.source}
+                              </TableCell>
+                            )}
+                            <TableCell
+                              data-ui="col-actions"
+                              className="w-18 pl-0 pr-2 text-left whitespace-nowrap"
+                            >
+                              <IconTooltip label="Quick preview">
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label={`Quick preview ${item.id}`}
+                                  aria-expanded={preview?.id === item.id}
+                                  aria-controls={
+                                    preview?.id === item.id
+                                      ? previewRegionId
+                                      : undefined
+                                  }
+                                  onClick={(event) =>
+                                    openPreview(
+                                      item,
+                                      event.currentTarget,
+                                      event.detail === 0,
+                                    )
+                                  }
+                                >
+                                  <Eye aria-hidden="true" />
+                                </Button>
+                              </IconTooltip>
+                              <DropdownMenu>
+                                <IconTooltip label="More actions">
+                                  <DropdownMenuTrigger
+                                    render={
+                                      <Button
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        aria-label={`More actions for ${item.id}`}
+                                      />
+                                    }
+                                  >
+                                    <MoreHorizontal aria-hidden="true" />
+                                  </DropdownMenuTrigger>
+                                </IconTooltip>
+                                <DropdownMenuContent
+                                  data-ui="preview menu"
+                                  align="end"
+                                  className="text-body text-foreground min-w-45"
+                                >
+                                  <DropdownMenuGroup>
+                                    <DropdownMenuItem
+                                      render={<Link href={caseHref(item.id)} />}
+                                    >
+                                      <ArrowUpRight aria-hidden="true" />
+                                      Open investigation
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => openPreview(item)}
+                                    >
+                                      <Eye aria-hidden="true" />
+                                      Quick preview
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => copyCaseId(item.id)}
+                                    >
+                                      <Copy aria-hidden="true" />
+                                      Copy case ID
+                                    </DropdownMenuItem>
+                                  </DropdownMenuGroup>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {!filtered.length && (
+                      <Empty className="py-14">
+                        <EmptyHeader>
+                          <Search aria-hidden="true" />
+                          <EmptyTitle>
+                            {activeFilters
+                              ? "No matching cases"
+                              : view === "mine"
+                                ? "No cases assigned to you"
+                                : view === "unassigned"
+                                  ? "No unassigned cases"
+                                  : view === "attention"
+                                    ? "Nothing needs attention"
+                                    : "No cases yet"}
+                          </EmptyTitle>
+                          <EmptyDescription>
+                            {activeFilters
+                              ? "Try a broader search or clear the active filters."
+                              : view === "mine"
+                                ? "Open cases assigned to you will appear here."
+                                : "Cases will appear here when they match this work view."}
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
+                    )}
+                  </div>
+                  <div
+                    data-ui="table-footer"
+                    className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-surface px-4 py-3 border-border @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:w-full @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:order-3"
+                  >
+                    <span
+                      data-ui="caption"
+                      role="status"
+                      className="text-caption font-normal text-muted-foreground"
+                    >
+                      {selected.size ? `${selected.size} selected · ` : ""}
+                      {filtered.length
+                        ? `${currentPage * 8 + 1}–${Math.min(currentPage * 8 + 8, filtered.length)} of ${filtered.length} cases`
+                        : "0 cases"}
+                    </span>
+                    <span
+                      data-ui="caption preview-note"
+                      className="text-caption font-normal text-muted-foreground"
+                    >
+                      Local preview · no live data
+                    </span>
+                    <div className="flex items-center gap-3 max-md:gap-1.75">
+                      <span
+                        data-ui="caption"
+                        className="text-caption font-normal text-muted-foreground"
+                      >
+                        Page {currentPage + 1} of {pageCount}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        aria-label="Previous page"
+                        disabled={currentPage === 0}
+                        onClick={() => setPage(currentPage - 1)}
+                      >
+                        <ChevronLeft />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        aria-label="Next page"
+                        disabled={currentPage >= pageCount - 1}
+                        onClick={() => setPage(currentPage + 1)}
+                      >
+                        <ChevronRight />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </div>
+        </Tabs>
+        <span className="sr-only" role="status">
+          {announcement}
+        </span>
+        {preview && (
+          <InvestigationInspector
+            item={preview}
+            regionRef={previewRegionRef}
+            regionId={previewRegionId}
+            headingId={previewHeadingId}
+            restoreFocus={previewFocusTarget}
+            onClose={closePreview}
+            position={previewIndex}
+            total={filtered.length}
+            onPrevious={
+              previewIndex > 0 ? () => navigatePreview(-1) : undefined
+            }
+            onNext={
+              previewIndex >= 0 && previewIndex < filtered.length - 1
+                ? () => navigatePreview(1)
+                : undefined
+            }
+          />
+        )}
+      </section>
+    </TooltipProvider>
   );
 }

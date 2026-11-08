@@ -63,7 +63,7 @@ export function NewCase({
       </DialogTrigger>
       <DialogContent
         data-ui="preview workspace new-case-dialog"
-        className="text-sm leading-5.5 text-foreground max-w-[min(calc(100vw-2rem),500px)] gap-6 p-6 sm:max-w-[500px]"
+        className="text-body text-foreground max-w-[min(calc(100vw-2rem),500px)] gap-6 p-6 sm:max-w-[500px]"
       >
         <DialogHeader>
           <DialogTitle>
@@ -83,9 +83,9 @@ export function NewCase({
             >
               <span
                 data-ui="created-mark"
-                className="flex items-center justify-center w-10 h-10 rounded-full text-success-foreground bg-success-muted"
+                className="inline-flex size-9 items-center justify-center rounded-md border border-success-border text-success-foreground"
               >
-                <Check className="w-5 h-5" />
+                <Check className="size-4 stroke-[1.75]" />
               </span>
               <h3 className="text-panel-title">{title}</h3>
               <code>{created}</code>

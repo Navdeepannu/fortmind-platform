@@ -57,12 +57,17 @@ export const runningCases = [
 export function runningCaseDetails(
   item: (typeof runningCases)[number],
 ): SecurityCase {
+  // Correlation has no defined phase mapping; never infer prior completion.
+  const phase = item.stage === "Collecting evidence" ? "Collect"
+    : item.stage === "Analyzing evidence" ? "Analyze" : undefined;
   return {
     id: item.id,
     title: item.title,
     priority: "Notable",
     verdict: "Inconclusive",
     status: "Running",
+    investigationPhase: phase,
+    investigationPhases: phase ? { [phase]: "active" } : undefined,
     owner: null,
     source: "SIEM webhook",
     ageMinutes: 1,
@@ -75,6 +80,29 @@ export function runningCaseDetails(
     summary: `OSCAR is ${item.stage.toLowerCase()}. The investigation is still running; no final verdict is available.`,
   };
 }
+
+// Include the queue fixture with supplied activity context. Keep the original
+// Overview fixtures reachable and their elapsed times static, as provided.
+export const monitoredInvestigations: {
+  item: SecurityCase;
+  stage: string;
+  elapsed?: string;
+  activity?: string;
+}[] = [
+  ...cases.filter((item) => item.status === "Running").map((item) => ({
+    item,
+    stage: Object.entries(item.investigationPhases ?? {}).find(([, state]) => state === "active")?.[0]
+      ?? item.investigationPhase ?? "Stage unavailable",
+    activity: item.summary,
+  })),
+  ...runningCases.map((entry) => ({
+    item: runningCaseDetails(entry),
+    stage: entry.stage,
+    elapsed: entry.elapsed,
+  })),
+];
+
+export const handoffCases = cases.filter((item) => item.status === "Escalated" || item.status === "Failed");
 export type ImpactPeriod = "7d" | "30d" | "90d";
 export interface OutcomeDay {
   day: string;

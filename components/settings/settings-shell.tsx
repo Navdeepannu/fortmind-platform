@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { WorkspaceThemeToggle } from "@/components/fortmind/theme-toggle";
 import { platformRoutes } from "@/lib/platform-routes";
+import { PageContainer } from "@/components/layout/page-container";
 import { cn } from "@/lib/utils";
 
 const groups = [
@@ -71,7 +72,7 @@ function SettingsNavigation({ close }: { close?: () => void }) {
     <nav aria-label="Settings navigation" className="flex flex-col gap-7">
       {groups.map((group) => (
         <div key={group.label} className="flex flex-col gap-1">
-          <p className="mb-1 px-3 text-xs font-normal text-muted-foreground">
+          <p className="mb-1 px-3 text-caption font-normal text-muted-foreground">
             {group.label}
           </p>
           {group.items.map((item) => (
@@ -81,12 +82,15 @@ function SettingsNavigation({ close }: { close?: () => void }) {
               onClick={close}
               aria-current={pathname === item.href ? "page" : undefined}
               className={cn(
-                "flex min-h-9 items-center gap-2.5 rounded-md px-3 py-2 text-sm outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-ring",
+                "flex min-h-10 items-center gap-3 rounded-sm px-3 py-2 text-label font-normal text-sidebar-foreground outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
                 pathname === item.href &&
-                  "bg-sidebar-accent font-normal text-sidebar-accent-foreground",
+                  "bg-sidebar-selected font-normal text-sidebar-accent-foreground hover:bg-sidebar-selected",
               )}
             >
-              <item.icon className="size-4 shrink-0" aria-hidden="true" />
+              <item.icon
+                className="size-4 shrink-0 stroke-[1.75]"
+                aria-hidden="true"
+              />
               {item.title}
             </Link>
           ))}
@@ -109,6 +113,7 @@ function BackLink({ close }: { close?: () => void }) {
 }
 export function SettingsShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   return (
     <div
       data-ui="preview"
@@ -127,8 +132,8 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
           <SettingsNavigation />
         </div>
       </aside>
-      <div className="min-w-0 min-h-svh bg-background md:ml-60">
-        <header className="flex h-12 items-center justify-between border-b px-5 md:justify-end md:px-8">
+      <div data-ui="settings-workspace" className="min-w-0 min-h-svh bg-background md:ml-60">
+        <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-sidebar-border bg-shell px-5 md:justify-end md:px-8 [&>button]:size-8">
           <Button
             variant="ghost"
             size="icon"
@@ -140,11 +145,10 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
           </Button>
           <WorkspaceThemeToggle />
         </header>
-        <main
-          id="settings-main"
-          className="min-w-0 p-5 md:p-8"
-        >
-          {children}
+        <main id="settings-main" className="min-w-0 py-5 md:py-8">
+          <PageContainer size={pathname === "/settings/trust-data" ? "standard" : "compact"}>
+            {children}
+          </PageContainer>
         </main>
       </div>
       <Sheet open={open} onOpenChange={setOpen}>

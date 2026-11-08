@@ -73,16 +73,35 @@ test("inventory covers every global color with one shared theme", () => {
   assert.ok(!inventory.entries.some((e) => /--(?:font|radius)/.test(e.name)));
 });
 
-test("Neutral controls, restrained emerald branding and semantic accents stay separate", () => {
+test("Shared surface roles and restrained brand actions follow the theme contract", () => {
   const primary = inventory.entries.find((e) => e.id === "global:--primary");
   assert.equal(primary.light, "oklch(0.2 0.006 265)");
-  assert.equal(primary.dark, "oklch(0.94 0.004 265)");
+  assert.equal(primary.dark, "var(--brand)");
   const brand = inventory.entries.find((e) => e.id === "global:--brand");
-  assert.equal(brand.light, "oklch(0.8 0.17 163)");
+  assert.equal(brand.light, "oklch(0.7688460193 0.1687457279 161.948704)");
   assert.equal(brand.dark, brand.light);
-  assert.notEqual(brand.dark, primary.dark);
-  assert.equal(inventory.entries.find(e => e.id === "global:--background").dark, "oklch(0.193532 0.01849 274.8082)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--card").dark, "oklch(0.2204 0.0198 275.84)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--accent").dark, "oklch(0.2694093689 0.0036615716 286.151393)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--background").dark, "oklch(0.1500354375 0.0021195596 286.141497)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--card").dark, "var(--surface)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--popover").dark, "var(--surface-floating)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--surface").dark, "oklch(0.1970565932 0.0059592644 285.840218)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--surface-elevated").dark, "var(--surface-floating)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--shell").dark, "oklch(0.1780747251 0.0020293983 286.191836)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--input").dark, "var(--border)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "var(--brand)");
+  const surfaceContract = {
+    "--surface": ["oklch(1 0 0)", "oklch(0.1970565932 0.0059592644 285.840218)"],
+    "--surface-hover": ["oklch(0.9674343314 0.0013258589 286.375246)", "oklch(0.2452044934 0.0075236989 285.831851)"],
+    "--surface-floating": ["oklch(0.9851036453 0 0)", "oklch(0.2665377591 0.0092167229 285.757855)"],
+    "--border": ["oklch(0.9197285496 0.0040314801 286.320232)", "oklch(0.3115590014 0.0106360449 285.766258)"],
+  };
+  const overrides = inventoryModule.readVariableBlocks(awaitableGlobals).find(block => block.selector === '.dark[data-visual-experiment="graphite"]');
+  for (const [name, [light, dark]] of Object.entries(surfaceContract)) {
+    const entry = inventory.entries.find(e => e.id === `global:${name}`);
+    assert.equal(entry.light, light);
+    assert.equal(entry.dark, dark);
+    assert.equal(Object.hasOwn(overrides.declarations, name), false, `${name} stays shared by the experiment`);
+  }
   const tint = inventory.entries.find((e) => e.id === "global:--danger-muted");
   assert.equal(tint.light, "oklch(0.9694 0.0152 12.42)");
   assert.equal(tint.dark, "oklch(0.2471 0.0378 3.36)");
@@ -94,7 +113,7 @@ test("Neutral controls, restrained emerald branding and semantic accents stay se
   assert.equal(escalation.dark, "oklch(0.7 0.07 305)");
   assert.equal(
     inventory.entries.find((e) => e.id === "global:--border").dark,
-    "oklch(0.335 0.018 275.84)",
+    "oklch(0.3115590014 0.0106360449 285.766258)",
   );
 });
 
@@ -156,7 +175,7 @@ test("dashboard inspector reads shared neutral ink from globals.css", () => {
   const ink = inventory.entries.find(entry => entry.id === "global:--muted-foreground");
   assert.equal(ink.source, "app/globals.css");
   assert.equal(ink.light, "oklch(0.46 0.012 265)");
-  assert.equal(ink.dark, "oklch(0.73 0.012 265)");
+  assert.equal(ink.dark, "oklch(0.7067969696 0.0087266582 278.576729)");
 });
 
 test("shared design colors use OKLCH literals or semantic aliases", () => {
@@ -164,6 +183,23 @@ test("shared design colors use OKLCH literals or semantic aliases", () => {
   for (const entry of inventory.entries.filter(entry => entry.token && entry.source === "app/globals.css")) {
     for (const mode of ["light", "dark"]) {
       assert.match(entry[mode], /^(?:oklch|var)\(/, `${entry.name} ${mode}`);
+    }
+  }
+});
+
+
+test("semantic primary, accent and muted tokens reuse the finalized palette in both modes", () => {
+  for (const role of ["danger", "warning", "success", "info", "unresolved"]) {
+    const base = role === "unresolved" ? "neutral" : role;
+    for (const part of ["primary", "accent", "muted"]) {
+      const entry = inventory.entries.find(e => e.id === `global:--${role}-${part}`);
+      assert.ok(entry, `${role}-${part} exists`);
+      const existing = inventory.entries.find(e => e.id === `global:--${base}${part === "primary" ? "" : `-${part}`}`);
+      for (const mode of ["light", "dark"]) {
+        assert.equal(inventoryModule.isColorVariable(entry.name, inventory.variables[mode].global), true);
+        const aliasesExisting = role === "unresolved" || part === "primary";
+        assert.equal(entry[mode], aliasesExisting ? `var(${existing.name})` : existing[mode]);
+      }
     }
   }
 });

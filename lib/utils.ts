@@ -5,7 +5,18 @@ export const cn = createCn({
   extend: {
     classGroups: {
       "font-size": [
-        { text: ["page-title", "section-title", "panel-title", "body", "label", "caption", "metric"] },
+        {
+          text: [
+            "page-title",
+            "section-title",
+            "panel-title",
+            "body",
+            "prose",
+            "label",
+            "caption",
+            "metric",
+          ],
+        },
       ],
     },
   },

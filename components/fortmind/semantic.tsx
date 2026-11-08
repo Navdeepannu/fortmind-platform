@@ -29,7 +29,7 @@ export function SemanticIcon({
     <Icon
       className={cn(
         "size-3.5 shrink-0 stroke-[1.75]",
-        semanticStyles[definition.tone].foreground,
+        definition.iconClassName ?? semanticStyles[definition.tone].foreground,
       )}
       data-ui="semantic-icon"
       data-tone={definition.tone}
@@ -51,7 +51,7 @@ export function SemanticBadge({
   showIcon = true,
 }: {
   definition: SemanticState;
-  treatment?: "badge" | "priority" | "status" | "inline" | "solid";
+  treatment?: "badge" | "muted" | "priority" | "status" | "inline" | "solid";
   label?: React.ReactNode;
   render?: React.ReactElement;
   compact?: boolean;
@@ -65,33 +65,38 @@ export function SemanticBadge({
       variant="outline"
       iconSize="compact"
       className={cn(
-        "h-6 gap-1.25 rounded-sm px-1.75 py-0.5 text-xs leading-4.5 font-medium transition-none [&>svg]:shrink-0 [&>svg]:stroke-[1.75]",
+        "h-6 gap-1.25 rounded-sm px-1.75 py-0.5 text-caption font-medium transition-none [&>svg]:shrink-0 [&>svg]:stroke-[1.75]",
         semanticStyles[definition.tone].badge,
-        (treatment === "priority" ||
-          treatment === "status" ||
-          treatment === "inline") && [
-          "gap-1.5 border-transparent bg-transparent px-0 text-neutral-foreground",
+        treatment === "muted" && semanticStyles[definition.tone].muted,
+        (treatment === "priority" || treatment === "inline") && [
+          "gap-1.5 border-transparent bg-transparent px-0",
+          semanticStyles[definition.tone].foreground,
           semanticStyles[definition.tone].icon,
         ],
-        !showIcon &&
-          treatment === "status" &&
-          semanticStyles[definition.tone].foreground,
+        treatment === "status" && [
+          "gap-1.5 border-transparent bg-transparent px-0 text-foreground",
+          !definition.iconClassName && semanticStyles[definition.tone].icon,
+        ],
         treatment === "solid" && semanticStyles[definition.tone].solid,
         queue &&
           treatment === "priority" &&
           "rounded-none border-0 has-data-[icon=inline-start]:pl-0",
         compact &&
           "h-auto min-h-5.5 max-w-full gap-1 px-1.25 py-px text-caption whitespace-nowrap has-data-[icon=inline-start]:pl-1.25",
+        compact &&
+          treatment === "status" &&
+          "border-0 px-0 has-data-[icon=inline-start]:pl-0",
       )}
       data-tone={definition.tone}
       data-treatment={treatment}
       data-state={definition.label}
-      title={definition.meaning}
+      aria-description={definition.meaning}
       render={render}
     >
       {showIcon && (
         <Icon
           aria-hidden="true"
+          className={definition.iconClassName}
           data-icon="inline-start"
           data-semantic-icon={definition.iconName}
         />
@@ -101,23 +106,109 @@ export function SemanticBadge({
   );
 }
 
-export function VerdictBadge({ value }: { value: Verdict }) {
-  return <SemanticBadge definition={verdictStates[value]} />;
+const verdictMarkerClass: Record<Verdict, string> = {
+  Malicious: "bg-verdict-malicious",
+  Suspicious: "bg-verdict-suspicious",
+  Benign: "bg-verdict-benign",
+  Inconclusive: "bg-verdict-inconclusive",
+};
+
+export function VerdictMarker({ value }: { value: Verdict }) {
+  return (
+    <span
+      data-ui="verdict-marker"
+      data-verdict={value}
+      aria-hidden="true"
+      className={cn(
+        "inline-block size-2 shrink-0 self-center",
+        verdictMarkerClass[value],
+      )}
+    />
+  );
 }
 
-export function PriorityBadge({
+// Keep the existing component API while rendering the verdict as a plain inline value.
+export function VerdictBadge({
   value,
-  queue = false,
+  score,
+  compact = false,
 }: {
-  value: Priority;
-  queue?: boolean;
+  value: Verdict;
+  score?: number;
+  compact?: boolean;
 }) {
+  const hasScore =
+    typeof score === "number" &&
+    Number.isFinite(score) &&
+    score >= 0 &&
+    score <= 100;
   return (
-    <SemanticBadge
-      definition={priorityStates[value]}
-      treatment="priority"
-      queue={queue}
-    />
+    <span
+      data-ui="verdict"
+      data-verdict={value}
+      aria-description={verdictStates[value].meaning}
+      className={cn(
+        "inline-flex min-h-6 max-w-full items-center gap-2 whitespace-nowrap text-label font-normal text-foreground",
+        compact && "min-h-5.5 text-caption",
+      )}
+    >
+      <VerdictMarker value={value} />
+      <span data-ui="verdict-label">{value}</span>
+      {hasScore && (
+        <span
+          data-ui="verdict-score"
+          className="text-caption tabular-nums text-muted-foreground"
+          aria-label={`Verdict confidence ${score} out of 100`}
+        >
+          {score}/100
+        </span>
+      )}
+    </span>
+  );
+}
+
+export function PriorityBars({ value }: { value: Priority }) {
+  const activeBars = { Urgent: 3, Notable: 2, Informational: 1 }[value];
+  return (
+    <svg
+      data-ui="priority-bars"
+      data-priority={value}
+      viewBox="0 0 16 16"
+      stroke="none"
+      aria-hidden="true"
+      className="size-4 shrink-0"
+    >
+      {[5, 9, 13].map((height, index) => (
+        <rect
+          key={height}
+          x={1.5 + index * 5}
+          y={14.5 - height}
+          width="3"
+          height={height}
+          rx="0.5"
+          data-active={index < activeBars}
+          className={cn({
+            "fill-priority-urgent": index < activeBars && value === "Urgent",
+            "fill-priority-active": index < activeBars && value !== "Urgent",
+            "fill-priority-inactive": index >= activeBars,
+          })}
+        />
+      ))}
+    </svg>
+  );
+}
+
+export function PriorityBadge({ value }: { value: Priority; queue?: boolean }) {
+  return (
+    <span
+      data-ui="priority"
+      data-priority={value}
+      aria-description={priorityStates[value].meaning}
+      className="inline-flex min-h-6 items-center gap-2 whitespace-nowrap text-caption font-normal text-foreground"
+    >
+      <PriorityBars value={value} />
+      <span data-ui="priority-label">{value}</span>
+    </span>
   );
 }
 
@@ -130,11 +221,7 @@ export function CaseStatusBadge({
 }) {
   const label = value === "Closed" && closedByOscar ? "Closed by OSCAR" : value;
   return (
-    <SemanticBadge
-      definition={workflowStates[label]}
-      treatment="status"
-      showIcon={false}
-    />
+    <SemanticBadge definition={workflowStates[label]} treatment="status" />
   );
 }
 export function SeverityBadge({
@@ -185,7 +272,7 @@ export function ConfidenceIndicator({
   return (
     <span
       data-ui="confidence"
-      className="inline-flex items-center gap-1.25 text-xs leading-4.5 whitespace-nowrap text-neutral-foreground"
+      className="inline-flex items-center gap-1.25 text-caption whitespace-nowrap text-neutral-foreground"
       role="img"
       aria-label={`${level} investigation confidence${value === undefined ? "" : `, ${value}%`}`}
       title={confidenceStates[level].meaning}

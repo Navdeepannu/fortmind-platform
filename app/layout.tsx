@@ -23,6 +23,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-visual-experiment={
+        process.env.FORTMIND_VISUAL_EXPERIMENT === "graphite"
+          ? "graphite"
+          : undefined
+      }
       suppressHydrationWarning
       className={cn(
         "h-full",

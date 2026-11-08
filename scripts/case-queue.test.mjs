@@ -21,10 +21,12 @@ test("verdict confidence is independent of investigation confidence; absence and
   assert.equal(queueVerdict({ ...base, verdict: "Inconclusive", verdictConfidence: undefined }).label, "Inconclusive");
 });
 
-test("a supplied verdict score renders with its icon and never uses investigation confidence", () => {
+test("a supplied verdict score stays secondary beside a square marker and never uses investigation confidence", () => {
   const html = markup(QueueVerdictBadge, { item: { ...base, verdictConfidence: 90 } });
-  assert.match(html.replace(/<[^>]*>/g, ""), /Malicious · 90\/100/);
-  assert.match(html, /data-semantic-icon="octagon-x"/);
+  assert.match(html, /data-ui="verdict-label">Malicious</);
+  assert.match(html, /data-ui="verdict-score"[^>]*>90\/100</);
+  assert.match(html, /data-ui="verdict-marker"/);
+  assert.doesNotMatch(html, /<svg|data-slot="badge"/);
   assert.doesNotMatch(html, /98\/100/);
 });
 
@@ -33,9 +35,9 @@ test("OSCAR closure requires both a closed lifecycle and explicit attribution", 
   assert.equal(queueStatus({ status: "Closed", closedByOscar: false, owner: null }).label, "Closed");
   const autonomous = queueStatus({ status: "Closed", closedByOscar: true });
   assert.equal(autonomous.label, "Closed by OSCAR");
-  assert.equal(autonomous.definition.iconName, "sparkles");
+  assert.equal(autonomous.definition.iconName, "check-circle-2");
   assert.equal(autonomous.definition.tone, "positive");
-  assert.equal(autonomous.treatment, "badge");
+  assert.equal(autonomous.treatment, "status");
   assert.equal(queueStatus({ status: "Running", closedByOscar: true }).label, "Running");
 });
 
@@ -57,19 +59,19 @@ test("closure reasons and errors are preserved as secondary text, escaped safely
   assert.doesNotMatch(html, /<script>/);
 });
 
-test("queue mappings retain urgency icons and scope green closure to the queue", () => {
-  assert.deepEqual(Object.values(priorityStates).map(state => state.iconName), ["chevrons-up", "chevron-up", "minus"]);
-  assert.equal(queueStatusStates["Needs you"].iconName, "hand-alert");
+test("queue and case details share the finalized priority and workflow semantics", () => {
+  assert.deepEqual(Object.values(priorityStates).map(state => state.iconName), ["alert-triangle", "bell", "info"]);
+  assert.equal(queueStatusStates["Needs you"].iconName, "user-round-pen");
   assert.equal(queueStatusStates.Escalated.iconName, "arrow-up-from-line");
-  assert.equal(queueStatusStates.Closed.iconName, "check-circle-2");
+  assert.equal(queueStatusStates.Closed.iconName, "circle-check");
   assert.equal(queueStatusStates.Closed.tone, "positive");
-  assert.equal(workflowStates.Closed.tone, "neutral");
-  assert.equal(workflowStates["Closed by OSCAR"].tone, "agent");
+  assert.equal(workflowStates.Closed.tone, "positive");
+  assert.equal(workflowStates["Closed by OSCAR"].tone, "positive");
   for (const status of ["Needs you", "Running", "Closed", "Failed", "Queued", "Escalated"]) {
     const html = markup(QueueStatusIndicator, { item: { ...base, status } });
-    assert.match(html, /data-treatment="badge"/);
-    assert.doesNotMatch(html, /data-treatment="status"/);
-    assert.doesNotMatch(html, /<svg/);
+    assert.match(html, /data-treatment="status"/);
+    assert.match(html, /<svg/);
+    assert.match(html, new RegExp(`data-semantic-icon="${queueStatusStates[status].iconName}"`));
   }
 });
 
@@ -80,9 +82,11 @@ test("autonomous filter excludes a running record even if a stale attribution fl
 });
 
 // Type scale extensions must coexist with the status palette when classes merge.
-test("readable compact badges retain semantic ink through shared typography", () => {
+test("verdict labels and secondary scores retain shared typography", () => {
   const html = markup(QueueVerdictBadge, { item: { ...base, verdict: "Malicious" } });
-  assert.match(html, /text-danger-foreground/);
+  assert.match(html, /text-foreground/);
+  assert.match(html, /bg-verdict-malicious/);
+  assert.match(html, /text-muted-foreground/);
   assert.match(html, /text-caption/);
   const { cn } = loadProjectModule("lib/utils.ts");
   assert.equal(cn("text-sm text-muted-foreground", "text-caption"), "text-muted-foreground text-caption");

@@ -114,6 +114,7 @@ export const cases: SecurityCase[] = [
     },
     summary:
       "An encoded PowerShell invocation followed an unexpected document process. OSCAR decoded the command and identified an execution pattern consistent with a staged payload. Analyst confirmation is required before containment.",
+    recommendedNextAction: "Confirm the proposed containment after reviewing OSCAR’s findings.",
   },
   {
     id: "FM-1046",
@@ -135,6 +136,7 @@ export const cases: SecurityCase[] = [
     },
     summary:
       "Audit logging was reduced outside the recorded maintenance window. OSCAR found no matching change request in the supplied evidence. Confirm whether the service account activity was authorized.",
+    recommendedNextAction: "Confirm whether the service account activity was authorized.",
   },
   {
     id: "FM-1045",
@@ -155,6 +157,7 @@ export const cases: SecurityCase[] = [
     },
     summary:
       "Two sign-in events for the same identity originated from geographically inconsistent network locations. A VPN remains a plausible explanation. The case has been escalated for identity verification.",
+    recommendedNextAction: "Verify the identity activity with the case owner; a VPN remains a possible explanation.",
   },
   {
     id: "FM-1044",
@@ -268,6 +271,7 @@ export const cases: SecurityCase[] = [
     },
     summary:
       "An unusual archive was created on a shared directory by an interactive user. OSCAR identified a deviation from the supplied baseline but no confirmed exfiltration. Review the file contents and business context.",
+    recommendedNextAction: "Review the file contents and business context.",
   },
   {
     id: "FM-1038",

@@ -1,22 +1,13 @@
 import type { SecurityCase } from "@/lib/preview-data";
 import { queueStatus, queueVerdict } from "@/lib/case-queue-presentation";
-import { SemanticBadge } from "./semantic";
+import { SemanticBadge, VerdictBadge } from "./semantic";
 
 export function QueueVerdictBadge({ item }: { item: SecurityCase }) {
-  const verdict = queueVerdict(item);
   return (
-    <SemanticBadge
-      definition={verdict.definition}
+    <VerdictBadge
+      value={item.verdict}
+      score={queueVerdict(item).score}
       compact
-      label={
-        <span
-          data-ui="verdict-label"
-          className="min-w-0 whitespace-nowrap tabular-nums leading-3.5"
-        >
-          {verdict.definition.label}
-          {verdict.score !== undefined && <> · {verdict.score}/100</>}
-        </span>
-      }
     />
   );
 }
@@ -32,7 +23,6 @@ export function QueueStatusIndicator({ item }: { item: SecurityCase }) {
       <SemanticBadge
         definition={status.definition}
         compact
-        showIcon={false}
         treatment={status.treatment}
         label={
           <span data-ui="status-label" className="whitespace-nowrap">
@@ -44,7 +34,7 @@ export function QueueStatusIndicator({ item }: { item: SecurityCase }) {
         <span
           data-ui="queue-outcome"
           title={status.description}
-          className="max-w-full truncate text-muted-foreground text-caption leading-3.75"
+          className="max-w-full truncate text-muted-foreground text-caption"
         >
           {status.description}
         </span>

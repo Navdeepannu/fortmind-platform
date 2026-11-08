@@ -3,8 +3,12 @@ import {
   Check,
   CheckCheck,
   CheckCircle2,
-  ChevronUp,
-  ChevronsUp,
+  AlertTriangle,
+  Bell,
+  Info,
+  CircleCheck,
+  CircleDashed,
+  ShieldAlert,
   Circle,
   CircleAlert,
   CircleHelp,
@@ -12,68 +16,25 @@ import {
   Clock3,
   ClockAlert,
   FileClock,
-  Hand,
   KeyRound,
   Lightbulb,
   LoaderCircle,
-  Minus,
   OctagonAlert,
-  OctagonX,
   Plug,
   PlugZap,
   Shield,
   SkipForward,
-  Sparkles,
+  ScanLine,
+  Target,
   TriangleAlert,
   UserRound,
   UserRoundCheck,
   UsersRound,
   X,
-  createLucideIcon,
   type LucideIcon,
+  UserRoundPen,
 } from "lucide-react";
 import type { CaseStatus, Priority, Tone, Verdict } from "./preview-data";
-
-// User-supplied geometry, wrapped once with the same props/ref behavior as Lucide.
-export const HandAlertIcon = createLucideIcon("HandAlert", [
-  [
-    "path",
-    {
-      d: "M10 6C10 5.46957 9.78929 4.96086 9.41421 4.58579C9.03914 4.21071 8.53043 4 8 4C7.46957 4 6.96086 4.21071 6.58579 4.58579C6.21071 4.96086 6 5.46957 6 6V14",
-      key: "finger-left",
-    },
-  ],
-  [
-    "path",
-    {
-      d: "M14 10V4C14 3.46957 13.7893 2.96086 13.4142 2.58579C13.0391 2.21071 12.5304 2 12 2C11.4696 2 10.9609 2.21071 10.5858 2.58579C10.2107 2.96086 10 3.46957 10 4V10.5",
-      key: "finger-center",
-    },
-  ],
-  [
-    "path",
-    {
-      d: "M18 11V6C18 5.46957 17.7893 4.96086 17.4142 4.58579C17.0391 4.21071 16.5304 4 16 4C15.4696 4 14.9609 4.21071 14.5858 4.58579C14.2107 4.96086 14 5.46957 14 6",
-      key: "finger-right",
-    },
-  ],
-  [
-    "path",
-    {
-      d: "M18 8C18 7.46957 18.2107 6.96086 18.5858 6.58579C18.9609 6.21071 19.4696 6 20 6C20.5304 6 21.0391 6.21071 21.4142 6.58579C21.7893 6.96086 22 7.46957 22 8V10",
-      key: "finger-outer",
-    },
-  ],
-  [
-    "path",
-    {
-      d: "M18.1651 20.83C16.9106 21.5951 15.4695 21.9999 14.0001 22H12.0001C9.2001 22 7.5001 21.14 6.0101 19.66L2.4101 16.06C2.06604 15.6789 1.88169 15.1802 1.89523 14.6669C1.90876 14.1537 2.11915 13.6653 2.48282 13.303C2.8465 12.9406 3.3356 12.7319 3.84888 12.7202C4.36215 12.7085 4.86027 12.8946 5.2401 13.24L7.0001 15",
-      key: "palm",
-    },
-  ],
-  ["path", { d: "M21.9902 14V18", key: "alert-stem" }],
-  ["path", { d: "M21.9902 22H22.0002", key: "alert-dot" }],
-]);
 
 export interface SemanticState {
   label: string;
@@ -82,6 +43,7 @@ export interface SemanticState {
   iconName: string;
   meaning: string;
   color: string;
+  iconClassName?: string;
 }
 function state(
   label: string,
@@ -105,29 +67,29 @@ export const verdictStates = {
   Malicious: state(
     "Malicious",
     "danger",
-    OctagonX,
-    "octagon-x",
+    ShieldAlert,
+    "shield-alert",
     "Evidence supports malicious activity.",
   ),
   Suspicious: state(
     "Suspicious",
     "warning",
-    TriangleAlert,
-    "triangle-alert",
+    CircleHelp,
+    "circle-help",
     "Activity warrants further analyst assessment.",
   ),
   Benign: state(
     "Benign",
     "positive",
-    Check,
-    "check",
+    CircleCheck,
+    "circle-check",
     "Evidence supports legitimate or expected activity.",
   ),
   Inconclusive: state(
     "Inconclusive",
     "neutral",
-    CircleHelp,
-    "circle-help",
+    CircleDashed,
+    "circle-dashed",
     "Evidence does not establish a verdict; this is not a severity level.",
   ),
 } satisfies Record<Verdict, SemanticState>;
@@ -135,54 +97,66 @@ export const priorityStates = {
   Urgent: state(
     "Urgent",
     "danger",
-    ChevronsUp,
-    "chevrons-up",
+    AlertTriangle,
+    "alert-triangle",
     "Requires the most immediate review, independently of verdict.",
   ),
   Notable: state(
     "Notable",
     "warning",
-    ChevronUp,
-    "chevron-up",
+    Bell,
+    "bell",
     "Requires prioritized review, independently of verdict.",
   ),
   Informational: state(
     "Informational",
-    "neutral",
-    Minus,
-    "minus",
+    "information",
+    Info,
+    "info",
     "Informational urgency; no positive or negative assessment is implied.",
   ),
 } satisfies Record<Priority, SemanticState>;
 export const lifecycleStates = {
-  "Needs you": state(
-    "Needs you",
-    "warning",
-    Hand,
-    "hand",
-    "An analyst decision or intervention is required.",
-  ),
-  Running: state(
-    "Running",
-    "information",
-    LoaderCircle,
-    "loader-circle",
-    "The investigation is actively processing.",
-  ),
-  Closed: state(
-    "Closed",
-    "neutral",
-    CheckCircle2,
-    "check-circle-2",
-    "The workflow is closed; this does not imply a benign verdict.",
-  ),
-  Failed: state(
-    "Failed",
-    "failure",
-    CircleX,
-    "circle-x",
-    "Investigation processing failed; this is not a malicious verdict.",
-  ),
+  "Needs you": {
+    ...state(
+      "Needs you",
+      "warning",
+      UserRoundPen,
+      "user-round-pen",
+      "An analyst decision or intervention is required.",
+    ),
+    iconClassName: "text-workflow-attention",
+  },
+  Running: {
+    ...state(
+      "Running",
+      "information",
+      CircleDashed,
+      "circle-dashed",
+      "The investigation is actively processing.",
+    ),
+    iconClassName: "text-workflow-neutral",
+  },
+  Closed: {
+    ...state(
+      "Closed",
+      "positive",
+      CircleCheck,
+      "circle-check",
+      "The workflow is closed; this does not imply a benign verdict.",
+    ),
+    iconClassName: "text-workflow-neutral",
+  },
+  Failed: {
+    ...state(
+      "Failed",
+      "failure",
+      CircleX,
+      "circle-x",
+      "Investigation processing failed; this is not a malicious verdict.",
+    ),
+    iconClassName: "text-workflow-failure",
+  },
   Queued: state(
     "Queued",
     "neutral",
@@ -194,9 +168,9 @@ export const lifecycleStates = {
 export const outcomeStates = {
   "Closed by OSCAR": state(
     "Closed by OSCAR",
-    "agent",
-    CheckCheck,
-    "check-check",
+    "positive",
+    CheckCircle2,
+    "check-circle-2",
     "A closed case with autonomous OSCAR attribution; not a separate backend lifecycle.",
   ),
   Escalated: state(
@@ -208,7 +182,7 @@ export const outcomeStates = {
   ),
   "Investigation complete": state(
     "Investigation complete",
-    "neutral",
+    "positive",
     Check,
     "check",
     "The investigation finished; the case may still require an analyst decision.",
@@ -235,34 +209,10 @@ export const workflowStates = {
   Escalated: outcomeStates.Escalated,
 } satisfies Record<CaseStatus | "Closed by OSCAR", SemanticState>;
 
-// Queue-only presentation: lifecycle/outcome meanings elsewhere remain unchanged.
+// Queue labels share the same workflow colors and Lucide glyphs as case details.
 export const queueStatusStates = {
   ...workflowStates,
-  "Needs you": {
-    ...lifecycleStates["Needs you"],
-    label: "Needs You",
-    icon: HandAlertIcon,
-    iconName: "hand-alert",
-  },
-  Escalated: {
-    ...outcomeStates.Escalated,
-    icon: ArrowUpFromLine,
-    iconName: "arrow-up-from-line",
-    tone: "escalation",
-    color: "var(--semantic-escalation)",
-  },
-  Closed: {
-    ...lifecycleStates.Closed,
-    tone: "positive",
-    color: "var(--success)",
-  },
-  "Closed by OSCAR": {
-    ...outcomeStates["Closed by OSCAR"],
-    icon: Sparkles,
-    iconName: "sparkles",
-    tone: "positive",
-    color: "var(--success)",
-  },
+  "Needs you": { ...lifecycleStates["Needs you"], label: "Needs You" },
 } satisfies Record<CaseStatus | "Closed by OSCAR", SemanticState>;
 
 export const severityStates = {
@@ -315,8 +265,8 @@ export const oscarStates = {
   OSCAR: state(
     "OSCAR",
     "agent",
-    Sparkles,
-    "sparkles",
+    ScanLine,
+    "scan-line",
     "OSCAR attribution identifies automated provenance, not a security verdict.",
   ),
 };
@@ -456,8 +406,8 @@ export const hypothesisStates = {
   Primary: state(
     "Primary",
     "agent",
-    Sparkles,
-    "sparkles",
+    Target,
+    "target",
     "OSCAR's primary investigation hypothesis.",
   ),
 };
@@ -494,7 +444,7 @@ export const assignmentStates = {
 export const phaseStates = {
   completed: state(
     "Completed",
-    "neutral",
+    "positive",
     Check,
     "check",
     "This investigation phase has completed.",
