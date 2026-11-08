@@ -28,7 +28,7 @@ async function DetailContent({ params }: { params: Promise<{ integrationId: stri
 
 export default function IntegrationDetailPage({ params }: { params: Promise<{ integrationId: string }> }) {
   return (
-    <Suspense fallback={<p className="p-8 text-sm text-muted-foreground">Loading integration…</p>}>
+    <Suspense fallback={<p className="py-8 text-sm text-muted-foreground">Loading integration…</p>}>
       <DetailContent params={params} />
     </Suspense>
   );

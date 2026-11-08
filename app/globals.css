@@ -10,6 +10,7 @@
   --color-black: oklch(0 0 0);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -24,6 +25,8 @@
   --color-brand-ink: var(--brand-ink);
   --color-shell: var(--shell);
   --color-surface-hover: var(--surface-hover);
+  --color-surface-floating: var(--surface-floating);
+  --color-surface-elevated: var(--surface-elevated);
   --color-overlay: var(--overlay);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -33,35 +36,46 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-workflow-attention: var(--workflow-attention);
+  --color-workflow-neutral: var(--workflow-neutral);
+  --color-workflow-failure: var(--workflow-failure);
 
   /* Semantic utilities share the same roles in both themes. */
   --color-danger: var(--danger);
+  --color-danger-primary: var(--danger-primary);
   --color-danger-foreground: var(--danger-foreground);
   --color-danger-muted: var(--danger-muted);
   --color-danger-border: var(--danger-border);
   --color-danger-accent: var(--danger-accent);
   --color-danger-solid-foreground: var(--danger-solid-foreground);
   --color-warning: var(--warning);
+  --color-warning-primary: var(--warning-primary);
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-muted: var(--warning-muted);
   --color-warning-border: var(--warning-border);
   --color-warning-accent: var(--warning-accent);
   --color-warning-solid-foreground: var(--warning-solid-foreground);
   --color-success: var(--success);
+  --color-success-primary: var(--success-primary);
   --color-success-foreground: var(--success-foreground);
   --color-success-muted: var(--success-muted);
   --color-success-border: var(--success-border);
   --color-success-accent: var(--success-accent);
   --color-success-solid-foreground: var(--success-solid-foreground);
   --color-info: var(--info);
+  --color-info-primary: var(--info-primary);
   --color-info-foreground: var(--info-foreground);
   --color-info-muted: var(--info-muted);
   --color-info-border: var(--info-border);
   --color-info-accent: var(--info-accent);
   --color-info-solid-foreground: var(--info-solid-foreground);
   --color-neutral: var(--neutral);
+  --color-unresolved-primary: var(--unresolved-primary);
+  --color-unresolved-accent: var(--unresolved-accent);
+  --color-unresolved-muted: var(--unresolved-muted);
   --color-neutral-foreground: var(--neutral-foreground);
   --color-neutral-muted: var(--neutral-muted);
   --color-neutral-border: var(--neutral-border);
@@ -80,34 +94,63 @@
   --color-escalation-accent: var(--escalation-accent);
   --color-escalation-solid-foreground: var(--escalation-solid-foreground);
 
+  /* Verdict markers are independent from workflow and priority colors. */
+  --color-verdict-malicious: var(--verdict-malicious);
+  --color-verdict-suspicious: var(--verdict-suspicious);
+  --color-verdict-benign: var(--verdict-benign);
+  --color-verdict-inconclusive: var(--verdict-inconclusive);
+
+  --color-priority-urgent: var(--priority-urgent);
+  --color-priority-active: var(--priority-active);
+  --color-priority-inactive: var(--priority-inactive);
+
   /* Fonts */
   --font-sans: var(--font-inter);
   --font-heading: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 
-  /* Inter hierarchy: page > section > panel > body > label > supporting copy. */
+  /* 13px UI base × 1.25, rounded per step to a 4px grid: 13 → 16 → 20 → 24 → 32.
+     12px captions and 14px reading text are deliberate density/legibility roles. */
   --text-page-title: 1.5rem;
   --text-page-title--line-height: 2rem;
-  --text-page-title--letter-spacing: -0.035em;
+  --text-page-title--letter-spacing: -0.025em;
   --text-page-title--font-weight: 600;
-  --text-section-title: 1rem;
-  --text-section-title--line-height: 1.5rem;
+  --text-section-title: 1.25rem;
+  --text-section-title--line-height: 1.75rem;
   --text-section-title--letter-spacing: -0.02em;
   --text-section-title--font-weight: 600;
-  --text-panel-title: 0.875rem;
-  --text-panel-title--line-height: 1.25rem;
+  --text-panel-title: 1rem;
+  --text-panel-title--line-height: 1.5rem;
   --text-panel-title--letter-spacing: -0.01em;
   --text-panel-title--font-weight: 600;
   --text-body: 0.875rem;
-  --text-body--line-height: 1.5rem;
+  --text-body--line-height: 1.25rem;
+  --text-prose: 0.875rem;
+  --text-prose--line-height: 1.5rem;
   --text-label: 0.8125rem;
   --text-label--line-height: 1.25rem;
   --text-caption: 0.75rem;
-  --text-caption--line-height: 1.125rem;
+  --text-caption--line-height: 1rem;
   --text-metric: 2rem;
   --text-metric--line-height: 2.5rem;
   --text-metric--letter-spacing: -0.04em;
   --text-metric--font-weight: 600;
+
+  /* Standard shadcn/Tailwind sizes resolve through the same scale. */
+  --text-xs: var(--text-caption);
+  --text-xs--line-height: var(--text-caption--line-height);
+  --text-sm: var(--text-body);
+  --text-sm--line-height: var(--text-body--line-height);
+  --text-base: var(--text-panel-title);
+  --text-base--line-height: var(--text-panel-title--line-height);
+  --text-lg: var(--text-section-title);
+  --text-lg--line-height: var(--text-section-title--line-height);
+  --text-xl: var(--text-section-title);
+  --text-xl--line-height: var(--text-section-title--line-height);
+  --text-2xl: var(--text-page-title);
+  --text-2xl--line-height: var(--text-page-title--line-height);
+  --text-3xl: var(--text-metric);
+  --text-3xl--line-height: var(--text-metric--line-height);
 
   /* Sidebar */
   --color-sidebar: var(--sidebar);
@@ -116,6 +159,7 @@
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-selected: var(--sidebar-selected);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
@@ -137,22 +181,34 @@
 }
 
 :root {
-  /* Neutral interface. Brand is an explicit action variant, not a selection color. */
+  /* Shared workspace geometry, independent of theme and sidebar state. */
+  --layout-content-standard: 1620px;
+  --layout-content-compact: 914px;
+  --layout-content-max: var(--layout-content-standard);
+  --layout-gutter-mobile: 1rem;
+  --layout-gutter-laptop: 1.5rem;
+  --layout-gutter-desktop: 2rem;
+  --layout-gutter: var(--layout-gutter-mobile);
+
+  /* Light foundation. Dark mode below overrides only the roles that differ. */
   color-scheme: light;
   --shell: oklch(0.955 0.003 265);
   --background: oklch(0.985 0.001 265);
   --foreground: oklch(0.2 0.006 265);
-  --card: oklch(1 0 0);
+  --surface: oklch(1 0 0);
+  --card: var(--surface);
   --card-foreground: var(--foreground);
-  --popover: oklch(1 0 0);
+  --surface-floating: oklch(0.9851036453 0 0);
+  --surface-elevated: var(--surface-floating);
+  --popover: var(--surface-floating);
   --popover-foreground: var(--foreground);
   --primary: oklch(0.2 0.006 265);
   --primary-foreground: oklch(0.985 0.001 265);
   --primary-hover: oklch(0.23 0.007 265);
-  --brand: oklch(0.8 0.17 163);
-  --brand-foreground: oklch(0.2 0.028 163);
-  --brand-hover: oklch(0.815 0.165 163);
-  --brand-active: oklch(0.74 0.155 163);
+  --brand: oklch(0.7688460193 0.1687457279 161.948704);
+  --brand-foreground: oklch(0.2395655541 0.0391345071 166.526876);
+  --brand-hover: oklch(0.7808460193 0.1687457279 161.948704);
+  --brand-active: oklch(0.7488460193 0.1687457279 161.948704);
   --brand-ink: oklch(0.44 0.095 163);
   --secondary: oklch(0.965 0.002 265);
   --secondary-foreground: oklch(0.27 0.008 265);
@@ -160,9 +216,10 @@
   --muted-foreground: oklch(0.46 0.012 265);
   --accent: oklch(0.955 0.003 265);
   --accent-foreground: var(--foreground);
-  --surface-hover: oklch(0.975 0.002 265);
+  --surface-hover: oklch(0.9674343314 0.0013258589 286.375246);
   --destructive: var(--danger-foreground);
-  --border: oklch(0.865 0.006 265);
+  --border: oklch(0.9197285496 0.0040314801 286.320232);
+  --border-strong: var(--border);
   --input: oklch(0.58 0.012 265);
   --ring: oklch(0.49 0.01 265);
   --overlay: oklch(0.13 0.004 265 / 0.42);
@@ -178,9 +235,13 @@
   --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: oklch(0.935 0.004 265);
   --sidebar-accent-foreground: var(--foreground);
+  --sidebar-selected: var(--sidebar-accent);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
-  /* Semantic ink and outline roles. Static badges stay transparent; callouts retain separate fills. */
+  --workflow-attention: var(--warning-foreground);
+  --workflow-neutral: var(--muted-foreground);
+  --workflow-failure: var(--danger-foreground);
+  /* Semantic ink, subtle badges and callouts reuse one palette. */
   --danger: oklch(0.57 0.14 20);
   --danger-foreground: oklch(0.48 0.11 20);
   --danger-muted: oklch(0.9694 0.0152 12.42);
@@ -230,6 +291,26 @@
   --escalation-accent: oklch(0.9365 0.0255 305.85);
   --escalation-solid-foreground: oklch(1 0 0);
 
+  /* Explicit primary/accent/muted roles reuse the finalized palette in both modes.
+     Foreground variants remain the contrast-tuned ink for small text and icons. */
+  --danger-primary: var(--danger);
+  --warning-primary: var(--warning);
+  --success-primary: var(--success);
+  --info-primary: var(--info);
+  --unresolved-primary: var(--neutral);
+  --unresolved-accent: var(--neutral-accent);
+  --unresolved-muted: var(--neutral-muted);
+
+  /* Verdict markers use contrast-tuned light ink and exact dark reference colors. */
+  --verdict-malicious: var(--danger-foreground);
+  --verdict-suspicious: var(--warning-foreground);
+  --verdict-benign: var(--success-foreground);
+  --verdict-inconclusive: var(--neutral-foreground);
+
+  --priority-urgent: var(--verdict-malicious);
+  --priority-active: var(--neutral-foreground);
+  --priority-inactive: var(--border);
+
   /* Product vocabulary aliases one palette; values adapt through var() in dark mode. */
   --semantic-danger: var(--danger);
   --semantic-danger-foreground: var(--danger-foreground);
@@ -266,43 +347,51 @@
   --indicator-warning-foreground: var(--warning-foreground);
 }
 
+@media (min-width: 48rem) {
+  :root { --layout-gutter: var(--layout-gutter-laptop); }
+}
+
+@media (min-width: 96rem) {
+  :root { --layout-gutter: var(--layout-gutter-desktop); }
+}
+
 .dark {
+  /* Phase 1: exact neutral sRGB palette expressed in OKLCH. Semantic states stay unchanged. */
   color-scheme: dark;
-  --shell: var(--background);
-  --background: oklch(0.193532 0.01849 274.8082);
-  --foreground: oklch(0.965 0.003 265);
-  --card: oklch(0.2204 0.0198 275.84);
-  --card-foreground: var(--foreground);
-  --popover: oklch(0.265 0.019 275.84);
-  --popover-foreground: var(--foreground);
-  --primary: oklch(0.94 0.004 265);
-  --primary-foreground: oklch(0.18 0.004 265);
-  --primary-hover: oklch(0.915 0.004 265);
-  --brand: oklch(0.8 0.17 163);
-  --brand-foreground: oklch(0.2 0.028 163);
-  --brand-hover: oklch(0.815 0.165 163);
-  --brand-active: oklch(0.74 0.155 163);
-  --brand-ink: oklch(0.8 0.14 163);
-  --secondary: oklch(0.265 0.019 275.84);
-  --secondary-foreground: oklch(0.94 0.004 265);
-  --muted: oklch(0.265 0.019 275.84);
-  --muted-foreground: oklch(0.73 0.012 265);
-  --accent: oklch(0.28 0.019 275.84);
-  --accent-foreground: var(--foreground);
-  --surface-hover: oklch(0.245 0.0198 275.84);
-  --destructive: var(--danger-foreground);
-  --border: oklch(0.335 0.018 275.84);
-  --input: oklch(0.52 0.015 265);
-  --ring: oklch(0.73 0.012 265);
-  --overlay: oklch(0.08 0.003 265 / 0.68);
-  --sidebar: var(--shell);
+  --background: oklch(0.1500354375 0.0021195596 286.141497);
+  --shell: oklch(0.1780747251 0.0020293983 286.191836);
+  --surface: oklch(0.1970565932 0.0059592644 285.840218);
+  --surface-floating: oklch(0.2665377591 0.0092167229 285.757855);
+  --foreground: oklch(0.9701507662 0 0);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-foreground);
+  --primary-hover: var(--brand-hover);
+  --brand-ink: var(--brand);
+  --secondary: var(--surface-elevated);
+  --secondary-foreground: oklch(0.8172851113 0.0043162020 271.359945);
+  --muted: var(--surface-elevated);
+  --muted-foreground: oklch(0.7067969696 0.0087266582 278.576729);
+  --accent: oklch(0.2694093689 0.0036615716 286.151393);
+  --surface-hover: oklch(0.2452044934 0.0075236989 285.831851);
+  --border: oklch(0.3115590014 0.0106360449 285.766258);
+  --input: var(--border);
+  --ring: var(--brand);
+  --overlay: oklch(0 0 0 / 0.68);
+  /* Navigation-only hover and selection; keep the shared surface palette intact. */
   --sidebar-foreground: var(--muted-foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: oklch(0.25 0.019 275.84);
-  --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
+  --sidebar-accent: oklch(0.2277133487 0.0057422919 285.934937);
+  --sidebar-selected: oklch(0.2611228862 0.0036907408 286.141366);
+  --verdict-malicious: oklch(0.7279374952 0.1684458742 19.573172);
+  --verdict-suspicious: oklch(0.8532283221 0.1199615176 72.517867);
+  --verdict-benign: oklch(0.7927928378 0.1300808921 168.378874);
+  --verdict-inconclusive: oklch(0.8001442818 0.0273210580 264.409248);
+
+  --priority-active: oklch(0.7265067320 0.0175976844 274.726511);
+  --priority-inactive: oklch(0.3948975360 0.0120490927 273.109278);
+  --workflow-attention: var(--verdict-suspicious);
+  --workflow-neutral: oklch(0.7265067320 0.0175976844 274.726511);
+  --workflow-failure: var(--verdict-malicious);
+
   /* Dark fills are independently tuned for near-black canvas, cards and popovers. */
   --danger: oklch(0.72 0.105 20);
   --danger-foreground: oklch(0.78 0.065 20);
@@ -353,6 +442,122 @@
   --escalation-solid-foreground: oklch(0.2093 0.0493 300.68);
 }
 
+/* BEGIN GRAPHITE EXPERIMENT — opt in with FORTMIND_VISUAL_EXPERIMENT=graphite.
+   Shared surface roles above apply in both themes, including this experiment.
+   This flag retains the earlier geometry/navigation experiment without defining
+   another table palette. See docs/table-surfaces.md for the current contract. */
+.dark[data-visual-experiment="graphite"] {
+  --background: oklch(0.1349309438 0.0023989446 286.073855);
+  --shell: oklch(0.1552700913 0.0042143369 285.898735);
+  --accent: oklch(0.2706661037 0.0091803520 285.770455);
+  --border-strong: oklch(0.3930136706 0.0116997960 285.849146);
+  --foreground: oklch(0.9701507662 0 0);
+  --secondary-foreground: oklch(0.8172851113 0.0043162020 271.359945);
+  --muted-foreground: oklch(0.7265067320 0.0175976844 274.726511);
+  --sidebar-accent: var(--surface-hover);
+  --sidebar-selected: var(--accent);
+  /* The strong decorative border alone is below 3:1. Controls use brighter
+     neutral ink, while focus uses the existing full-strength brand ring. */
+  --input: oklch(0.5764333544 0 0);
+
+  & :where([data-slot="card"], [data-slot="alert"], [data-ui="table-shell"]) {
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+  }
+
+  & :where([data-variant][data-size], [data-slot="checkbox"], [data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="select-trigger"], [data-sidebar="menu-button"], [aria-label="Settings navigation"] a) {
+    border-radius: var(--radius-xs);
+  }
+
+  & :where([data-slot="input"], [data-slot="select-trigger"], [data-slot="native-select"]) {
+    height: 2rem;
+    border-color: var(--input);
+  }
+
+  & :where([data-slot="textarea"], [data-slot="checkbox"], [data-variant="outline"][data-size]) {
+    border-color: var(--input);
+  }
+
+  & [data-variant][data-size="default"] { height: 2rem; }
+  & [data-variant][data-size="lg"] { height: 2.25rem; }
+  & [data-variant][data-size="sm"] { height: 1.75rem; }
+  & [data-variant][data-size="xs"] { height: 1.5rem; }
+  & [data-variant][data-size="icon"] { width: 2rem; height: 2rem; }
+  & [data-variant][data-size="icon-sm"] { width: 1.75rem; height: 1.75rem; }
+  & [data-variant][data-size="icon-xs"] { width: 1.5rem; height: 1.5rem; }
+  & [data-variant][data-size="icon-lg"] { width: 2.25rem; height: 2.25rem; }
+
+  & :where(button, a, input, textarea, select, [role="checkbox"], [role="switch"], [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  & :where([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"], [data-slot="checkbox"]):focus-visible {
+    border-color: var(--ring);
+  }
+
+  & :where([data-slot="popover-content"], [data-slot="hover-card-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"], [data-slot="tooltip-content"], [data-slot="chart-tooltip-content"]) {
+    border-radius: var(--radius-sm);
+  }
+
+  & [data-slot="sheet-content"]:not([data-ui="case-investigation-preview"]) {
+    border-color: var(--border-strong);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  & [data-ui~="cases-main"] { padding-block: 1.5rem; }
+  & [data-ui="case-section"] { margin-top: 1.5rem; }
+  & [data-ui="table-shell"] { border: 1px solid var(--border); }
+  & [data-ui="queue-top"] { padding-inline: 1rem; }
+  & [data-ui="queue-top"] [data-slot="tabs-list"] { height: 2.75rem; }
+  & [data-ui="filter-row"] { gap: 0.75rem; padding: 0.75rem 1rem; }
+  & [data-ui="search"] > svg { top: 0.5rem; }
+  & [data-ui="table-footer"] { padding-block: 0.5rem; }
+
+  & [data-ui="case-table"] th { height: 2.25rem; color: var(--secondary-foreground); }
+  & [data-ui="case-table"][data-density="comfortable"] tbody td { height: 4rem; padding-block: 0.625rem; }
+  & [data-ui="case-table"][data-density="compact"] tbody td { height: 3.25rem; padding-block: 0.375rem; }
+  & [data-ui="case-table"] tbody tr { border-bottom: 1px solid var(--border); }
+  & [data-ui="case-table"] tbody tr:last-child { border-bottom: 0; }
+  & [data-ui="case-title"] { font-size: var(--text-label); line-height: var(--text-label--line-height); }
+  & td[data-ui="col-age"] { font-family: var(--font-mono); }
+
+  & [data-ui="case-investigation-preview"] {
+    border-radius: 0;
+    outline-offset: -2px;
+  }
+
+  & [data-ui="case-investigation-preview"] > header { gap: 0.5rem; padding: 0.75rem 1rem; }
+  & [data-ui="case-investigation-preview"] > footer { padding: 0.75rem 1rem; }
+  & [data-ui="investigation-preview-scroll"] { gap: 1rem; padding: 1rem; }
+  & [data-ui="investigation-preview-scroll"] section { gap: 0.625rem; }
+  & [data-ui="preview-summary"] { color: var(--secondary-foreground); line-height: 1.5; }
+  & [data-ui="preview-next-action"] {
+    gap: 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    padding: 0.75rem;
+    box-shadow: none;
+  }
+  & [data-ui="preview-next-action"] [data-slot="alert-description"] { color: var(--secondary-foreground); font-size: var(--text-label); }
+  & [aria-label="Classification"] dl { grid-template-columns: 6rem minmax(0, 1fr); }
+  & [aria-label="Supporting context"] dl { gap: 0; }
+  & [aria-label="Supporting context"] dl > div {
+    grid-template-columns: 6rem minmax(0, 1fr);
+    border-bottom: 1px solid var(--border);
+    padding-block: 0.375rem;
+  }
+  & [aria-label="Supporting context"] dl > div:last-child { border-bottom: 0; }
+
+  @media (max-width: 767px) {
+    & [data-ui~="cases-main"] { padding-block: 1rem; }
+    & [data-ui="filter-row"], & [data-ui="queue-top"] { padding-inline: 0.75rem; }
+  }
+}
+/* END GRAPHITE EXPERIMENT */
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -365,6 +570,14 @@
   body {
     @apply bg-background text-foreground text-body;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  :where(code, kbd, samp) {
+    font-family: var(--font-mono);
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: normal;
+    vertical-align: baseline;
   }
 
   h1 { @apply text-page-title; }

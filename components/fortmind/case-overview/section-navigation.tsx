@@ -1,157 +1,191 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import { caseSectionGroups, type CaseSectionId } from "@/lib/case-sections";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  caseSectionGroups,
+  caseViewForTarget,
+  resolveCaseView,
+  type CaseSectionId,
+  type CaseViewSelection,
+} from "@/lib/case-sections";
+import { caseViewHref } from "@/lib/platform-routes";
 
-export function SectionNavigation({
-  sections,
+function hashTarget() {
+  try {
+    return decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return "";
+  }
+}
+
+export function CaseCategoryTabs({
+  views,
   counts,
-  caseId,
   status,
 }: {
-  sections: readonly CaseSectionId[];
+  views: Record<CaseSectionId, ReactNode>;
   counts: Partial<Record<CaseSectionId, number>>;
-  caseId: string;
   status: string;
 }) {
-  const [active, setActive] = useState<CaseSectionId>(sections[0]);
-  const navRef = useRef<HTMLElement>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchKey = searchParams.toString();
+  const selection = resolveCaseView(searchParams);
+  const [request, setRequest] = useState(0);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const focusTarget = useRef<string | null>(null);
+
+  function navigate(next: CaseViewSelection, target = "") {
+    focusTarget.current = target || null;
+    const href = caseViewHref(window.location.href, next, target);
+    if (`${location.pathname}${location.search}${location.hash}` !== href) {
+      // App Router supports the History API for local query state. This avoids
+      // fetching the case again or remounting forms when a view changes.
+      window.history.pushState(null, "", href);
+    }
+    setRequest((value) => value + 1);
+  }
 
   useEffect(() => {
-    const nav = navRef.current;
-    if (!nav) return;
-    const targets = sections
-      .map((id) => document.getElementById(id))
-      .filter((item): item is HTMLElement => Boolean(item));
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const boundary = nav.getBoundingClientRect().bottom + 70;
-      const atEnd =
-        window.scrollY > 0 &&
-        window.innerHeight + window.scrollY >=
-          document.documentElement.scrollHeight - 3;
-      const current = atEnd
-        ? targets.at(-1)
-        : (targets
-            .filter((item) => item.getBoundingClientRect().top <= boundary)
-            .at(-1) ?? targets[0]);
-      if (current) setActive(current.id as CaseSectionId);
+    const restore = () => {
+      const target = hashTarget();
+      const url = new URL(window.location.href);
+      const selected = caseViewForTarget(target) ?? resolveCaseView(url.searchParams);
+      const canonical = caseViewHref(url.href, selected, target);
+      if (`${url.pathname}${url.search}${url.hash}` !== canonical) {
+        window.history.replaceState(null, "", canonical);
+      }
+      setRequest((value) => value + 1);
     };
-    const queue = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    const observer = new IntersectionObserver(queue, {
-      rootMargin: "-120px 0px -55% 0px",
-      threshold: [0, 1],
-    });
-    targets.forEach((target) => observer.observe(target));
-    window.addEventListener("scroll", queue, { passive: true });
-    window.addEventListener("resize", queue);
-    window.addEventListener("hashchange", queue);
-    queue();
+    const frame = requestAnimationFrame(restore);
+    window.addEventListener("hashchange", restore);
     return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", queue);
-      window.removeEventListener("resize", queue);
-      window.removeEventListener("hashchange", queue);
       cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", restore);
     };
-  }, [sections]);
+  }, [pathname, searchKey]);
 
   useEffect(() => {
-    const track = navRef.current?.querySelector<HTMLElement>(
-      '[data-ui~="nav-groups"]',
-    );
-    const link = track?.querySelector<HTMLElement>(`a[href="#${active}"]`);
-    if (!track || !link) return;
-    const left = link.offsetLeft - track.clientWidth / 2 + link.clientWidth / 2;
-    track.scrollTo({
-      left,
-      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "instant"
-        : "smooth",
+    const frame = requestAnimationFrame(() => {
+      const workspace = workspaceRef.current;
+      if (!workspace) return;
+      const targetId = hashTarget();
+      const current = caseViewForTarget(targetId) ?? resolveCaseView(new URL(location.href).searchParams);
+      // The App Router may publish new query state after our local request.
+      // Wait for that selection before focusing content in a different panel.
+      if (current.tab !== selection.tab || current.view !== selection.view) return;
+      for (const track of workspace.querySelectorAll<HTMLElement>("[data-case-tab-scroll]")) {
+        if (!track.getClientRects().length) continue;
+        const tab = track.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+        if (!tab) continue;
+        const tabBox = tab.getBoundingClientRect();
+        const trackBox = track.getBoundingClientRect();
+        if (tabBox.left < trackBox.left || tabBox.right > trackBox.right) {
+          track.scrollBy({ left: tabBox.left - trackBox.left - 12, behavior: "instant" });
+        }
+      }
+      const target = workspace.querySelector<HTMLElement>(`section[id="${selection.view}"]`);
+      const linked = targetId ? document.getElementById(targetId) : null;
+      const destination = linked && target?.contains(linked) ? linked : target;
+      if (!destination) return;
+      if (destination instanceof HTMLDetailsElement) destination.open = true;
+      if (focusTarget.current === targetId && targetId) {
+        const focus = destination instanceof HTMLDetailsElement ? destination.querySelector("summary") : destination;
+        focus?.focus({ preventScroll: true });
+      }
+      focusTarget.current = null;
+      const nav = [...workspace.querySelectorAll<HTMLElement>('[data-ui="secondary-nav"]')].find((node) => node.getClientRects().length)
+        ?? workspace.querySelector<HTMLElement>('[data-ui="page-nav"]');
+      const boundary = nav?.getBoundingClientRect().bottom ?? 0;
+      // Switching a workspace never scrolls through other views. Only recover
+      // its heading when a previously long view left the document scrolled down.
+      if (targetId || destination.getBoundingClientRect().top < boundary) {
+        destination.scrollIntoView({ block: "start", behavior: "instant" });
+      }
     });
-  }, [active]);
+    return () => cancelAnimationFrame(frame);
+  }, [selection.tab, selection.view, request]);
 
-  const links: { id: CaseSectionId; label: string }[] = caseSectionGroups
-    .flatMap((group) => [...group.sections])
-    .filter((section) => sections.includes(section.id));
+  function followReference(event: MouseEvent<HTMLDivElement>) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
+    const target = link?.hash.slice(1);
+    const next = target ? caseViewForTarget(target) : undefined;
+    if (!target || !next) return;
+    event.preventDefault();
+    navigate(next, target);
+  }
+
   return (
-    <nav
-      data-ui="page-nav"
-      ref={navRef}
-      className="sticky top-12 z-20 flex min-w-0 items-center gap-5.5 border-b bg-background px-8 @max-[641px]/case:px-5 @max-[501px]/case:px-4"
-      aria-label="Case sections"
-    >
-      <div
-        data-ui="nav-groups"
-        className="flex-1 min-w-0 overflow-x-auto [scrollbar-width:thin] border-transparent [&_a:hover]:text-foreground [&_a[aria-current]]:text-foreground [&_a[aria-current]]:border-b-primary"
+    <div ref={workspaceRef} onClick={followReference} data-ui="case-navigation" className="min-w-0 [--case-primary-nav-height:3.0625rem]">
+      <Tabs
+        value={selection.tab}
+        onValueChange={(value) => {
+          const group = caseSectionGroups.find((group) => group.id === value);
+          if (group) navigate({ tab: group.id, view: group.sections[0].id });
+        }}
+        className="min-w-0 gap-0"
+        data-ui="case-category-tabs"
       >
-        <ul className="flex items-stretch min-w-[max-content] gap-6.25">
-          {links.map((section) => (
-            <li key={section.id}>
-              <a
-                href={`#${section.id}`}
-                aria-current={active === section.id ? "location" : undefined}
-                onClick={(event) => {
-                  const target = document.getElementById(section.id);
-                  if (!target) return;
-                  event.preventDefault();
-                  if (location.hash !== `#${section.id}`)
-                    history.pushState(null, "", `#${section.id}`);
-                  setActive(section.id);
-                  target.focus({ preventScroll: true });
-                  target.scrollIntoView({
-                    block: "start",
-                    behavior: matchMedia("(prefers-reduced-motion: reduce)")
-                      .matches
-                      ? "instant"
-                      : "smooth",
-                  });
+        <div data-ui="page-nav" className="sticky top-(--workspace-header-height) z-20 flex h-(--case-primary-nav-height) min-w-0 items-center gap-5 border-b bg-background @max-[501px]/case:gap-3">
+          <div data-case-tab-scroll className="relative min-w-0 flex-1 overflow-x-auto [scrollbar-width:thin]">
+            <TabsList variant="line" activateOnFocus aria-label="Case categories" className="min-w-max gap-6 border-0 p-0 group-data-horizontal/tabs:h-12">
+              {caseSectionGroups.map((group) => (
+                <TabsTrigger key={group.id} value={group.id} className="h-12 flex-none rounded-none px-0 group-data-horizontal/tabs:after:bottom-0">
+                  {group.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          {status === "Needs you" && (
+            <Button size="sm" onClick={() => navigate({ tab: "decision", view: "conclusion" }, "decision-heading")} aria-label="Review verdict">
+              <span className="@max-[641px]/case:hidden">Review verdict</span>
+              <span className="hidden @max-[641px]/case:inline">Review</span>
+              <ArrowRight data-icon="inline-end" aria-hidden="true" />
+            </Button>
+          )}
+        </div>
+        {caseSectionGroups.map((group) => (
+          <TabsContent key={group.id} value={group.id} keepMounted hidden={selection.tab !== group.id} data-case-category={group.id} className="min-w-0 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2">
+            {group.sections.length > 1 ? (
+              <Tabs
+                value={selection.tab === group.id ? selection.view : group.sections[0].id}
+                onValueChange={(value) => {
+                  const view = group.sections.find((section) => section.id === value);
+                  if (view) navigate({ tab: group.id, view: view.id });
                 }}
-                className="inline-flex items-center gap-1.75 h-11.5 border-b-2 text-muted-foreground text-label font-medium whitespace-nowrap"
+                className="min-w-0 gap-0"
               >
-                {section.label}
-                {counts[section.id] !== undefined && (
-                  <span
-                    data-ui="nav-count"
-                    className="text-muted-foreground text-xs tabular-nums"
-                  >
-                    {counts[section.id]}
-                  </span>
-                )}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div
-        data-ui="nav-context"
-        className="flex items-center flex-none gap-2.5 pl-4 border-l border-border whitespace-nowrap text-xs @max-[861px]/case:hidden"
-      >
-        <code title={caseId}>{caseId.slice(0, 8)}</code>
-        <span className="text-muted-foreground">{status}</span>
-        {status === "Needs you" && (
-          <a
-            href="#decision-heading"
-            onClick={(event) => {
-              event.preventDefault();
-              document.getElementById("decision-heading")?.scrollIntoView({
-                block: "start",
-                behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-                  ? "instant"
-                  : "smooth",
-              });
-            }}
-            className="inline-flex items-center gap-1.25 pt-1.25 pr-2.25 pb-1.25 pl-2.25 rounded-sm bg-primary text-primary-foreground font-medium"
-          >
-            Review verdict{" "}
-            <ArrowRight aria-hidden="true" className="w-3.25 h-3.25" />
-          </a>
-        )}
-      </div>
-    </nav>
+                <div data-ui="secondary-nav" className="sticky top-[calc(var(--workspace-header-height)+var(--case-primary-nav-height))] z-10 border-b bg-background">
+                  <div data-case-tab-scroll className="relative min-w-0 overflow-x-auto [scrollbar-width:thin]">
+                    <TabsList variant="line" activateOnFocus aria-label={`${group.label} views`} className="min-w-max gap-5 border-0 p-0 group-data-horizontal/tabs:h-10">
+                      {group.sections.map((section) => (
+                        <TabsTrigger key={section.id} value={section.id} className="h-10 flex-none rounded-none px-0 group-data-horizontal/tabs:after:bottom-0">
+                          {section.label}
+                          {counts[section.id] !== undefined && <span className="text-caption tabular-nums"> ({counts[section.id]})</span>}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </div>
+                </div>
+                {group.sections.map((section) => (
+                  <TabsContent key={section.id} value={section.id} keepMounted hidden={selection.tab !== group.id || selection.view !== section.id} data-case-view={section.id} className="min-w-0 pb-12 pt-6 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 @max-[501px]/case:pt-5">
+                    {views[section.id]}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : (
+              <div data-case-view={group.sections[0].id} className="min-w-0 pb-12 pt-6 @max-[501px]/case:pt-5">
+                {views[group.sections[0].id]}
+              </div>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
   );
 }

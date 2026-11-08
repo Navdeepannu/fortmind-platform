@@ -28,9 +28,13 @@ Current route and implementation reference, November 5, 2026. Earlier design-pre
 
 The marketing page remains at `/`. Unknown integration IDs use the existing not-found view. The detailed source-derived case is available at both `/platform/cases/case-detail` for client review and `/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c` by ID; both reuse `CaseOverview`. It remains distinct from the synthetic `FM-1048` case.
 
+The full 11-section investigation uses five primary tabs and contextual secondary tabs (November 6, 2026). Exactly one subsection is visible: **Decision** → Conclusion / How OSCAR decided; **Investigation** → Findings / Hypotheses / Attack path; **Evidence** → Entities / Evidence / Similar past cases; **Response** → Actions / Analyst notes; **Timeline** → Timeline, without redundant secondary navigation. The shared case header scrolls normally, while the two navigation levels remain below the utility bar. URLs use `?tab=investigation&view=findings`; refresh and browser history preserve the selected view, invalid combinations use the category's first view, and legacy section/finding/entity/review anchors select the corresponding workspace. All view components stay mounted to preserve local review drafts and finding disclosures. See [contextual navigation](case-contextual-navigation.md). Lightweight case previews retain their existing available data.
+
 ## Architecture
 
 `app/platform/layout.tsx` owns the persistent workspace sidebar and top bar. `app/settings/layout.tsx` owns a separate settings sidebar, mobile sheet and page shell. Knowledge and Reports use the platform shell; none of the Settings routes render it. `lib/platform-routes.ts` centralizes platform destinations and ID-safe links.
+
+Both shells apply `components/layout/page-container.tsx` once, below the full-width top bar. `app/globals.css` owns its 1620 px standard / 914 px compact caps and 16/24/32 px responsive gutters. All platform routes, including the complete case workspace and loading/error states, inherit that boundary. Settings forms use compact width; Trust & Data uses standard width. Page components retain vertical spacing and card-internal padding but do not add their own page gutters or competing width caps. See [content-width verification](content-width-layout.md).
 
 `components/settings/settings-form.tsx` supplies shared headings, settings groups, responsive rows, dirty state and save feedback. The seven routes remain independent pages. `hooks/use-browser-record.ts` validates and persists local prototype preferences and taught facts; a failed write leaves edits visible and shows an error. It is not a production policy store. The source-derived Trust & Data page uses a wider document layout with an on-page index.
 

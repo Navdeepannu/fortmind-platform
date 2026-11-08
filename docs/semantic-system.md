@@ -1,3 +1,5 @@
+> Current semantic presentation (2026-11-06): [design-foundation.md](design-foundation.md#semantic-indicators-6-november-refinement). It replaces the historical palette, badge styling and icon choices below. `app/globals.css` and `lib/semantic-states.ts` are the current source of truth.
+
 # FortMind semantic design system
 
 > The state registry remains applicable. Preview routes/components and captures below describe an earlier design audit; see [platform-structure.md](platform-structure.md) and [css-cleanup.md](css-cleanup.md) for the current implementation.

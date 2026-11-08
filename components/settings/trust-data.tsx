@@ -23,17 +23,17 @@ const processing = [
   ["Connected-tool queries", "Each connected tool’s vendor", "Set by that vendor"],
 ];
 function DocumentSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
-  return <section id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-8 border-b py-7 first:pt-0 last:border-0"><h2 id={`${id}-heading`} className="mb-3 text-section-title">{title}</h2><div className="flex flex-col gap-4 text-sm leading-6 text-muted-foreground">{children}</div></section>;
+  return <section id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-8 border-b py-7 first:pt-0 last:border-0"><h2 id={`${id}-heading`} className="mb-3 text-section-title">{title}</h2><div className="flex flex-col gap-4 text-body text-muted-foreground">{children}</div></section>;
 }
 export function TrustData() {
-  return <div className="mx-auto max-w-6xl">
+  return <div className="min-w-0">
     <SettingsHeading title="Trust & Data" description="Where FortCases data goes, what is retained, and who can access it. Scope: the case queue, OSCAR investigations, Integrations, Knowledge and FortCases settings." />
     <Alert className="mb-8"><Info /><AlertTitle>Product reference · reviewed November 5, 2026</AlertTitle><AlertDescription>The information below is preserved from the supplied FortMind Trust and Data screenshot. It describes that product’s policies, not a verified deployment of this local prototype. Preferences and taught facts in this prototype are browser-local; no organization backend is connected. Older FortMind incident-triage services are outside this document’s scope.</AlertDescription></Alert>
     <div className="grid min-w-0 gap-10 xl:grid-cols-[minmax(0,1fr)_190px]">
       <article className="min-w-0">
         <DocumentSection id="processing" title="Where data is processed and stored">
           <p>The reference product runs FortCases on Google Cloud in us-central1 (Iowa, United States). The language model uses Google Cloud’s global endpoint and may process requests in any Google Cloud region. Investigation conclusions are stored with the case; memory also holds redacted case summaries, verdict corrections, taught facts, numeric representations for similarity search, and admin-managed rules.</p>
-          <div className="overflow-hidden rounded-lg border text-foreground"><Table><TableHeader><TableRow><TableHead className="min-w-60">Data</TableHead><TableHead className="min-w-44">Provider / location</TableHead><TableHead className="min-w-44">Retention in reference</TableHead></TableRow></TableHeader><TableBody>{processing.map(([data, location, retention]) => <TableRow key={data}><TableCell className="whitespace-normal align-top text-xs leading-5">{data}</TableCell><TableCell className="whitespace-normal align-top text-xs leading-5">{location}</TableCell><TableCell className="whitespace-normal align-top text-xs leading-5">{retention}</TableCell></TableRow>)}</TableBody></Table></div>
+          <div className="overflow-hidden rounded-lg border text-foreground"><Table><TableHeader><TableRow><TableHead className="min-w-60">Data</TableHead><TableHead className="min-w-44">Provider / location</TableHead><TableHead className="min-w-44">Retention in reference</TableHead></TableRow></TableHeader><TableBody>{processing.map(([data, location, retention]) => <TableRow key={data}><TableCell className="whitespace-normal align-top text-caption">{data}</TableCell><TableCell className="whitespace-normal align-top text-caption">{location}</TableCell><TableCell className="whitespace-normal align-top text-caption">{retention}</TableCell></TableRow>)}</TableBody></Table></div>
           <p>Some cloud activity-log and threat-finding results are retained with their evidence summary: at most ten events per lookup, redacted in the same way as recorded lookups and shortened when long.</p>
         </DocumentSection>
         <DocumentSection id="redaction" title="What is redacted, and what is not">
@@ -77,7 +77,7 @@ export function TrustData() {
           <a href="mailto:support@fortmind.ai" className="inline-flex items-center gap-2 self-start font-medium text-foreground underline underline-offset-4"><Mail className="size-4" aria-hidden="true" />Contact support@fortmind.ai</a>
         </DocumentSection>
       </article>
-      <aside className="hidden xl:block"><nav aria-label="On this page" className="sticky top-8 flex flex-col gap-1 border-l pl-5"><p className="mb-2 text-xs font-medium text-foreground">On this page</p>{sections.map(([id, title]) => <a key={id} href={`#${id}`} className="rounded py-1.5 text-xs leading-5 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring">{title}</a>)}</nav></aside>
+      <aside className="hidden xl:block"><nav aria-label="On this page" className="sticky top-8 flex flex-col gap-1 border-l pl-5"><p className="mb-2 text-caption font-medium text-foreground">On this page</p>{sections.map(([id, title]) => <a key={id} href={`#${id}`} className="rounded py-1.5 text-caption text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring">{title}</a>)}</nav></aside>
     </div>
   </div>;
 }

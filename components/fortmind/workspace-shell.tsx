@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { caseHref, platformRoutes } from "@/lib/platform-routes";
 import { caseOverview } from "@/lib/case-overview-data";
 import { usePreviewCases } from "@/lib/preview-case-store";
 import { platformCases } from "@/lib/platform-cases";
+import { PageContainer } from "@/components/layout/page-container";
 import {
   createContext,
   useContext,
@@ -17,7 +19,7 @@ import {
 import {
   ArrowRight,
   Bell,
-  BrainCircuit,
+  BookOpen,
   Building2,
   ChartColumn,
   ChevronsUpDown,
@@ -75,7 +77,11 @@ import { WorkspaceThemeToggle } from "./theme-toggle";
 type Panel = "integrations" | "search";
 
 type PlatformSection =
-  "Overview" | "Cases" | "OSCAR Context" | "Reports" | "Integrations";
+  | "Overview"
+  | "Cases"
+  | "OSCAR Context"
+  | "Reports"
+  | "Integrations";
 
 const WorkspaceContext = createContext<{
   openPanel: (panel: Panel) => void;
@@ -110,7 +116,7 @@ function AppSidebar({ section }: { section: PlatformSection }) {
     { label: "Cases", icon: Inbox, href: platformRoutes.cases },
     {
       label: "OSCAR Context",
-      icon: BrainCircuit,
+      icon: BookOpen,
       href: platformRoutes.knowledge,
     },
     { label: "Reports", icon: ChartColumn, href: platformRoutes.reports },
@@ -131,12 +137,14 @@ function AppSidebar({ section }: { section: PlatformSection }) {
     { label: "Settings", icon: Settings, href: platformRoutes.settings },
   ];
 
-  const navItemClass =
-    "h-10 gap-3 rounded-md px-3 text-label font-normal transition-colors [&>svg]:size-4 " +
-    "data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground " +
-    "data-active:font-normal data-active:hover:bg-sidebar-accent " +
-    "focus-visible:ring-2 focus-visible:ring-sidebar-ring " +
-    "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center";
+  const navItemClass = cn(
+    "h-10 gap-3 rounded-sm px-3 text-label font-normal text-sidebar-foreground transition-colors",
+    "[&>svg]:size-4 [&>svg]:stroke-[1.75] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+    "data-active:bg-sidebar-selected data-active:text-sidebar-accent-foreground data-active:font-normal",
+    "data-active:hover:bg-sidebar-selected",
+    "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+    "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center",
+  );
 
   return (
     <Sidebar
@@ -147,14 +155,17 @@ function AppSidebar({ section }: { section: PlatformSection }) {
     >
       <SidebarHeader className="sticky top-0 z-10 shrink-0 gap-0 bg-sidebar p-0">
         {/* The product header and the utility toolbar share the same 48px baseline. */}
-        <div className=" bg-sidebar flex h-12 shrink-0  items-center justify-between border-b border-sidebar-border px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
+        <div
+          data-ui="sidebar-brand"
+          className="flex h-12 shrink-0 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
+        >
           <Link
             href={platformRoutes.overview}
             aria-label="FortMind overview"
-            className="flex h-full min-w-0 items-center gap-2 rounded-md px-1 text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
+            className="flex h-8 min-w-0 items-center gap-2 rounded-md px-1 text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
           >
-            <FortMindMark className="size-6 shrink-0 text-brand-ink" />
-            <span className="truncate text-base font-normal tracking-tight text-foreground">
+            <FortMindMark className="size-6 shrink-0 text-foreground " />
+            <span className="truncate text-lg font-medium tracking-tight text-foreground">
               FortMind
             </span>
           </Link>
@@ -174,16 +185,16 @@ function AppSidebar({ section }: { section: PlatformSection }) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="bg-sidebar gap-0 px-3 pt-4 group-data-[collapsible=icon]:px-2">
+      <SidebarContent className="gap-0 bg-sidebar px-3 pb-5 pt-5 group-data-[collapsible=icon]:px-2">
         <SidebarGroup
           role="navigation"
           aria-label="Workspace navigation"
           className="px-0 py-0"
         >
-          <SidebarGroupLabel className="h-7 px-2 text-xs font-normal text-muted-foreground">
+          <SidebarGroupLabel className="h-7 px-2 text-caption font-normal text-muted-foreground">
             Workspace
           </SidebarGroupLabel>
-          <SidebarMenu className="gap-1.5">
+          <SidebarMenu className="gap-1">
             {workspaceItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
@@ -205,16 +216,16 @@ function AppSidebar({ section }: { section: PlatformSection }) {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarSeparator className="mt-3 mb-2 hidden group-data-[collapsible=icon]:block" />
+        <SidebarSeparator className="mx-0 my-5 bg-sidebar-border group-data-[collapsible=icon]:my-4" />
         <SidebarGroup
           role="navigation"
           aria-label="Management navigation"
-          className="mt-6 px-0 py-0 group-data-[collapsible=icon]:mt-0"
+          className="px-0 py-0"
         >
-          <SidebarGroupLabel className="h-7 px-2 text-xs font-normal text-muted-foreground">
+          <SidebarGroupLabel className="h-7 px-2 text-caption font-normal text-muted-foreground">
             Management
           </SidebarGroupLabel>
-          <SidebarMenu className="gap-1.5">
+          <SidebarMenu className="gap-1">
             {managementItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
@@ -251,7 +262,7 @@ function AppSidebar({ section }: { section: PlatformSection }) {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* The user's account menu also owns theme switching, not the global toolbar. */}
+      {/* Account preferences include appearance controls. */}
       <SidebarFooter className="bg-sidebar gap-0 border-t border-sidebar-border px-3 pt-3 pb-3 group-data-[collapsible=icon]:px-2">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -259,10 +270,10 @@ function AppSidebar({ section }: { section: PlatformSection }) {
               <DropdownMenuTrigger
                 aria-label="Account and appearance"
                 title="Account and appearance"
-                className="flex h-12 w-full items-center gap-3 rounded-md px-2 text-left text-sm text-sidebar-foreground outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+                className="flex h-12 w-full items-center gap-1.5 rounded-md px-1.5 text-left text-body text-sidebar-foreground outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
               >
                 <span
-                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-normal group-data-[collapsible=icon]:size-8"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full border border-sidebar-border bg-card text-caption font-normal group-data-[collapsible=icon]:size-8"
                   aria-hidden="true"
                 >
                   NA
@@ -271,8 +282,8 @@ function AppSidebar({ section }: { section: PlatformSection }) {
                   <span className="truncate text-label font-normal text-foreground">
                     Navdeep Annu
                   </span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    My account
+                  <span className="truncate text-caption text-muted-foreground">
+                    Account & preferences
                   </span>
                 </span>
                 <ChevronsUpDown
@@ -288,8 +299,8 @@ function AppSidebar({ section }: { section: PlatformSection }) {
               >
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className="flex flex-col gap-0.5">
-                    <span className="text-sm font-normal">Navdeep Annu</span>
-                    <span className="text-xs font-normal text-muted-foreground">
+                    <span className="text-body font-normal">Navdeep Annu</span>
+                    <span className="text-caption font-normal text-muted-foreground">
                       Customer Zero
                     </span>
                   </DropdownMenuLabel>
@@ -312,7 +323,7 @@ function AppSidebar({ section }: { section: PlatformSection }) {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <div className="flex items-center justify-between gap-3 px-2 py-1.5 text-sm">
+                <div className="flex items-center justify-between gap-3 px-2 py-1.5 text-body">
                   <span>Appearance</span>
                   {/* Reuse the existing theme toggle; connect Clerk profile/sign-out later. */}
                   <WorkspaceThemeToggle />
@@ -333,7 +344,7 @@ function CollapsedSidebarTrigger() {
   return (
     <SidebarTrigger
       aria-label="Expand sidebar"
-      className="hidden md:inline-flex"
+      className="hidden size-8 md:inline-flex"
     />
   );
 }
@@ -375,7 +386,7 @@ function WorkspacePanel({
       >
         <SheetContent
           data-ui="preview workspace panel"
-          className="text-sm leading-5.5 bg-card text-foreground w-full max-w-[540px] overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-[540px]"
+          className="text-body bg-popover text-foreground w-full max-w-[540px] overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-[540px]"
         >
           <SheetHeader>
             <SheetTitle>{panel ? titles[panel] : "Workspace"}</SheetTitle>
@@ -418,10 +429,10 @@ function WorkspacePanel({
                     <i className="w-2.25 h-2.25 bg-red-500" />
                   </span>
                   <span>
-                    <strong className="text-sm font-medium">
+                    <strong className="text-body font-medium">
                       Microsoft 365
                     </strong>
-                    <small className="text-muted-foreground text-xs">
+                    <small className="text-muted-foreground text-caption">
                       Identity & email events
                     </small>
                   </span>
@@ -434,15 +445,15 @@ function WorkspacePanel({
                   </Badge>
                 </div>
                 <dl data-ui="property-list" className="flex flex-col">
-                  <div className="grid grid-cols-[145px_minmax(0,_1fr)] gap-5 pt-3.25 pr-0 pb-3.25 pl-0 border-b border-border text-label leading-5.25 max-md:grid-cols-[115px_minmax(0,_1fr)] max-md:gap-3">
+                  <div className="grid grid-cols-[145px_minmax(0,_1fr)] gap-5 pt-3.25 pr-0 pb-3.25 pl-0 border-b border-border text-label max-md:grid-cols-[115px_minmax(0,_1fr)] max-md:gap-3">
                     <dt className="text-muted-foreground">Connection</dt>
                     <dd className="font-medium">Configured</dd>
                   </div>
-                  <div className="grid grid-cols-[145px_minmax(0,_1fr)] gap-5 pt-3.25 pr-0 pb-3.25 pl-0 border-b border-border text-label leading-5.25 max-md:grid-cols-[115px_minmax(0,_1fr)] max-md:gap-3">
+                  <div className="grid grid-cols-[145px_minmax(0,_1fr)] gap-5 pt-3.25 pr-0 pb-3.25 pl-0 border-b border-border text-label max-md:grid-cols-[115px_minmax(0,_1fr)] max-md:gap-3">
                     <dt className="text-muted-foreground">Last event</dt>
                     <dd className="font-medium">42 minutes ago</dd>
                   </div>
-                  <div className="grid grid-cols-[145px_minmax(0,_1fr)] gap-5 pt-3.25 pr-0 pb-3.25 pl-0 border-b border-border text-label leading-5.25 max-md:grid-cols-[115px_minmax(0,_1fr)] max-md:gap-3">
+                  <div className="grid grid-cols-[145px_minmax(0,_1fr)] gap-5 pt-3.25 pr-0 pb-3.25 pl-0 border-b border-border text-label max-md:grid-cols-[115px_minmax(0,_1fr)] max-md:gap-3">
                     <dt className="text-muted-foreground">Next step</dt>
                     <dd className="font-medium">
                       Verify the connector and event forwarding in Microsoft
@@ -450,7 +461,7 @@ function WorkspacePanel({
                     </dd>
                   </div>
                 </dl>
-                <p data-ui="muted" className="text-muted-foreground text-sm">
+                <p data-ui="muted" className="text-muted-foreground text-prose">
                   This preview shows connection health without changing
                   credentials or integrations.
                 </p>
@@ -474,7 +485,7 @@ function WorkspacePanel({
                 />
                 <p
                   data-ui="muted"
-                  className="text-muted-foreground text-sm"
+                  className="text-muted-foreground text-prose"
                   role="status"
                 >
                   {results.length + Number(detailedMatch)} matching cases
@@ -493,7 +504,7 @@ function WorkspacePanel({
                         <strong className="text-label font-medium">
                           {caseOverview.title}
                         </strong>
-                        <small className="text-xs font-mono text-muted-foreground">
+                        <small className="text-caption font-mono text-muted-foreground">
                           {caseOverview.id} · fmlab-ws1
                         </small>
                       </span>
@@ -510,7 +521,7 @@ function WorkspacePanel({
                           <strong className="text-label font-medium">
                             {item.title}
                           </strong>
-                          <small className="text-xs font-mono text-muted-foreground">
+                          <small className="text-caption font-mono text-muted-foreground">
                             {item.id} · {item.entities.hostname}
                           </small>
                         </span>
@@ -565,6 +576,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             {
               "--sidebar-width": "16rem",
               "--sidebar-width-icon": "4rem",
+              "--workspace-header-height": "3rem",
             } as CSSProperties
           }
         >
@@ -580,44 +592,36 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             data-ui="inset"
             className="min-w-0 min-h-dvh bg-background"
           >
-            {/* A compact utility bar, not a second navigation system.
-                On desktop the left-side trigger is only visible when collapsed. */}
+            {/* Workspace tools stay available while content scrolls. */}
             <header
               data-ui="utility-bar"
-              className="flex h-12 bg-background shrink-0 items-center justify-between gap-3 border-b px-4 md:px-6 in-has-[[data-case-workspace]]:sticky in-has-[[data-case-workspace]]:top-0 in-has-[[data-case-workspace]]:z-30"
+              className="sticky top-0 z-30 flex h-(--workspace-header-height) shrink-0 items-center justify-between gap-3 border-b border-sidebar-border bg-shell px-5 md:px-8"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <SidebarTrigger
                   aria-label="Open sidebar"
-                  className="md:hidden"
+                  className="size-8 shrink-0 md:hidden"
                 />
                 <CollapsedSidebarTrigger />
-                <div className="flex items-center gap-2 text-caption text-muted-foreground">
-                  <span className="hidden sm:inline">Customer Zero</span>
-                  <span aria-hidden="true" className="hidden sm:inline">
-                    /
-                  </span>
-                  <span className="font-medium text-foreground">{section}</span>
-                </div>
-              </div>
-              <div className="ml-auto flex items-center gap-1 sm:gap-2">
                 <Button
                   data-ui="global-search"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="gap-2 text-muted-foreground"
+                  className="min-w-0 flex-1 max-w-80 justify-start gap-2 px-3 text-muted-foreground has-data-[icon=inline-start]:pl-3"
                   onClick={() => openPanel("search")}
                   aria-label="Search cases"
                 >
-                  <Search aria-hidden="true" className="size-4" />
-                  <span className="hidden sm:inline">Search cases…</span>
+                  <Search data-icon="inline-start" aria-hidden="true" />
+                  <span>Search cases…</span>
                   <kbd
-                    className="ml-4 hidden rounded border border-border px-1.5 py-0.5 font-sans text-xs leading-none text-muted-foreground lg:inline"
+                    className="ml-auto hidden rounded-sm border border-border/70 bg-background px-1 font-sans text-caption text-muted-foreground lg:inline-flex"
                     aria-hidden="true"
                   >
                     ⌘ K
                   </kbd>
                 </Button>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     aria-label={
@@ -626,13 +630,19 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                         : "Notifications"
                     }
                     title="Notifications"
-                    className="relative inline-flex size-9 items-center justify-center rounded-md text-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="relative text-muted-foreground"
+                      />
+                    }
                   >
                     <Bell aria-hidden="true" className="size-4" />
                     {attentionIntegrations.length > 0 && (
                       <span
                         aria-hidden="true"
-                        className="absolute right-1.5 top-1.5 size-1.5 rounded-full border border-background bg-warning"
+                        className="absolute right-1.5 top-1.5 size-1.5 rounded-full border border-shell bg-warning"
                       />
                     )}
                   </DropdownMenuTrigger>
@@ -655,20 +665,20 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                           className="mt-0.5 size-4 shrink-0 text-warning-foreground"
                         />
                         <span className="flex min-w-0 flex-col gap-1">
-                          <span className="text-sm font-medium">
+                          <span className="text-body font-medium">
                             {attentionIntegrations.length} integration
                             {attentionIntegrations.length === 1
                               ? " needs"
                               : "s need"}{" "}
                             attention
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-caption text-muted-foreground">
                             Review your connected security tools
                           </span>
                         </span>
                       </DropdownMenuItem>
                     ) : (
-                      <p className="px-2 py-5 text-center text-sm text-muted-foreground">
+                      <p className="px-2 py-5 text-center text-prose text-muted-foreground">
                         No new notifications
                       </p>
                     )}
@@ -682,7 +692,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                 </DropdownMenu>
               </div>
             </header>
-            {children}
+            <PageContainer>{children}</PageContainer>
           </SidebarInset>
           <WorkspacePanel panel={panel} close={() => setPanel(null)} />
         </SidebarProvider>

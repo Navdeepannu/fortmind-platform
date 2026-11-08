@@ -1,3 +1,5 @@
+> Current semantic presentation (2026-11-06): [design-foundation.md](design-foundation.md#semantic-indicators-6-november-refinement). It replaces the historical palette, badge styling and icon choices below. `app/globals.css` and `lib/semantic-states.ts` are the current source of truth.
+
 > The finalized 2026-11-04 palette, icon registry and validation are in [semantic-system.md](semantic-system.md). The earlier implementation notes below are historical and superseded where they differ.
 
 > Historical design/validation record. For current routes, file locations and checks, see [platform structure](platform-structure.md).

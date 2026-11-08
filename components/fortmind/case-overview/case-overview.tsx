@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
-import { semanticStyles } from "@/lib/semantic-styles";
 import Link from "next/link";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowRight,
   ChevronDown,
@@ -31,17 +31,17 @@ import {
   SemanticIcon,
   SeverityBadge,
   VerdictBadge,
+  VerdictMarker,
 } from "@/components/fortmind/semantic";
 import type {
   CaseOverviewData,
   OverviewEntity,
   OverviewFinding,
 } from "@/lib/case-overview-data";
-import { overviewSectionIds } from "@/lib/case-sections";
 import { CopyIdentifier } from "./copy-identifier";
 import { InvestigationSection } from "./investigation-section";
 import { ReviewVerdict } from "./review-verdict";
-import { SectionNavigation } from "./section-navigation";
+import { CaseCategoryTabs } from "./section-navigation";
 import {
   Table,
   TableBody,
@@ -55,7 +55,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
   return (
     <header
       data-ui="header"
-      className="flex-none min-w-0 pt-6 pr-8 pb-6 pl-8 border-b border-border bg-background @max-[641px]/case:pl-5 @max-[641px]/case:pr-5 @max-[501px]/case:pt-3.5 @max-[501px]/case:pr-4 @max-[501px]/case:pb-4 @max-[501px]/case:pl-4"
+      className="flex-none min-w-0 py-5 border-b border-border bg-background @max-[501px]/case:py-4"
     >
       <div
         data-ui="breadcrumb-row"
@@ -81,7 +81,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
         </Breadcrumb>
         <div
           data-ui="header-id"
-          className="flex items-center gap-2.25 pl-4.5 border-l border-border text-muted-foreground text-xs @max-[501px]/case:pl-3"
+          className="flex items-center gap-2.25 pl-4.5 border-l border-border text-muted-foreground text-caption @max-[501px]/case:pl-3"
         >
           <span>Case ID</span>
           <CopyIdentifier
@@ -92,7 +92,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
         </div>
         <span
           data-ui="fixture-label"
-          className="ml-auto text-muted-foreground text-xs @max-[501px]/case:hidden"
+          className="ml-auto text-muted-foreground text-caption @max-[501px]/case:hidden"
         >
           Case preview
         </span>
@@ -102,29 +102,26 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
       </h1>
       <p
         data-ui="description"
-        className="mt-1 max-w-[88ch] text-muted-foreground text-sm leading-[1.55]"
+        className="mt-1 max-w-[88ch] text-muted-foreground text-prose"
       >
         {data.description}
       </p>
       <div
         data-ui="header-states"
-        className="flex items-center flex-wrap gap-y-2 gap-x-3.5 mt-4.25 text-label @max-[501px]/case:mt-3.5 @max-[501px]/case:gap-y-2 @max-[501px]/case:gap-x-0 @max-[501px]/case:[&>_:nth-child(n+3)]:basis-full @max-[501px]/case:[&>_:nth-child(n+3)]:pl-0 @max-[501px]/case:[&>_:nth-child(n+3)]:border-l-0"
+        className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-label"
         aria-label="Case assessment and workflow"
       >
         <CaseStatusBadge value={data.status} />
         <PriorityBadge value={data.priority} />
         <span
           data-ui="inline-verdict"
-          className="inline-flex items-center gap-1.5 [&>_span:last-child]:text-muted-foreground [&>_span:last-child]:text-xs @max-[501px]/case:[flex-basis:50%]"
+          className="inline-flex items-center gap-1.5"
         >
           OSCAR: <VerdictBadge value={data.proposedVerdict} />
-          <span className="pl-3.5 border-l border-border">
-            Analyze 70 · Report 70
-          </span>
         </span>
         <span
           data-ui="ai-state"
-          className="text-muted-foreground text-label [&_svg]:w-3.75 [&_svg]:h-3.75 @max-[501px]/case:[flex-basis:50%]"
+          className="text-muted-foreground text-label [&_svg]:size-3.75"
         >
           <SemanticBadge
             definition={outcomeStates["Investigation complete"]}
@@ -138,7 +135,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
         className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,.8fr)_minmax(0,.8fr)_minmax(0,1.1fr)] gap-y-3 gap-x-5.5 mt-3.5 pt-3.25 border-t border-border [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1.25 @max-[861px]/case:grid-cols-2 @max-[501px]/case:grid-cols-2 @max-[501px]/case:mt-3 @max-[501px]/case:pt-2.5 [&_a:hover]:underline [&_a:hover]:underline-offset-3 @max-[501px]/case:[&>_div:first-child]:col-span-full @max-[501px]/case:[&>_div:last-child]:col-span-full"
       >
         <div>
-          <dt className="mb-1 text-muted-foreground text-xs">
+          <dt className="mb-1 text-muted-foreground text-caption">
             Involved entities
           </dt>
           <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
@@ -159,7 +156,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           </dd>
         </div>
         <div>
-          <dt className="mb-1 text-muted-foreground text-xs">Received</dt>
+          <dt className="mb-1 text-muted-foreground text-caption">Received</dt>
           <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             <time dateTime={data.investigation.receivedAt}>
               {data.investigation.dateLabel} ·{" "}
@@ -168,19 +165,19 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           </dd>
         </div>
         <div>
-          <dt className="mb-1 text-muted-foreground text-xs">Assigned to</dt>
+          <dt className="mb-1 text-muted-foreground text-caption">Assigned to</dt>
           <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             {data.owner ?? "Unassigned"}
           </dd>
         </div>
         <div>
-          <dt className="mb-1 text-muted-foreground text-xs">Source</dt>
+          <dt className="mb-1 text-muted-foreground text-caption">Source</dt>
           <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             {data.source}
           </dd>
         </div>
         <div>
-          <dt className="mb-1 text-muted-foreground text-xs">MITRE ATT&CK</dt>
+          <dt className="mb-1 text-muted-foreground text-caption">MITRE ATT&CK</dt>
           <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
             <Crosshair
               aria-hidden="true"
@@ -212,11 +209,11 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
             <h3 className="text-panel-title">
               Recommended next steps
             </h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-0.5 text-caption text-muted-foreground">
               Suggestions only; no response has been approved or executed here.
             </p>
           </div>
-          <ol className="grid grid-cols-3 gap-x-6 gap-y-3.5 pl-4.5 list-decimal text-label leading-5.25 marker:text-muted-foreground @max-[641px]/case:grid-cols-1">
+          <ol className="grid grid-cols-3 gap-x-6 gap-y-3.5 pl-4.5 list-decimal text-label marker:text-muted-foreground @max-[641px]/case:grid-cols-1">
             {data.nextSteps.map((step) => (
               <li className="pl-0.5" key={step}>
                 {step}
@@ -233,31 +230,27 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
         <div data-ui="assessment">
           <p
             data-ui="eyebrow"
-            className="text-muted-foreground text-xs font-medium"
+            className="text-muted-foreground text-caption font-medium"
           >
             OSCAR’s proposed verdict
           </p>
           <h3
             data-ui="proposed-verdict"
-            className={cn(
-              "mt-1.25 flex items-center gap-2.25 text-[26px] leading-8.75 font-semibold tracking-[-.03em] [&>svg]:size-5.5 [&>svg]:stroke-[1.7]",
-              semanticStyles[verdictStates[data.proposedVerdict].tone]
-                .foreground,
-            )}
+            className="mt-1.25 flex items-center gap-2.25 text-page-title text-foreground"
             data-tone={verdictStates[data.proposedVerdict].tone}
           >
-            <SemanticIcon definition={verdictStates[data.proposedVerdict]} />
+            <VerdictMarker value={data.proposedVerdict} />
             {data.proposedVerdict}
           </h3>
           <p
             data-ui="assessment-summary"
-            className="mt-3 max-w-[68ch] text-[15px] leading-6.25"
+            className="mt-3 max-w-[68ch] text-prose"
           >
             {data.assessment}
           </p>
           <p
             data-ui="confidence-summary"
-            className="flex flex-wrap gap-y-1 gap-x-2.25 mt-4.5 text-muted-foreground text-xs [&_span:last-child]:basis-full"
+            className="flex flex-wrap gap-y-1 gap-x-2.25 mt-4.5 text-muted-foreground text-caption [&_span:last-child]:basis-full"
           >
             <span>Investigation confidence</span>
             <strong className="text-foreground font-medium">
@@ -267,16 +260,16 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
           </p>
           <div
             data-ui="supporting"
-            className="mt-6 pt-5 border-t border-border [&_li_+_li]:border-t [&_li_+_li]:border-border [&_li_span:not([data-ui~='evidence-index'])]:block [&_li_span:not([data-ui~='evidence-index'])]:mt-1 [&_li_span:not([data-ui~='evidence-index'])]:text-muted-foreground [&_li_span:not([data-ui~='evidence-index'])]:text-xs [&_a:hover]:decoration-current"
+            className="mt-6 pt-5 border-t border-border [&_li_+_li]:border-t [&_li_+_li]:border-border [&_li_span:not([data-ui~='evidence-index'])]:block [&_li_span:not([data-ui~='evidence-index'])]:mt-1 [&_li_span:not([data-ui~='evidence-index'])]:text-muted-foreground [&_li_span:not([data-ui~='evidence-index'])]:text-caption [&_a:hover]:decoration-current"
           >
             <h3 className="text-panel-title">
               Key evidence
             </h3>
             <ul className="flex flex-col gap-0 mt-1.75">
-              <li className="flex gap-3 pt-2.75 pb-2.75 text-sm leading-5.5">
+              <li className="flex items-baseline gap-3 py-3 text-prose">
                 <span
                   data-ui="evidence-index"
-                  className="pt-px text-muted-foreground font-mono text-xs"
+                  className="text-muted-foreground font-mono text-caption"
                 >
                   01
                 </span>
@@ -288,17 +281,17 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
                   <span>Alert report · not independently confirmed</span>
                   <a
                     href="#finding-memory-access"
-                    className="inline-flex items-center gap-1 mt-1 text-foreground text-xs font-medium underline decoration-border underline-offset-3"
+                    className="inline-flex items-center gap-1 mt-1 text-foreground text-caption font-medium underline decoration-border underline-offset-3"
                   >
                     View finding{" "}
                     <ArrowRight aria-hidden="true" className="w-3.25 h-3.25" />
                   </a>
                 </div>
               </li>
-              <li className="flex gap-3 pt-2.75 pb-2.75 text-sm leading-5.5">
+              <li className="flex items-baseline gap-3 py-3 text-prose">
                 <span
                   data-ui="evidence-index"
-                  className="pt-px text-muted-foreground font-mono text-xs"
+                  className="text-muted-foreground font-mono text-caption"
                 >
                   02
                 </span>
@@ -312,7 +305,7 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
                   </span>
                   <a
                     href="#finding-host-alerts"
-                    className="inline-flex items-center gap-1 mt-1 text-foreground text-xs font-medium underline decoration-border underline-offset-3"
+                    className="inline-flex items-center gap-1 mt-1 text-foreground text-caption font-medium underline decoration-border underline-offset-3"
                   >
                     View finding{" "}
                     <ArrowRight aria-hidden="true" className="w-3.25 h-3.25" />
@@ -324,7 +317,6 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
         </div>
         <ReviewVerdict
           proposedVerdict={data.proposedVerdict}
-          owner={data.owner}
           reason={data.decisionSummary}
           status={data.status}
         />
@@ -342,7 +334,7 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
           </h3>
           <p
             data-ui="limitation"
-            className="flex items-start gap-2 mt-3.5 text-sm leading-5.75 col-span-full"
+            className="flex items-start gap-2 mt-3.5 text-prose col-span-full"
           >
             <FileSearch
               aria-hidden="true"
@@ -359,8 +351,8 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
             >
               <SemanticIcon definition={outcomeStates.Unresolved} />
               <div>
-                <h4 className="text-sm font-medium">{item.question}</h4>
-                <p className="mt-0.75 text-muted-foreground text-label leading-5.25">
+                <h4 className="text-body font-medium">{item.question}</h4>
+                <p className="mt-0.75 text-muted-foreground text-label">
                   {item.resolution}
                 </p>
               </div>
@@ -383,7 +375,7 @@ function EntityRow({ entity }: { entity: OverviewEntity }) {
     <TableRow
       data-ui="entity-row"
       id={`entity-${entity.id}`}
-      className="scroll-mt-34 outline-none min-h-15.5 text-label"
+      className="scroll-mt-40 outline-none min-h-15.5 text-label"
       tabIndex={-1}
     >
       <TableCell>
@@ -406,14 +398,14 @@ function EntityRow({ entity }: { entity: OverviewEntity }) {
       </TableCell>
       <TableCell
         data-ui="entity-sources"
-        className="text-muted-foreground text-xs leading-4.75"
+        className="text-muted-foreground text-caption"
       >
         {entity.sources.join(" · ")}
       </TableCell>
       <TableCell>
         <span
           data-ui="entity-context"
-          className="text-muted-foreground text-xs leading-4.75 flex flex-col"
+          className="text-muted-foreground text-caption flex flex-col"
         >
           {entity.findingCount !== undefined && (
             <span>{entity.findingCount} findings</span>
@@ -439,7 +431,7 @@ function Entities({ data }: { data: CaseOverviewData }) {
       count={data.entities.length}
       description="Identifiers and relationships recorded in this investigation"
       footer={
-        <p className="text-xs leading-5 text-muted-foreground">
+        <p className="text-caption text-muted-foreground">
           The source classifies the host and user as “Confirmed affected.” That
           label does not establish compromise.
         </p>
@@ -453,31 +445,31 @@ function Entities({ data }: { data: CaseOverviewData }) {
           <TableRow>
             <TableHead
               scope="col"
-              className="text-muted-foreground text-xs font-medium"
+              className="text-muted-foreground text-caption font-medium"
             >
               Type
             </TableHead>
             <TableHead
               scope="col"
-              className="text-muted-foreground text-xs font-medium"
+              className="text-muted-foreground text-caption font-medium"
             >
               Identifier
             </TableHead>
             <TableHead
               scope="col"
-              className="text-muted-foreground text-xs font-medium"
+              className="text-muted-foreground text-caption font-medium"
             >
               Relationship
             </TableHead>
             <TableHead
               scope="col"
-              className="text-muted-foreground text-xs font-medium"
+              className="text-muted-foreground text-caption font-medium"
             >
               Source
             </TableHead>
             <TableHead
               scope="col"
-              className="text-muted-foreground text-xs font-medium"
+              className="text-muted-foreground text-caption font-medium"
             >
               Related
             </TableHead>
@@ -534,7 +526,7 @@ function SimilarCases({ data }: { data: CaseOverviewData }) {
               <VerdictBadge value={item.verdict} />
               <CaseStatusBadge value={item.status} />
             </div>
-            <p className="mt-auto text-muted-foreground text-xs leading-4.75">
+            <p className="mt-auto text-muted-foreground text-caption">
               Similar because both cases name <code>{item.sharedEntity}</code>.
               No analyst-confirmed outcome is supplied.
             </p>
@@ -543,7 +535,7 @@ function SimilarCases({ data }: { data: CaseOverviewData }) {
       </div>
       <p
         data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-xs"
+        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
       >
         A shared host does not establish this case’s intent. Historical case IDs
         and direct links were not present in the supplied capture.
@@ -562,13 +554,13 @@ function FindingRow({
   return (
     <details
       data-ui="finding"
-      className="scroll-mt-34 outline-none border-t border-border [&_summary::-webkit-details-marker]:hidden [&_summary:hover]:bg-muted [&_summary:focus-visible]:outline-2 [&_summary:focus-visible]:outline-ring [&_summary:focus-visible]:-outline-offset-2"
+      className="group/finding scroll-mt-40 outline-none border-t border-border first:border-t-0 [&_summary::-webkit-details-marker]:hidden [&_summary:hover]:bg-muted [&_summary:focus-visible]:outline-2 [&_summary:focus-visible]:outline-ring [&_summary:focus-visible]:-outline-offset-2"
       id={`finding-${finding.id}`}
     >
-      <summary className="flex items-start gap-3.75 pt-4.25 pr-6 pb-4.25 pl-6 cursor-pointer list-none @max-[501px]/case:pl-3.25 @max-[501px]/case:pr-3.25">
+      <summary className="flex items-baseline gap-3.75 pt-4.25 pr-6 pb-4.25 pl-6 cursor-pointer list-none @max-[501px]/case:pl-3.25 @max-[501px]/case:pr-3.25">
         <span
           data-ui="finding-number"
-          className="pt-0.5 text-muted-foreground font-mono text-caption"
+          className="text-muted-foreground font-mono text-caption"
         >
           {String(index + 1).padStart(2, "0")}
         </span>
@@ -578,16 +570,16 @@ function FindingRow({
         >
           <span
             data-ui="finding-title-row"
-            className="flex items-center flex-wrap gap-2"
+            className="flex items-baseline flex-wrap gap-2"
           >
-            <strong className="text-sm leading-5.5 [font-weight:550]">
+            <strong className="text-body font-medium">
               {finding.title}
             </strong>
             {finding.severity && <SeverityBadge value={finding.severity} />}
           </span>
           <span
             data-ui="finding-summary"
-            className="text-muted-foreground text-label leading-5"
+            className="text-muted-foreground text-label"
           >
             {finding.summary}
           </span>
@@ -601,7 +593,7 @@ function FindingRow({
         </span>
         <ChevronDown
           data-ui="finding-chevron"
-          className="flex-none w-4 h-4 mt-0.5 text-muted-foreground transition-transform duration-150 group-open/finding:rotate-180"
+          className="flex-none size-4 self-center text-muted-foreground transition-transform duration-150 group-open/finding:rotate-180"
           aria-hidden="true"
         />
       </summary>
@@ -613,13 +605,13 @@ function FindingRow({
           <span className="text-muted-foreground text-caption font-medium uppercase tracking-[.04em]">
             Evidence and interpretation
           </span>
-          <p className="mt-1.5 text-label leading-5.5">{finding.detail}</p>
+          <p className="mt-1.5 text-label">{finding.detail}</p>
         </div>
         <div>
           <span className="text-muted-foreground text-caption font-medium uppercase tracking-[.04em]">
             Source / provenance
           </span>
-          <p className="mt-1.5 text-label leading-5.5">
+          <p className="mt-1.5 text-label">
             <FileSearch
               aria-hidden="true"
               className="inline w-3.25 h-3.25 mr-1.5 [vertical-align:-2px] text-muted-foreground"
@@ -639,6 +631,7 @@ function Findings({ data }: { data: CaseOverviewData }) {
       title="Findings"
       count={data.findings.length}
       description="What the alert and source lookups reported, and what they leave unresolved"
+      contentClassName="p-0"
     >
       <div
         data-ui="findings-list"
@@ -666,7 +659,7 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
         />
       }
       footer={
-        <p className="text-xs">
+        <p className="text-caption">
           OSCAR completed its investigation. The case workflow still requires
           analyst review.
         </p>
@@ -680,12 +673,12 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
           <h3 className="text-panel-title">
             Investigation handoff
           </h3>
-          <p className="max-w-[65ch] mt-2 text-muted-foreground text-label leading-5.5">
+          <p className="max-w-[65ch] mt-2 text-muted-foreground text-label">
             {data.reviewReason}
           </p>
           <dl
             data-ui="investigation-times"
-            className="flex flex-col gap-2.25 mt-4.25 text-xs"
+            className="flex flex-col gap-2.25 mt-4.25 text-caption"
           >
             <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2.5">
               <dt className="text-muted-foreground">Received</dt>
@@ -715,8 +708,8 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
           data-ui="stage-confidence"
           className="[&_:is(th,td)]:pt-1.75 [&_:is(th,td)]:pr-1.75 [&_:is(th,td)]:pb-1.75 [&_:is(th,td)]:pl-1.75 [&_:is(th,td)]:border-b [&_:is(th,td)]:border-border [&_:is(th,td)]:text-left [&_th:first-child]:pl-0 [&_td:nth-child(2)]:tabular-nums"
         >
-          <table className="w-full border-collapse text-xs">
-            <caption className="mb-1.5 text-left text-base [font-weight:550]">
+          <table className="w-full border-collapse text-caption">
+            <caption className="mb-1.5 text-left text-base font-medium">
               Confidence by stage
             </caption>
             <thead className="text-muted-foreground">
@@ -746,7 +739,7 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
               ))}
             </tbody>
           </table>
-          <p className="mt-2.25 text-muted-foreground text-xs leading-5">
+          <p className="mt-2.25 text-muted-foreground text-caption">
             Plan is a pre-lookup estimate. Analyze and Report are the scores
             relevant to OSCAR’s review handoff.
           </p>
@@ -763,7 +756,7 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
           {data.investigation.phases.map((phase) => (
             <li
               key={phase.name}
-              className="inline-flex items-center gap-1.25 text-muted-foreground text-xs"
+              className="inline-flex items-center gap-1.25 text-muted-foreground text-caption"
             >
               <SemanticIcon definition={phaseStates[phase.state]} />
               <span>
@@ -794,7 +787,7 @@ function AttackPath({ data }: { data: CaseOverviewData }) {
             aria-hidden="true"
             className="w-3.75 h-3.75 text-muted-foreground"
           />
-          <code>lab.bob</code>
+          <CopyIdentifier value="lab.bob" label="attack path user lab.bob" />
         </span>
         <ArrowRight
           aria-hidden="true"
@@ -805,7 +798,7 @@ function AttackPath({ data }: { data: CaseOverviewData }) {
             aria-hidden="true"
             className="w-3.75 h-3.75 text-muted-foreground"
           />
-          <code>procdump.exe</code>
+          <CopyIdentifier value="procdump.exe" label="attack path process procdump.exe" />
         </span>
         <ArrowRight
           aria-hidden="true"
@@ -816,12 +809,12 @@ function AttackPath({ data }: { data: CaseOverviewData }) {
             aria-hidden="true"
             className="w-3.75 h-3.75 text-muted-foreground"
           />
-          <code>lsass.exe</code>
+          <CopyIdentifier value="lsass.exe" label="attack path target lsass.exe" />
         </span>
       </div>
       <p
         data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-xs"
+        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
       >
         The alert describes an attempt to access LSASS memory on{" "}
         <code>fmlab-ws1</code>, classified as {data.technique.id}{" "}
@@ -844,26 +837,41 @@ function Hypotheses({ data }: { data: CaseOverviewData }) {
         {data.hypotheses.map((item, index) => (
           <article
             data-ui="record"
-            className="pt-4.25 mt-4.25 border-t border-border"
+            className="mt-5 border-t border-border pt-5 first:mt-0 first:border-t-0 first:pt-0"
             key={item.title}
           >
             <div
               data-ui="record-top"
-              className="flex items-center justify-between gap-3 text-muted-foreground text-xs"
+              className="flex items-center justify-between gap-3 text-muted-foreground text-caption"
             >
               <span>
                 H{index + 1} · {item.result}
               </span>
-              <strong className="text-foreground font-medium">
-                Medium · {item.score}
-              </strong>
+              {item.score !== undefined && (
+                <strong className="text-foreground font-medium">
+                  {item.level && `${item.level} · `}{item.score}
+                </strong>
+              )}
             </div>
             <h3 className="mt-1.25 text-panel-title">
               {item.title}
             </h3>
-            <p className="max-w-[90ch] mt-1.5 text-muted-foreground text-label leading-5.25">
-              {item.explanation}
-            </p>
+            {item.supportingEvidence && item.limitations ? (
+              <dl className="mt-4 grid grid-cols-2 gap-5 text-label @max-[641px]/case:grid-cols-1 @max-[641px]/case:gap-3">
+                <div>
+                  <dt className="font-medium">Supporting evidence</dt>
+                  <dd className="mt-1 text-muted-foreground">{item.supportingEvidence}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium">Contradicting or missing evidence</dt>
+                  <dd className="mt-1 text-muted-foreground">{item.limitations}</dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="max-w-[90ch] mt-1.5 text-muted-foreground text-label">
+                {item.explanation}
+              </p>
+            )}
           </article>
         ))}
       </div>
@@ -894,19 +902,19 @@ function Evidence({ data }: { data: CaseOverviewData }) {
             <TableRow>
               <TableHead
                 scope="col"
-                className="text-muted-foreground text-xs font-medium"
+                className="text-muted-foreground text-caption font-medium"
               >
                 Source
               </TableHead>
               <TableHead
                 scope="col"
-                className="text-muted-foreground text-xs font-medium"
+                className="text-muted-foreground text-caption font-medium"
               >
                 Lookup
               </TableHead>
               <TableHead
                 scope="col"
-                className="text-muted-foreground text-xs font-medium"
+                className="text-muted-foreground text-caption font-medium"
               >
                 Response summary
               </TableHead>
@@ -925,7 +933,7 @@ function Evidence({ data }: { data: CaseOverviewData }) {
       </div>
       <p
         data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-xs"
+        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
       >
         Successful lookups establish only the response shown. Empty results do
         not establish benign activity.
@@ -946,17 +954,17 @@ function Actions({ data }: { data: CaseOverviewData }) {
         {data.actions.map((item, index) => (
           <div
             data-ui="action-row"
-            className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-start gap-2.5 text-label pt-4.25 mt-4.25 border-t border-border @max-[501px]/case:grid-cols-[22px_minmax(0,1fr)] [&>_span:last-child]:text-muted-foreground [&>_span:last-child]:text-xs [&>_span:last-child]:whitespace-nowrap @max-[501px]/case:[&>_span:last-child]:col-start-2"
+            className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-baseline gap-2.5 text-label pt-4.25 mt-4.25 border-t border-border @max-[501px]/case:grid-cols-[22px_minmax(0,1fr)] [&>_span:last-child]:text-muted-foreground [&>_span:last-child]:text-caption [&>_span:last-child]:whitespace-nowrap @max-[501px]/case:[&>_span:last-child]:col-start-2"
             key={item.title}
           >
             <span
               data-ui="evidence-index"
-              className="pt-px text-muted-foreground font-mono text-xs"
+              className="text-muted-foreground font-mono text-caption"
             >
               {String(index + 1).padStart(2, "0")}
             </span>
             <div>
-              <strong className="text-sm leading-5.5 font-medium">
+              <strong className="text-body font-medium">
                 {item.title}
               </strong>
               {item.condition && (
@@ -971,7 +979,7 @@ function Actions({ data }: { data: CaseOverviewData }) {
       </div>
       <p
         data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-xs"
+        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
       >
         The source interface says only an administrator can approve or reject
         these recommendations. No response has been approved or executed in this
@@ -1023,7 +1031,7 @@ function Timeline({ data }: { data: CaseOverviewData }) {
       </ol>
       <p
         data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-xs"
+        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
       >
         The captured interface lists 17 events; the 12 legible events are
         reproduced here. The later analyst confirmation is historical and is not
@@ -1037,107 +1045,50 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
   return (
     <div
       data-ui="case workspace"
-      className="@container/case w-full min-w-0 flex-1 bg-background text-sm leading-[1.55]"
+      className="@container/case w-full min-w-0 flex-1 bg-background text-body"
       id="preview-main"
       data-case-workspace
       data-inspector-open="false"
     >
       <div data-ui="layout" className="flex flex-col min-h-0">
         <CaseHeader data={data} />
-        <SectionNavigation
-          sections={overviewSectionIds}
-          caseId={data.id}
-          status={data.status}
-          counts={{
-            entities: data.entities.length,
-            "similar-cases": data.relatedCases.length,
-            hypotheses: data.hypotheses.length,
-            findings: data.findings.length,
-            evidence: data.evidence.length,
-            actions: data.actions.length,
-          }}
-        />
-        <div data-ui="scroll-region" className="min-w-0 overflow-visible">
-          <div
-            data-ui="document"
-            className="flex flex-col gap-12 min-w-0 mt-0 mr-auto mb-0 ml-auto pt-8 pr-8 pb-20 pl-8 @max-[641px]/case:pl-5 @max-[641px]/case:pr-5 @max-[501px]/case:pt-5 @max-[501px]/case:pr-4 @max-[501px]/case:pb-10 @max-[501px]/case:pl-4 @max-[501px]/case:gap-11"
-          >
-            <div
-              data-ui="section-group"
-              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
-              role="group"
-              aria-labelledby="case-decision-group"
-            >
-              <p
-                data-ui="group-label"
-                id="case-decision-group"
-                className="-mb-5 text-muted-foreground text-xs leading-4.5 font-medium"
-              >
-                Decision
-              </p>
-              <Conclusion data={data} />
-            </div>
-            <div
-              data-ui="section-group"
-              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
-              role="group"
-              aria-labelledby="case-investigation-group"
-            >
-              <p
-                data-ui="group-label"
-                id="case-investigation-group"
-                className="-mb-5 text-muted-foreground text-xs leading-4.5 font-medium"
-              >
-                Investigation
-              </p>
-              <AttackPath data={data} />
-              <Hypotheses data={data} />
-              <Findings data={data} />
-              <InvestigationSummary data={data} />
-            </div>
-            <div
-              data-ui="section-group"
-              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
-              role="group"
-              aria-labelledby="case-context-group"
-            >
-              <p
-                data-ui="group-label"
-                id="case-context-group"
-                className="-mb-5 text-muted-foreground text-xs leading-4.5 font-medium"
-              >
-                Context and evidence
-              </p>
-              <Entities data={data} />
-              <SimilarCases data={data} />
-              <Evidence data={data} />
-            </div>
-            <div
-              data-ui="section-group"
-              className="flex flex-col gap-10 min-w-0 pt-8 border-t border-border @max-[501px]/case:gap-9"
-              role="group"
-              aria-labelledby="case-response-group"
-            >
-              <p
-                data-ui="group-label"
-                id="case-response-group"
-                className="-mb-5 text-muted-foreground text-xs leading-4.5 font-medium"
-              >
-                Response and history
-              </p>
-              <Actions data={data} />
-              <AnalystNotes />
-              <Timeline data={data} />
-            </div>
-            <p
-              data-ui="preview-footnote"
-              className="text-muted-foreground text-caption"
-            >
-              Screenshot-derived case · reconstructed before analyst
-              confirmation · local preview interactions
-            </p>
+        <Suspense fallback={
+          <div className="flex min-w-0 flex-col gap-5 py-6" aria-label="Loading case workspace" aria-busy="true">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-80 w-full" />
           </div>
-        </div>
+        }>
+          <CaseCategoryTabs
+            status={data.status}
+            counts={{
+              entities: data.entities.length,
+              "similar-cases": data.relatedCases.length,
+              hypotheses: data.hypotheses.length,
+              findings: data.findings.length,
+              evidence: data.evidence.length,
+              actions: data.actions.length,
+            }}
+            views={{
+              conclusion: <Conclusion data={data} />,
+              "how-oscar-decided": <InvestigationSummary data={data} />,
+              findings: <Findings data={data} />,
+              hypotheses: <Hypotheses data={data} />,
+              "attack-path": <AttackPath data={data} />,
+              entities: <Entities data={data} />,
+              evidence: <Evidence data={data} />,
+              "similar-cases": <SimilarCases data={data} />,
+              actions: <Actions data={data} />,
+              "analyst-notes": <AnalystNotes />,
+              timeline: <Timeline data={data} />,
+            }}
+          />
+        </Suspense>
+        <p
+          data-ui="preview-footnote"
+          className="pb-8 text-caption text-muted-foreground"
+        >
+          Screenshot-derived case · reconstructed before analyst confirmation · local preview interactions
+        </p>
       </div>
     </div>
   );

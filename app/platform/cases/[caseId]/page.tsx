@@ -40,7 +40,7 @@ export default function CasePage(props: PageProps<"/platform/cases/[caseId]">) {
   return (
     <Suspense
       fallback={
-        <p className="p-8 text-sm text-muted-foreground">
+        <p className="py-8 text-sm text-muted-foreground">
           Loading investigation…
         </p>
       }

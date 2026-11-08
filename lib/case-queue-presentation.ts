@@ -24,6 +24,6 @@ export function queueStatus(
     definition,
     label: phase ? `${definition.label} · ${phase}` : definition.label,
     description: item.outcomeDescription?.trim() || undefined,
-    treatment: "badge" as const,
+    treatment: "status" as const,
   };
 }
