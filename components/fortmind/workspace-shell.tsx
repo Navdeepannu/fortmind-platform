@@ -73,6 +73,9 @@ import { type ImpactPeriod } from "@/lib/overview-data";
 import { attentionIntegrations } from "@/lib/preview-integrations";
 import { CaseQuickPreview } from "./case-table";
 import { WorkspaceThemeToggle } from "./theme-toggle";
+import { FortMindLogo, FortMindMark } from "./brand-logo";
+
+export { FortMindMark } from "./brand-logo";
 
 type Panel = "integrations" | "search";
 
@@ -95,18 +98,6 @@ export function useWorkspace() {
   return context;
 }
 
-export function FortMindMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="currentColor"
-      aria-hidden="true"
-      className={className}
-    >
-      <path d="M2 5h8l5 6v16H8V16l-6-6V5Zm20 0h8v5l-6 6v11h-7V11l5-6Z" />
-    </svg>
-  );
-}
 
 function AppSidebar({ section }: { section: PlatformSection }) {
   const { setOpenMobile } = useSidebar();
@@ -162,12 +153,9 @@ function AppSidebar({ section }: { section: PlatformSection }) {
           <Link
             href={platformRoutes.overview}
             aria-label="FortMind overview"
-            className="flex h-8 min-w-0 items-center gap-2 rounded-md px-1 text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
+            className="flex h-8 min-w-0 items-center rounded-md px-1 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
           >
-            <FortMindMark className="size-6 shrink-0 text-foreground " />
-            <span className="truncate text-lg font-medium tracking-tight text-foreground">
-              FortMind
-            </span>
+            <FortMindLogo className="h-6 w-auto max-w-full" />
           </Link>
           {/* Collapsed sidebar retains product identity; the expand control lives in the top bar. */}
           <Link
@@ -176,7 +164,7 @@ function AppSidebar({ section }: { section: PlatformSection }) {
             title="FortMind"
             className="hidden size-9 items-center justify-center rounded-md text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:flex"
           >
-            <FortMindMark className="size-6 text-brand-ink" />
+            <FortMindMark className="size-6" />
           </Link>
           <SidebarTrigger
             aria-label="Collapse sidebar"
