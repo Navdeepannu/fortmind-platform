@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { attentionCases, handoffCases, operations } from "@/lib/overview-data";
+import { caseHref } from "@/lib/platform-routes";
 import { formatAge } from "@/lib/preview-data";
 import { caseNextAction } from "@/lib/case-context";
 import { cn } from "@/lib/utils";
@@ -34,9 +35,9 @@ export function NeedsAttention() {
       data-ui="card attention"
       role="region"
       aria-labelledby="cases-heading"
-      className="h-full gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
+      className="h-full min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
     >
-      <CardHeader className="flex flex-row items-center justify-between gap-3 border-b px-6 py-5">
+      <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 border-b px-5 py-5 sm:px-6">
         <div className="flex min-w-0 flex-col gap-1">
           <CardTitle>
             <h2 id="cases-heading" className="text-panel-title">
@@ -44,7 +45,7 @@ export function NeedsAttention() {
             </h2>
           </CardTitle>
           <CardDescription className="text-caption">
-            Human decisions · urgent first, then oldest case
+            Decision inbox · urgent first, then oldest case
           </CardDescription>
         </div>
         <Button
@@ -58,20 +59,26 @@ export function NeedsAttention() {
           View cases <ArrowRight data-icon="inline-end" />
         </Button>
       </CardHeader>
-      <CardContent className="flex-1 p-0">
+
+      <div className="flex items-start gap-3 border-b border-border bg-muted/40 px-5 py-3 sm:px-6">
+        <span
+          aria-hidden="true"
+          className="mt-1.5 size-1.5 shrink-0 rounded-full bg-warning"
+        />
+        <p className="text-caption text-muted-foreground">
+          <strong className="font-semibold text-foreground">{operations.urgent} urgent</strong> in the
+          current snapshot. Preview the available case context before deciding.
+        </p>
+      </div>
+
+      <CardContent className="min-w-0 flex-1 p-0">
         <Table className="w-full table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="h-11 px-6">
-                Investigation / next action
+              <TableHead className="h-10 px-5 sm:px-6">
+                Investigation / decision context
               </TableHead>
-              <TableHead className="hidden h-11 w-25 px-3 text-center sm:table-cell">
-                Priority
-              </TableHead>
-              <TableHead className="hidden h-11 w-29 px-3 text-center sm:table-cell">
-                Verdict
-              </TableHead>
-              <TableHead className="h-11 w-19 px-3 text-center">
+              <TableHead className="h-10 w-20 px-3 text-right sm:w-24 sm:pr-6">
                 Case age
               </TableHead>
             </TableRow>
@@ -79,46 +86,56 @@ export function NeedsAttention() {
           <TableBody>
             {attentionCases.map((item) => (
               <TableRow key={item.id} data-case-id={item.id}>
-                <TableCell className="min-w-0 whitespace-normal px-6 py-5 align-middle">
-                  <CaseQuickPreview item={item}>
-                    <button
-                      type="button"
-                      className="line-clamp-2 max-w-full cursor-pointer text-left text-body font-medium hover:underline hover:underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                      aria-label={`Preview ${item.id}: ${item.title}`}
-                    >
-                      {item.title}
-                    </button>
-                  </CaseQuickPreview>
-                  <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-caption text-muted-foreground">
-                    <code className="font-mono">{item.id}</code>
-                    <span aria-hidden="true">·</span>
-                    <span className="min-w-0 truncate">
+                <TableCell className="min-w-0 whitespace-normal px-5 py-4 align-top sm:px-6">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <code className="font-mono text-caption text-muted-foreground">
+                      {item.id}
+                    </code>
+                    <span className="text-muted-foreground" aria-hidden="true">·</span>
+                    <span className="min-w-0 truncate text-caption text-muted-foreground">
                       {item.entities.hostname}
                     </span>
                   </div>
-                  <p
-                    data-ui="attention-action"
-                    className="mt-2 line-clamp-2 text-caption text-muted-foreground"
+
+                  <div className="mt-2">
+                    <CaseQuickPreview item={item}>
+                      <button
+                        type="button"
+                        className="line-clamp-2 max-w-full cursor-pointer text-left text-body font-semibold hover:underline hover:underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        aria-label={`Preview ${item.id}: ${item.title}`}
+                      >
+                        {item.title}
+                      </button>
+                    </CaseQuickPreview>
+                  </div>
+
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <PriorityBadge value={item.priority} />
+                    <VerdictBadge value={item.verdict} />
+                  </div>
+
+                  <div className="mt-3 border-l-2 border-border pl-3">
+                    <span className="text-caption font-medium text-foreground">
+                      Next action
+                    </span>
+                    <p
+                      data-ui="attention-action"
+                      className="mt-1 line-clamp-3 text-caption text-muted-foreground"
+                    >
+                      {caseNextAction(item)}
+                    </p>
+                  </div>
+
+                  <Link
+                    href={caseHref(item.id)}
+                    className="mt-3 inline-flex min-h-7 items-center gap-1.5 text-label font-medium text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
-                    {caseNextAction(item)}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2 sm:hidden">
-                    <PriorityBadge value={item.priority} />
-                    <VerdictBadge value={item.verdict} />
-                  </div>
-                </TableCell>
-                <TableCell className="hidden px-3 py-5 text-center align-middle sm:table-cell">
-                  <div className="flex justify-center">
-                    <PriorityBadge value={item.priority} />
-                  </div>
-                </TableCell>
-                <TableCell className="hidden px-3 py-5 text-center align-middle sm:table-cell">
-                  <div className="flex justify-center">
-                    <VerdictBadge value={item.verdict} />
-                  </div>
+                    Review investigation
+                    <ArrowUpRight aria-hidden="true" className="size-3.5" />
+                  </Link>
                 </TableCell>
                 <TableCell
-                  className="px-3 py-5 text-center align-middle text-caption tabular-nums whitespace-nowrap text-muted-foreground"
+                  className="px-3 py-4 text-right align-top text-caption tabular-nums whitespace-nowrap text-muted-foreground sm:pr-6"
                   title={`Case age ${item.ageMinutes} minutes; waiting duration unavailable`}
                 >
                   {formatAge(item.ageMinutes)}
@@ -128,11 +145,11 @@ export function NeedsAttention() {
           </TableBody>
         </Table>
       </CardContent>
-      <CardFooter className="mt-auto flex flex-col items-stretch gap-3 border-t px-6 py-4">
+
+      <CardFooter className="mt-auto flex flex-col items-stretch gap-3 border-t px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-caption text-muted-foreground">
-            {attentionCases.length} highlighted · {operations.needsYou} awaiting
-            decisions
+            {attentionCases.length} highlighted · {operations.needsYou} awaiting decisions
           </p>
           <Button
             variant="ghost"
@@ -142,7 +159,7 @@ export function NeedsAttention() {
             onClick={() => setShowHandoffs((value) => !value)}
             className="px-0"
           >
-            Escalations & recovery{" "}
+            Escalations & recovery
             <ChevronDown
               data-icon="inline-end"
               className={cn(showHandoffs && "rotate-180")}
@@ -163,7 +180,7 @@ export function NeedsAttention() {
                   <CaseQuickPreview item={item}>
                     <button
                       type="button"
-                      className="self-start cursor-pointer text-left text-body font-medium hover:underline"
+                      className="self-start cursor-pointer text-left text-body font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                       aria-label={`Preview ${item.id}: ${item.title}`}
                     >
                       {item.title}
