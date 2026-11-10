@@ -12,6 +12,7 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-control: var(--control);
+  --color-table-stripe: var(--table-stripe);
   --color-floating-hover: var(--floating-hover);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -192,17 +193,18 @@
   --layout-gutter-desktop: 2rem;
   --layout-gutter: var(--layout-gutter-mobile);
 
-  /* Light neutral ladder: workspace chrome / canvas / cards / controls / floating UI. */
+  /* Geist-inspired neutral roles: shared canvas and chrome; border-led cards. */
   color-scheme: light;
-  --shell: oklch(0.946467 0.007610 241.67); /* #E9EEF2 */
-  --background: oklch(0.972191 0.003423 247.86); /* #F4F6F8 */
-  --foreground: oklch(0.2 0.006 265);
-  --surface: oklch(1 0 0); /* #FFFFFF: card and table */
-  --control: oklch(0.961973 0.005878 239.82); /* #EFF3F6: inputs, filters, outline buttons */
-  --card: var(--surface);
+  --shell: var(--background); /* same canvas as sidebar */
+  --background: oklch(0.985104 0 0); /* #FAFAFA */
+  --foreground: oklch(0.209238 0.006108 271.12); /* #17181B */
+  --surface: oklch(1 0 0); /* #FFFFFF, filled content panels */
+  --table-stripe: oklch(0.978 0.0015 255); /* #F8F8F9 */
+  --control: oklch(0.976419 0.001323 286.38); /* #F7F7F8 */
+  --card: var(--background); /* border-led cards */
   --card-foreground: var(--foreground);
-  --surface-floating: oklch(0.990872 0.002856 264.54); /* #FBFCFE: menus and previews */
-  --floating-hover: oklch(0.946301 0.010340 247.94); /* #E8EEF4 */
+  --surface-floating: oklch(1 0 0); /* #FFFFFF */
+  --floating-hover: oklch(0.957665 0.001718 247.84); /* #F0F1F2 */
   --surface-elevated: var(--surface-floating);
   --popover: var(--surface-floating);
   --popover-foreground: var(--foreground);
@@ -215,16 +217,16 @@
   --brand-active: oklch(0.7488460193 0.1687457279 161.948704);
   --brand-ink: oklch(0.44 0.095 163);
   --secondary: var(--control);
-  --secondary-foreground: oklch(0.27 0.008 265);
-  --muted: oklch(0.964975 0.005874 239.82);
-  --muted-foreground: oklch(0.46 0.012 265);
-  --accent: oklch(0.943285 0.010348 247.94);
+  --secondary-foreground: oklch(0.384656 0.013631 256.76); /* #3F444B */
+  --muted: oklch(0.973427 0.001324 286.38); /* #F6F6F7 */
+  --muted-foreground: oklch(0.512199 0.014072 259.82); /* #62676F */
+  --accent: oklch(0.963673 0.001715 247.84); /* #F2F3F4 */
   --accent-foreground: var(--foreground);
-  --surface-hover: oklch(0.943285 0.010348 247.94); /* #E7EDF3 */
+  --surface-hover: oklch(0.957665 0.001718 247.84); /* #F0F1F2 */
   --destructive: var(--danger-foreground);
-  --border: oklch(0.902652 0.012907 244.27); /* #D8E0E7 */
-  --border-strong: oklch(0.820254 0.022116 245.91); /* #B9C6D2 */
-  --input: oklch(0.817130 0.022137 245.91); /* #B8C5D1 */
+  --border: oklch(0.924740 0.002906 264.54); /* #E5E6E8 */
+  --border-strong: oklch(0.866175 0.004672 258.33); /* #D1D3D6 */
+  --input: oklch(0.866175 0.004672 258.33); /* #D1D3D6 */
   --ring: oklch(0.49 0.01 265);
   --overlay: oklch(0.13 0.004 265 / 0.42);
   --chart-1: var(--oscar);
@@ -232,15 +234,15 @@
   --chart-3: var(--info);
   --chart-4: var(--warning);
   --chart-5: var(--escalation);
-  --radius: 0.5rem;
+  --radius: 0.375rem; /* 6px */
   --sidebar: var(--shell);
   --sidebar-foreground: var(--muted-foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: oklch(0.917871 0.012853 244.26);
+  --sidebar-accent: oklch(0.963673 0.001715 247.84); /* #F2F3F4 */
   --sidebar-accent-foreground: var(--foreground);
-  --sidebar-selected: oklch(0.892909 0.017483 248.02);
-  --sidebar-border: oklch(0.868800 0.015843 248.01);
+  --sidebar-selected: oklch(0.945144 0.003447 247.86); /* #EBEDEF */
+  --sidebar-border: var(--border); /* shared subtle border */
   --sidebar-ring: var(--ring);
   --workflow-attention: var(--warning-foreground);
   --workflow-neutral: var(--muted-foreground);
@@ -360,35 +362,36 @@
 }
 
 .dark {
-  /* Restrained cool-graphite ladder. No hue is applied to the semantic state palette. */
+  /* Neutral-first dark theme: brand and semantic colors remain independent. */
   color-scheme: dark;
-  --background: oklch(0.167554 0.007085 258.37); /* #0D0F12: darkest canvas */
-  --shell: oklch(0.212479 0.010909 260.67); /* #16191E: sidebar + topbar */
-  --surface: oklch(0.253718 0.013511 253.07); /* #1E2329: cards and tables */
-  --control: oklch(0.306721 0.016703 255.65); /* #2A3038: filters and inputs */
-  --surface-floating: oklch(0.364308 0.020338 254.09); /* #373F49: menus, tooltip and previews */
-  --floating-hover: oklch(0.425820 0.023086 248.37); /* #45505B */
-  --foreground: oklch(0.969196 0.003426 247.86);
+  --background: oklch(0.158823 0.004543 264.44); /* #0C0D0F */
+  --shell: var(--background); /* same canvas as sidebar */
+  --surface: oklch(0.185404 0.005178 248.11); /* #111315 */
+  --table-stripe: oklch(0.199330 0.006777 258.37); /* #141619 */
+  --control: oklch(0.217386 0.008416 264.38); /* #181A1E */
+  --surface-floating: oklch(0.255182 0.010408 260.70); /* #202328 */
+  --floating-hover: oklch(0.296183 0.010017 260.71); /* #2A2D32 */
+  --foreground: oklch(0.961433 0.001328 286.38); /* #F2F2F3 */
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
   --primary-hover: var(--brand-hover);
   --brand-ink: var(--brand);
   --secondary: var(--control);
-  --secondary-foreground: oklch(0.891483 0.013344 251.57);
-  --muted: oklch(0.286174 0.015423 252.36);
-  --muted-foreground: oklch(0.775015 0.019252 250.64);
-  --accent: oklch(0.340378 0.021404 251.19);
-  --surface-hover: oklch(0.340787 0.019192 251.46); /* #313942: row and control hover */
-  --border: oklch(0.382427 0.020801 251.12); /* #3B444E */
-  --border-strong: oklch(0.480044 0.025758 250.46); /* #535F6C */
-  --input: oklch(0.454947 0.026100 250.49); /* #4C5865: control outlines */
+  --secondary-foreground: oklch(0.867248 0.005584 274.96); /* #D2D3D7 */
+  --muted: oklch(0.199330 0.006777 258.37); /* #141619 */
+  --muted-foreground: oklch(0.721033 0.007985 260.73); /* #A2A5AA */
+  --accent: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
+  --surface-hover: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
+  --border: oklch(0.296183 0.010017 260.71); /* #2A2D32 */
+  --border-strong: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
+  --input: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
   --ring: var(--brand);
   --overlay: oklch(0 0 0 / 0.68);
   /* Navigation-only hover and selection; keep the shared surface palette intact. */
   --sidebar-foreground: var(--muted-foreground);
-  --sidebar-border: oklch(0.345100 0.020615 254.11);
-  --sidebar-accent: oklch(0.285737 0.017736 251.89);
-  --sidebar-selected: oklch(0.324405 0.023882 251.01);
+  --sidebar-border: var(--border); /* shared subtle border */
+  --sidebar-accent: oklch(0.208174 0.006702 258.37); /* #16181B */
+  --sidebar-selected: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
   --verdict-malicious: oklch(0.7279374952 0.1684458742 19.573172);
   --verdict-suspicious: oklch(0.8532283221 0.1199615176 72.517867);
   --verdict-benign: oklch(0.7927928378 0.1300808921 168.378874);
@@ -609,5 +612,12 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* Alternating case rows only; hover, selection and preview take precedence. */
+@layer utilities {
+  [data-ui="case-table"] tbody tr:nth-child(even):not(:hover):not([data-state="selected"]):not([data-preview-selected="true"]):not([aria-selected="true"]) {
+    background-color: var(--table-stripe);
   }
 }
