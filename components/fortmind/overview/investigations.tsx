@@ -45,7 +45,7 @@ export function ActiveInvestigations() {
       data-ui="card running"
       role="region"
       aria-labelledby="running-heading"
-      className="h-full min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
+      className="@container h-full min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
     >
       <div className="relative overflow-hidden bg-[#101916] px-5 py-6 text-white sm:px-6">
         <div
@@ -94,7 +94,7 @@ export function ActiveInvestigations() {
         </div>
       </div>
 
-      <div className="grid min-w-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.93fr)]">
+      <div className="grid min-w-0 flex-1 grid-cols-1 @min-[740px]:grid-cols-[minmax(0,1fr)_minmax(0,0.93fr)]">
         <div className="min-w-0">
           <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 sm:px-6">
             <h3 className="text-label font-semibold">Investigation runs</h3>
@@ -164,7 +164,7 @@ export function ActiveInvestigations() {
 
         <div
           data-ui="run-inspector"
-          className="min-w-0 border-t border-border bg-muted/40 lg:border-t-0 lg:border-l"
+          className="min-w-0 border-t border-border bg-muted/40 @min-[740px]:border-t-0 @min-[740px]:border-l"
         >
           {expandedId === null && (
             <div className="flex h-full min-h-64 flex-col items-start justify-center gap-3 p-6">
