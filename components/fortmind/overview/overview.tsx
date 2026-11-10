@@ -38,7 +38,7 @@ export function Overview() {
   return (
     <div data-ui="main" id="preview-main" className="min-w-0 py-5 md:py-8">
       <div className="min-[1720px]:grid min-[1720px]:grid-cols-[minmax(0,1fr)_10.5rem] min-[1720px]:gap-7">
-        <main className="min-w-0">
+        <div className="min-w-0">
           <header data-ui="page-heading" className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
               <h1 className="text-page-title">Overview</h1>
@@ -89,7 +89,7 @@ export function Overview() {
             </div>
           </section>
           <PlatformImpact />
-        </main>
+        </div>
 
         <aside className="hidden min-[1720px]:block">
           <nav aria-label="On this page" className="sticky top-20 flex flex-col gap-2 border-l border-border pl-4">
