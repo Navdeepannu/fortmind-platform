@@ -774,7 +774,7 @@ export function CaseTable({
             data-ui="table-shell"
             className="overflow-hidden rounded-lg bg-surface border border-border"
           >
-            <div data-ui="queue-top" className="border-b bg-surface px-5 max-md:px-3">
+            <div data-ui="queue-top" className="border-b bg-muted px-5 max-md:px-3">
               <div className="max-w-full overflow-x-auto">
                 <TabsList
                   variant="line"
@@ -810,7 +810,7 @@ export function CaseTable({
             </div>
             <div
               data-ui="filter-row"
-              className="flex flex-wrap items-center gap-3 border-b bg-surface px-5 py-4 max-md:px-3"
+              className="flex flex-wrap items-center gap-3 border-b bg-muted px-5 py-4 max-md:px-3"
             >
               <div
                 data-ui="search"
