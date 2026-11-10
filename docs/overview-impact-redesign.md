@@ -41,3 +41,25 @@ Priority and verdict are **not comparable cohorts**: priority describes open wor
 - Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` and `scripts/overview-browser-check.mjs` with Playwright.
 
 Preview fixtures only; the final design can connect to real telemetry later without showing unsupported claims today.
+
+
+## Visual-density iteration — Nov 10
+
+Research sources:
+- [Dropzone AI Dashboard documentation](https://docs.dropzone.ai/platform/dashboard): compact priority/conclusion totals, activity chart and operational breakdown
+- [Darktrace Threat Visualizer](https://www.darktrace.com/products/network): concise incident prioritization with drill-in context
+- [Cloudflare custom dashboard guidance](https://developers.cloudflare.com/analytics/custom-dashboards/): trends for timeseries, bars for categories, metric blocks for key totals
+- [Linear Dashboards](https://linear.app/docs/dashboards): interactive drill-down over additional static cards
+- [Vercel Web Interface Guidelines](https://vercel.com/design/guidelines): accurate state labels, text as needed, next action from each screen
+- [EvilCharts](https://evilcharts.com/docs): higher craft in chart composition; **no new chart dependency installed**
+
+Additional reductions:
+- The Overview title and snapshot label now occupy one row; long guiding paragraphs, decorative headings and repeated reminders were removed.
+- Top metric links are compact; the 7-day autonomous count is labeled separately from the current queue snapshot.
+- OSCAR run activity is a **phase matrix**: five recorded-phase columns, four actual sample runs, click-to-inspect case details. Empty/unknown states do not show fake progress. The selected run's summary is truncated to two lines with full text on hover, plus a direct link to the case.
+- Human intervention is three concise action rows rather than a table. Each shows identity, priority, case age and next step; context and verdict details live in the existing preview.
+- Impact presents **one graph at a time**, switchable between stacked investigation throughput and cumulative estimated analyst hours. Its 7/30/90-day control is shared; exact denominators, assumptions and generated-demo disclosures are preserved.
+- Two side-by-side priority/verdict mini distributions stay compact, with explicit cohort labels.
+- Real-time execution totals, measured productivity, per-step completion, approval autonomy, failure rate or confidence shifts are **not** inferred or invented.
+
+The new presentation is intended to minimize initial scanning time without removing evidence: substantive detail still lives in the case investigation.
