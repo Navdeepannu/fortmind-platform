@@ -99,7 +99,7 @@ export function useWorkspace() {
 }
 
 
-function AppSidebar({ section }: { section: PlatformSection }) {
+function AppSidebar({ section, openSearch }: { section: PlatformSection; openSearch: () => void }) {
   const { setOpenMobile } = useSidebar();
 
   const workspaceItems = [
@@ -172,6 +172,23 @@ function AppSidebar({ section }: { section: PlatformSection }) {
           />
         </div>
       </SidebarHeader>
+
+      <div className="px-3 pt-3 group-data-[collapsible=icon]:px-2">
+        <button
+          type="button"
+          aria-label="Search cases"
+          title="Search cases"
+          onClick={() => {
+            setOpenMobile(false);
+            openSearch();
+          }}
+          className="flex h-9 w-full items-center gap-3 rounded-sm border border-sidebar-border px-3 text-left text-label text-sidebar-foreground outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+        >
+          <Search aria-hidden="true" className="size-4 shrink-0" />
+          <span className="flex-1 group-data-[collapsible=icon]:hidden">Search cases</span>
+          <kbd aria-hidden="true" className="rounded-sm border border-sidebar-border px-1 text-caption group-data-[collapsible=icon]:hidden">⌘K</kbd>
+        </button>
+      </div>
 
       <SidebarContent className="gap-0 bg-sidebar px-3 pb-5 pt-5 group-data-[collapsible=icon]:px-2">
         <SidebarGroup
@@ -575,7 +592,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           >
             Skip to {section.toLowerCase()}
           </a>
-          <AppSidebar section={section} />
+          <AppSidebar section={section} openSearch={() => openPanel("search")} />
           <SidebarInset
             data-ui="inset"
             className="min-w-0 min-h-dvh bg-background"
@@ -591,25 +608,20 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                   className="size-8 shrink-0 md:hidden"
                 />
                 <CollapsedSidebarTrigger />
-                <Button
-                  data-ui="global-search"
-                  variant="outline"
-                  size="sm"
-                  className="min-w-0 flex-1 max-w-80 justify-start gap-2 px-3 text-muted-foreground has-data-[icon=inline-start]:pl-3"
-                  onClick={() => openPanel("search")}
-                  aria-label="Search cases"
-                >
-                  <Search data-icon="inline-start" aria-hidden="true" />
-                  <span>Search cases…</span>
-                  <kbd
-                    className="ml-auto hidden rounded-sm border border-border/70 bg-background px-1 font-sans text-caption text-muted-foreground lg:inline-flex"
-                    aria-hidden="true"
-                  >
-                    ⌘ K
-                  </kbd>
-                </Button>
+                <span className="truncate text-label font-medium text-foreground">{section}</span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
+                <Button
+                  data-ui="global-search"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground"
+                  aria-label="Search cases"
+                  title="Search cases"
+                  onClick={() => openPanel("search")}
+                >
+                  <Search aria-hidden="true" className="size-4" />
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     aria-label={
