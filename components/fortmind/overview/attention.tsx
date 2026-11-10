@@ -32,6 +32,7 @@ export function NeedsAttention() {
   const [showHandoffs, setShowHandoffs] = useState(false);
   return (
     <Card
+      id="attention"
       data-ui="card attention"
       role="region"
       aria-labelledby="cases-heading"
@@ -59,17 +60,6 @@ export function NeedsAttention() {
           View cases <ArrowRight data-icon="inline-end" />
         </Button>
       </CardHeader>
-
-      <div className="flex items-start gap-3 border-b border-border bg-muted/40 px-5 py-3 sm:px-6">
-        <span
-          aria-hidden="true"
-          className="mt-1.5 size-1.5 shrink-0 rounded-full bg-warning"
-        />
-        <p className="text-caption text-muted-foreground">
-          <strong className="font-semibold text-foreground">{operations.urgent} urgent</strong> in the
-          current snapshot. Preview the available case context before deciding.
-        </p>
-      </div>
 
       <CardContent className="min-w-0 flex-1 p-0">
         <Table className="w-full table-fixed">
