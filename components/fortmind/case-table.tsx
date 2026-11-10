@@ -36,6 +36,8 @@ import {
   MoreHorizontal,
   ArrowUpRight,
   SlidersHorizontal,
+  Columns3,
+  LayoutList,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -112,6 +114,7 @@ import {
   type Tone,
 } from "@/lib/preview-data";
 import { platformCases } from "@/lib/platform-cases";
+import { CaseBoard } from "./case-board";
 import { queueStatusStates, type SemanticState } from "@/lib/semantic-states";
 import {
   caseListViews,
@@ -445,6 +448,13 @@ export function CaseTable({
   const [caseStatus, setCaseStatus] = useState<CaseStatus | "">(entry.status);
   const [filters, setFilters] = useState<CaseFilters>(initialFilters);
   const [density, setDensity] = useState("comfortable");
+  const [layoutMode, setLayoutMode] = useState<"list" | "board">("list");
+  // Preserve the analyst's original list tab and status when temporarily
+  // switching to the all-status board.
+  const listContext = useRef<{ view: CaseListView; status: CaseStatus | "" }>({
+    view: initialView ?? entry.view,
+    status: entry.status,
+  });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [columns, setColumns] = useState<Record<OptionalColumn, boolean>>({
     priority: true,
@@ -645,6 +655,25 @@ export function CaseTable({
       ? [{ key: "autonomous" as const, label: "Closed by OSCAR" }]
       : []),
   ];
+  function changeLayout(next: "list" | "board") {
+    if (next === layoutMode) return;
+    if (next === "board") {
+      listContext.current = { view, status: caseStatus };
+      setView("all");
+      setCaseStatus("");
+    } else {
+      setView(listContext.current.view);
+      setCaseStatus(listContext.current.status);
+    }
+    setLayoutMode(next);
+    setPage(0);
+    setPreview(null);
+    setSelected(new Set());
+    setAnnouncement(next === "board"
+      ? "Board view: cases grouped by workflow status."
+      : "List view restored.");
+  }
+
   function clearFilters() {
     setFilters((previous) => ({
       ...initialFilters,
@@ -1090,6 +1119,37 @@ export function CaseTable({
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <div
+                  data-ui="case-view-switch"
+                  role="group"
+                  aria-label="Case layout"
+                  className="flex shrink-0 items-center overflow-hidden rounded-md border border-border"
+                >
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={layoutMode === "list" ? "secondary" : "ghost"}
+                    aria-label="List view"
+                    aria-pressed={layoutMode === "list"}
+                    onClick={() => changeLayout("list")}
+                    className="h-9 rounded-none border-r border-border px-2.5"
+                  >
+                    <LayoutList aria-hidden="true" className="size-3.5" />
+                    <span className="hidden lg:inline">List</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={layoutMode === "board" ? "secondary" : "ghost"}
+                    aria-label="Board view"
+                    aria-pressed={layoutMode === "board"}
+                    onClick={() => changeLayout("board")}
+                    className="h-9 rounded-none px-2.5"
+                  >
+                    <Columns3 aria-hidden="true" className="size-3.5" />
+                    <span className="hidden lg:inline">Board</span>
+                  </Button>
+                </div>
               </div>
               {filterChips.length > 0 && (
                 <div
@@ -1120,7 +1180,7 @@ export function CaseTable({
                 </div>
               )}
             </div>
-            {selected.size > 0 && (
+            {layoutMode === "list" && selected.size > 0 && (
               <div
                 data-ui="selection-toolbar"
                 className="flex items-center gap-2.25 mt-3 mr-4.5 mb-3 ml-4.5 pt-1.75 pr-2.5 pb-1.75 pl-2.5 border border-border rounded-md bg-surface"
@@ -1148,7 +1208,7 @@ export function CaseTable({
               </div>
             )}
             <TabsContent data-ui="table-panel" value={view} className="m-0">
-              <div data-ui="investigation-workspace" className="min-w-0">
+              <div data-ui="investigation-workspace" className="min-w-0" hidden={layoutMode !== "list"}>
                 <div
                   data-ui="case-grid"
                   className="@container/case-grid flex min-h-0 min-w-0 flex-col"
@@ -1620,6 +1680,12 @@ export function CaseTable({
                   </div>
                 </div>
               </div>
+              {layoutMode === "board" && (
+                <CaseBoard
+                  cases={filtered}
+                  onPreview={(item, trigger, keyboard) => openPreview(item, trigger, keyboard)}
+                />
+              )}
             </TabsContent>
           </div>
         </Tabs>
