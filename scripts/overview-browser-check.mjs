@@ -32,6 +32,8 @@ try {
       await noOverflow();
       assert.equal(await page.getByRole("button", { name: /New case|Create new case/i }).count(), 0);
       assert.equal(await running().locator('[data-ui="active-investigation"]').count(), monitoredInvestigations.length);
+      assert.equal(await running().locator('[data-ui="run-inspector"]').getByText("Inspect a run", { exact: true }).count(), 1);
+      assert.equal(await attention().getByRole("link", { name: "Review investigation", exact: true }).count(), 3);
       assert.deepEqual(await attention().locator("tbody tr").evaluateAll(rows => rows.map(row => row.dataset.caseId)), ["FM-1047", "FM-1048", "FM-1039"]);
       assert.equal(await attention().getByRole("columnheader", { name: "Waiting", exact: true }).count(), 0);
       if (width < 1280) assert.ok((await running().boundingBox()).y < (await attention().boundingBox()).y);
@@ -50,6 +52,7 @@ try {
       await first.focus();
       await page.keyboard.press("Enter");
       assert.equal(await first.getAttribute("aria-expanded"), "true");
+      await running().locator('[data-ui="run-inspector"]').getByText("What OSCAR has reported", { exact: true }).waitFor();
       const progress = running().locator('[data-ui="investigation-progress"]');
       assert.equal(await progress.getByRole("listitem").count(), 5);
       assert.equal(await progress.locator('[data-step-state="completed"]').count(), 0);
