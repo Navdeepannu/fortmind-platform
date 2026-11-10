@@ -25,7 +25,7 @@ Hex values are human-readable design references converted to OKLCH values in CSS
 - `components/fortmind/workspace-shell.tsx`: sidebar uses `bg-sidebar` (which aliases `--shell`); top utility bar uses `bg-shell`; workspace inset uses `bg-background`.
 - `components/fortmind/overview/overview.tsx`: metric cards continue to use `bg-card` and therefore automatically receive the revised surface.
 - `components/fortmind/case-table.tsx`: the table shell and rows use `bg-surface`; queue tabs and filter toolbar use `bg-muted`; filter buttons and search inputs use `bg-control`.
-- `components/ui/button.tsx`, `components/ui/input.tsx`, `components/ui/select.tsx`: control fill and interaction states are shared across the platform.
+- `components/ui/button.tsx`, `components/ui/input.tsx`, `components/ui/textarea.tsx`, `components/ui/native-select.tsx`, `components/ui/select.tsx`: control fill and interaction states are shared across the platform.
 - `components/ui/dropdown-menu.tsx`, `components/ui/popover.tsx`, `components/ui/hover-card.tsx`, `components/ui/tooltip.tsx`: floating panels use `bg-surface-floating` and `ring-border-strong`; nested menu focus uses `bg-floating-hover`.
 - `components/ui/table.tsx`: hover/selected rows use `bg-surface-hover`. Do not add separate per-table palettes.
 
