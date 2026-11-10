@@ -52,7 +52,7 @@ export function settingsBreadcrumbs(pathname: string): NavigationCrumb[] {
     return [
       root,
       section("FortCases", "/settings/fortcases/investigations"),
-      section(labels[parts[2]] ?? "Settings"),
+      section(labels[parts[2] ?? ""] ?? "Settings"),
     ];
   }
   if (category === "notifications") return [root, section("Notifications")];
