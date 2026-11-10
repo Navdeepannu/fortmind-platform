@@ -131,6 +131,39 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   );
 });
 
+test("workspace, filter controls, and floating content consume the layered palette", async () => {
+  const files = [
+    "components/fortmind/workspace-shell.tsx",
+    "components/fortmind/case-table.tsx",
+    "components/ui/button.tsx",
+    "components/ui/input.tsx",
+    "components/ui/textarea.tsx",
+    "components/ui/native-select.tsx",
+    "components/ui/select.tsx",
+    "components/ui/dropdown-menu.tsx",
+    "components/ui/popover.tsx",
+    "components/ui/tooltip.tsx",
+    "components/ui/hover-card.tsx",
+  ];
+  const sources = Object.fromEntries(await Promise.all(files.map(async (path) => [
+    path,
+    await readFile(new URL(`../${path}`, import.meta.url), "utf8"),
+  ])));
+  assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="utility-bar"\s+className="[^"]*bg-shell/);
+  assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="inset"\s+className="[^"]*bg-background/);
+  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*bg-muted/);
+  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="table-shell"\s+className="[^"]*bg-surface/);
+  for (const path of ["button", "input", "textarea", "native-select", "select"]) {
+    assert.match(sources[`components/ui/${path}.tsx`], /bg-control/, `${path} uses the shared control fill`);
+  }
+  for (const path of ["dropdown-menu", "popover", "tooltip", "hover-card", "select"]) {
+    assert.match(sources[`components/ui/${path}.tsx`], /bg-surface-floating/, `${path} uses the shared floating surface`);
+  }
+  for (const path of ["dropdown-menu", "select"]) {
+    assert.match(sources[`components/ui/${path}.tsx`], /focus:bg-floating-hover/, `${path} uses an elevated hover state`);
+  }
+});
+
 test("aliases resolve as colors and cyclic or non-color variables do not", () => {
   const vars = {
     "--color": "oklch(.5 .1 30)",
