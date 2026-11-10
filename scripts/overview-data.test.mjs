@@ -38,3 +38,28 @@ test('review queue orders urgent cases first and oldest first within priority',(
 test('priority breakdown matches the open snapshot',()=>{
  assert.equal(overview.openPriorities.reduce((s,x)=>s+x.value,0),overview.operations.needsYou+overview.operations.running);
 });
+
+test('impact trend preserves grouped closure totals and cumulative time',()=>{
+ const report=overview.impactReports['7d'];
+ const buckets=overview.impactTrend(report,20);
+ assert.equal(buckets.length,7);
+ assert.deepEqual(buckets[0],{
+   label:'Oct 28', axisLabel:'Oct 28', oscar:2, analyst:4,
+   failed:0, closed:6, hoursAdded:0.67, cumulativeHours:0.67,
+ });
+ assert.equal(buckets.at(-1).cumulativeHours,6);
+ assert.equal(buckets.reduce((sum,row)=>sum+row.oscar,0),report.oscar);
+ assert.equal(buckets.reduce((sum,row)=>sum+row.analyst,0),report.analyst);
+ assert.equal(overview.impactTrend(report,30).at(-1).cumulativeHours,9);
+});
+test('30 and 90 day trends group data without inventing additional closures',()=>{
+ for (const name of ['30d','90d']) {
+  const report=overview.impactReports[name];
+  const rows=overview.impactTrend(report,20);
+  assert.equal(rows.length,Math.ceil(report.daily.length/7));
+  assert.equal(rows.reduce((sum,row)=>sum+row.oscar,0),report.oscar);
+  assert.equal(rows.reduce((sum,row)=>sum+row.analyst,0),report.analyst);
+  assert.equal(rows.reduce((sum,row)=>sum+row.failed,0),report.failed);
+  assert.equal(rows.at(-1).cumulativeHours,overview.impactSummary(report).estimatedHoursSaved);
+ }
+});

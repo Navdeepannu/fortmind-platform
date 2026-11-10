@@ -90,7 +90,7 @@ async function caseViews(route, state) {
       const dimensions = await measure(`${route} ${group.label}/${section.label} ${state}`);
       const alignment = await page.evaluate(view => {
         const visible = selector => [...document.querySelectorAll(selector)].filter(node => node.getClientRects().length);
-        const nodes = [document.querySelector('[data-ui="header"]'), document.querySelector('[data-ui="breadcrumb-row"]'), document.querySelector('[data-ui="page-nav"]'), ...visible('[data-ui="secondary-nav"]'), document.querySelector(`[data-case-view="${view}"]`), document.querySelector('[data-ui="preview-footnote"]')];
+        const nodes = [document.querySelector('[data-ui="header"]'), document.querySelector('[data-ui="header-meta"]'), document.querySelector('[data-ui="page-nav"]'), ...visible('[data-ui="secondary-nav"]'), document.querySelector(`[data-case-view="${view}"]`), document.querySelector('[data-ui="preview-footnote"]')];
         return nodes.map(node => { const rect = node.getBoundingClientRect(), css = getComputedStyle(node); return { name: node.dataset.ui ?? node.dataset.caseView, x: rect.x, width: rect.width, paddingLeft: parseFloat(css.paddingLeft), paddingRight: parseFloat(css.paddingRight) }; });
       }, section.id);
       for (const item of alignment) {

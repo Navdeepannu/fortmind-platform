@@ -6,7 +6,6 @@ import Link from "next/link";
 import { integrationHref } from "@/lib/platform-routes";
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   BookOpen,
@@ -260,8 +259,7 @@ export function IntegrationDetail({ integration }: { integration: PreviewIntegra
   }
   return (
       <main data-ui="main integration-detail" id="preview-main" className="min-w-0 py-5 md:py-8">
-        <Link data-ui="back" href="/platform/integrations" className="inline-flex items-center gap-1.75 text-muted-foreground text-caption [&:focus-visible]:outline-2 [&:focus-visible]:outline-ring [&:focus-visible]:outline-offset-3 [&:hover]:text-foreground"><ArrowLeft aria-hidden="true" className="w-3.75 h-3.75" />All integrations</Link>
-        <div data-ui="detail-heading" className="flex items-center gap-3.75 mt-6 max-[681px]:items-start max-[681px]:flex-wrap">
+        <div data-ui="detail-heading" className="flex items-center gap-3.75 mt-1 max-[681px]:items-start max-[681px]:flex-wrap">
           <IntegrationMark integration={integration} />
           <div data-ui="detail-heading-copy" className="flex-1 min-w-0">
             <span data-ui="eyebrow" className="mb-1.75 block text-caption font-semibold tracking-[.09em] uppercase text-muted-foreground">{integration.category}</span>

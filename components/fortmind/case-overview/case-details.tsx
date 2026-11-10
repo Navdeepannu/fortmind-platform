@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   usePreviewCases,
@@ -43,13 +43,6 @@ export function CaseDetails({ id }: { id: string }) {
       id="preview-main"
       className="min-w-0 py-5 md:py-8"
     >
-      <Link
-        data-ui="back-link"
-        href="/platform/cases"
-        className="inline-flex items-center gap-1.75 text-muted-foreground text-caption [&:hover]:text-foreground"
-      >
-        <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" /> Cases
-      </Link>
       {!item ? (
         <div
           data-ui="investigation-missing"
@@ -68,7 +61,7 @@ export function CaseDetails({ id }: { id: string }) {
         <>
           <header
             data-ui="investigation-header"
-            className="mt-6 mr-0 mb-7 ml-0"
+            className="mt-0 mr-0 mb-7 ml-0"
           >
             <div
               data-ui="investigation-id"

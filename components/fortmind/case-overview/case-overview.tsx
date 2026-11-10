@@ -11,14 +11,6 @@ import {
   UserRound,
 } from "lucide-react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
   outcomeStates,
   phaseStates,
   verdictStates,
@@ -58,30 +50,12 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
       className="flex-none min-w-0 py-5 border-b border-border bg-background @max-[501px]/case:py-4"
     >
       <div
-        data-ui="breadcrumb-row"
-        className="flex items-center justify-start gap-4.5 @max-[501px]/case:gap-3"
+        data-ui="header-meta"
+        className="flex min-w-0 items-center justify-between gap-3"
       >
-        <Breadcrumb data-ui="breadcrumb" className="text-label">
-          <BreadcrumbList className="gap-2 text-label">
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                render={<Link href="/platform/cases" />}
-                className="whitespace-nowrap"
-              >
-                ← Back to Cases
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="@max-[501px]/case:hidden" />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="@max-[501px]/case:hidden">
-                Investigation
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
         <div
           data-ui="header-id"
-          className="flex items-center gap-2.25 pl-4.5 border-l border-border text-muted-foreground text-caption @max-[501px]/case:pl-3"
+          className="flex items-center gap-2 text-muted-foreground text-caption"
         >
           <span>Case ID</span>
           <CopyIdentifier
@@ -92,12 +66,12 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
         </div>
         <span
           data-ui="fixture-label"
-          className="ml-auto text-muted-foreground text-caption @max-[501px]/case:hidden"
+          className="text-muted-foreground text-caption @max-[501px]/case:hidden"
         >
           Case preview
         </span>
       </div>
-      <h1 className="mt-3 text-page-title">
+      <h1 className="mt-2 text-page-title">
         {data.title}
       </h1>
       <p

@@ -22,6 +22,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { WorkspaceThemeToggle } from "@/components/fortmind/theme-toggle";
+import { SettingsTopBarBreadcrumbs } from "@/components/fortmind/workspace-breadcrumbs";
 import { platformRoutes } from "@/lib/platform-routes";
 import { PageContainer } from "@/components/layout/page-container";
 import { cn } from "@/lib/utils";
@@ -133,17 +134,27 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
       <div data-ui="settings-workspace" className="min-w-0 min-h-svh bg-background md:ml-60">
-        <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-sidebar-border bg-shell px-5 md:justify-end md:px-8 [&>button]:size-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            aria-label="Open settings navigation"
-            onClick={() => setOpen(true)}
-          >
-            <Menu />
-          </Button>
-          <WorkspaceThemeToggle />
+        <header
+          data-ui="utility-bar"
+          className="sticky top-0 z-30 grid h-12 grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] items-center gap-2 border-b border-sidebar-border bg-shell px-3 sm:px-5 md:px-8"
+        >
+          <div className="flex min-w-0 items-center justify-start">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 md:hidden"
+              aria-label="Open settings navigation"
+              onClick={() => setOpen(true)}
+            >
+              <Menu />
+            </Button>
+          </div>
+          <div className="flex min-w-0 items-center justify-center overflow-hidden">
+            <SettingsTopBarBreadcrumbs />
+          </div>
+          <div className="flex min-w-0 items-center justify-end">
+            <WorkspaceThemeToggle />
+          </div>
         </header>
         <main id="settings-main" className="min-w-0 py-5 md:py-8">
           <PageContainer size={pathname === "/settings/trust-data" ? "standard" : "compact"}>
