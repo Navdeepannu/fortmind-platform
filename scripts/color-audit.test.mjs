@@ -80,31 +80,33 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   const brand = inventory.entries.find((e) => e.id === "global:--brand");
   assert.equal(brand.light, "oklch(0.7688460193 0.1687457279 161.948704)");
   assert.equal(brand.dark, brand.light);
-  assert.equal(inventory.entries.find(e => e.id === "global:--accent").dark, "oklch(0.340378 0.021404 251.19)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--background").dark, "oklch(0.167554 0.007085 258.37)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--card").dark, "var(--surface)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--accent").dark, "oklch(0.233609 0.008932 255.60)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--background").dark, "oklch(0.158823 0.004543 264.44)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--card").dark, "var(--background)");
   assert.equal(inventory.entries.find(e => e.id === "global:--popover").dark, "var(--surface-floating)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--surface").dark, "oklch(0.253718 0.013511 253.07)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--surface").dark, "oklch(0.185404 0.005178 248.11)");
   assert.equal(inventory.entries.find(e => e.id === "global:--surface-elevated").dark, "var(--surface-floating)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--shell").dark, "oklch(0.212479 0.010909 260.67)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--input").dark, "oklch(0.454947 0.026100 250.49)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--shell").dark, "var(--background)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--input").dark, "oklch(0.359444 0.011117 264.43)");
   assert.equal(inventory.entries.find(e => e.id === "global:--secondary").dark, "var(--control)");
   assert.equal(inventory.entries.find(e => e.id === "global:--sidebar").dark, "var(--shell)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--sidebar-border").dark, "oklch(0.345100 0.020615 254.11)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--sidebar-border").dark, "var(--border)");
   const aliases = inventoryModule.readVariableBlocks(awaitableGlobals).find(block => block.selector === "@theme inline");
   assert.equal(aliases.declarations["--color-control"], "var(--control)");
+  assert.equal(aliases.declarations["--color-table-stripe"], "var(--table-stripe)");
   assert.equal(aliases.declarations["--color-floating-hover"], "var(--floating-hover)");
   assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "var(--brand)");
   const surfaceContract = {
-    "--surface": ["oklch(1 0 0)", "oklch(0.253718 0.013511 253.07)"],
-    "--surface-hover": ["oklch(0.943285 0.010348 247.94)", "oklch(0.340787 0.019192 251.46)"],
-    "--surface-floating": ["oklch(0.990872 0.002856 264.54)", "oklch(0.364308 0.020338 254.09)"],
-    "--border": ["oklch(0.902652 0.012907 244.27)", "oklch(0.382427 0.020801 251.12)"],
-    "--control": ["oklch(0.961973 0.005878 239.82)", "oklch(0.306721 0.016703 255.65)"],
-    "--floating-hover": ["oklch(0.946301 0.010340 247.94)", "oklch(0.425820 0.023086 248.37)"],
-    "--shell": ["oklch(0.946467 0.007610 241.67)", "oklch(0.212479 0.010909 260.67)"],
-    "--border-strong": ["oklch(0.820254 0.022116 245.91)", "oklch(0.480044 0.025758 250.46)"],
-    "--input": ["oklch(0.817130 0.022137 245.91)", "oklch(0.454947 0.026100 250.49)"],
+    "--surface": ["oklch(1 0 0)", "oklch(0.185404 0.005178 248.11)"],
+    "--surface-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.233609 0.008932 255.60)"],
+    "--surface-floating": ["oklch(1 0 0)", "oklch(0.255182 0.010408 260.70)"],
+    "--border": ["oklch(0.924740 0.002906 264.54)", "oklch(0.296183 0.010017 260.71)"],
+    "--control": ["oklch(0.976419 0.001323 286.38)", "oklch(0.217386 0.008416 264.38)"],
+    "--floating-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.296183 0.010017 260.71)"],
+    "--shell": ["var(--background)", "var(--background)"],
+    "--border-strong": ["oklch(0.866175 0.004672 258.33)", "oklch(0.359444 0.011117 264.43)"],
+    "--input": ["oklch(0.866175 0.004672 258.33)", "oklch(0.359444 0.011117 264.43)"],
+    "--table-stripe": ["oklch(0.978 0.0015 255)", "oklch(0.199330 0.006777 258.37)"],
   };
   const overrides = inventoryModule.readVariableBlocks(awaitableGlobals).find(block => block.selector === '.dark[data-visual-experiment="graphite"]');
   for (const [name, [light, dark]] of Object.entries(surfaceContract)) {
@@ -113,7 +115,7 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
     assert.equal(entry.dark, dark);
     assert.equal(Object.hasOwn(overrides.declarations, name), false, `${name} stays shared by the experiment`);
   }
-  for (const name of ["--background", "--shell", "--control", "--floating-hover", "--border-strong", "--input", "--sidebar-accent", "--sidebar-selected", "--foreground", "--muted-foreground"]) {
+  for (const name of ["--background", "--shell", "--table-stripe", "--control", "--floating-hover", "--border-strong", "--input", "--sidebar-accent", "--sidebar-selected", "--foreground", "--muted-foreground"]) {
     assert.equal(Object.hasOwn(overrides.declarations, name), false, `${name} should not fork between default and graphite mode`);
   }
   const tint = inventory.entries.find((e) => e.id === "global:--danger-muted");
@@ -127,7 +129,7 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   assert.equal(escalation.dark, "oklch(0.7 0.07 305)");
   assert.equal(
     inventory.entries.find((e) => e.id === "global:--border").dark,
-    "oklch(0.382427 0.020801 251.12)",
+    "oklch(0.296183 0.010017 260.71)",
   );
 });
 
@@ -151,9 +153,10 @@ test("workspace, filter controls, and floating content consume the layered palet
   ])));
   assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="utility-bar"\s+className="[^"]*bg-shell/);
   assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="inset"\s+className="[^"]*bg-background/);
-  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*bg-muted/);
+  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*bg-surface/);
   assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="table-shell"\s+className="[^"]*bg-surface/);
-  for (const path of ["button", "input", "textarea", "native-select", "select"]) {
+  assert.match(sources["components/ui/button.tsx"], /border-border-strong bg-transparent text-foreground/);
+  for (const path of ["input", "textarea", "native-select", "select"]) {
     assert.match(sources[`components/ui/${path}.tsx`], /bg-control/, `${path} uses the shared control fill`);
   }
   for (const path of ["dropdown-menu", "popover", "tooltip", "hover-card", "select"]) {
@@ -161,6 +164,13 @@ test("workspace, filter controls, and floating content consume the layered palet
   }
   for (const path of ["dropdown-menu", "select"]) {
     assert.match(sources[`components/ui/${path}.tsx`], /focus:bg-floating-hover/, `${path} uses an elevated hover state`);
+  }
+});
+
+test("only FortCases tbody rows are striped, without hiding selected or hovered states", () => {
+  assert.match(awaitableGlobals, /\[data-ui="case-table"\] tbody tr:nth-child\(even\)/);
+  for (const guard of [":not(:hover)", ':not([data-state="selected"])', ':not([data-preview-selected="true"])']) {
+    assert.ok(awaitableGlobals.includes(guard), `stripe guards ${guard}`);
   }
 });
 
@@ -221,12 +231,12 @@ test("all semantic palette definitions are owned by globals.css", async () => {
 test("dashboard inspector reads shared neutral ink from globals.css", () => {
   const ink = inventory.entries.find(entry => entry.id === "global:--muted-foreground");
   assert.equal(ink.source, "app/globals.css");
-  assert.equal(ink.light, "oklch(0.46 0.012 265)");
-  assert.equal(ink.dark, "oklch(0.7067969696 0.0087266582 278.576729)");
+  assert.equal(ink.light, "oklch(0.512199 0.014072 259.82)");
+  assert.equal(ink.dark, "oklch(0.721033 0.007985 260.73)");
 });
 
 test("shared design colors use OKLCH literals or semantic aliases", () => {
-  assert.doesNotMatch(awaitableGlobals, /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\(/i);
+  assert.doesNotMatch(awaitableGlobals.replace(/\/\*[\s\S]*?\*\//g, ""), /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\(/i);
   for (const entry of inventory.entries.filter(entry => entry.token && entry.source === "app/globals.css")) {
     for (const mode of ["light", "dark"]) {
       assert.match(entry[mode], /^(?:oklch|var)\(/, `${entry.name} ${mode}`);

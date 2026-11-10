@@ -74,14 +74,14 @@ function OverviewContent() {
       {/* Snapshot counts retain their existing sources and queue destinations. */}
       <section
         data-ui="metrics"
-        className="grid grid-cols-2 gap-4 my-6 md:grid-cols-4 lg:gap-6"
+        className="grid grid-cols-2 gap-3 my-5 md:grid-cols-4 md:gap-4"
         aria-label="Current case status"
       >
         <h2 className="sr-only text-section-title">Current operations</h2>
         {metrics.map((metric) => (
           <Link
             data-ui="metric"
-            className="group/metric bg-card border border-border p-5 md:p-6 rounded-lg hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-safe:transition-colors motion-safe:duration-150"
+            className="group/metric bg-card border border-border p-4 md:p-5 rounded-lg hover:border-border-strong hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-safe:transition-colors motion-safe:duration-150"
             key={metric.label}
             href={`/platform/cases?queue=${encodeURIComponent(metric.queue)}`}
           >
@@ -96,7 +96,7 @@ function OverviewContent() {
                 aria-hidden="true"
               />
             </div>
-            <div data-ui="metric-body" className="flex flex-col mt-4 gap-3">
+            <div data-ui="metric-body" className="flex flex-col mt-3 gap-2">
               <strong className="text-metric tabular-nums">
                 {metric.value}
               </strong>
