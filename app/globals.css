@@ -11,6 +11,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
+  --color-control: var(--control);
+  --color-floating-hover: var(--floating-hover);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -190,15 +192,17 @@
   --layout-gutter-desktop: 2rem;
   --layout-gutter: var(--layout-gutter-mobile);
 
-  /* Light foundation. Dark mode below overrides only the roles that differ. */
+  /* Light neutral ladder: workspace chrome / canvas / cards / controls / floating UI. */
   color-scheme: light;
-  --shell: oklch(0.955 0.003 265);
-  --background: oklch(0.985 0.001 265);
+  --shell: oklch(0.946467 0.007610 241.67); /* #E9EEF2 */
+  --background: oklch(0.972191 0.003423 247.86); /* #F4F6F8 */
   --foreground: oklch(0.2 0.006 265);
-  --surface: oklch(1 0 0);
+  --surface: oklch(1 0 0); /* #FFFFFF: card and table */
+  --control: oklch(0.961973 0.005878 239.82); /* #EFF3F6: inputs, filters, outline buttons */
   --card: var(--surface);
   --card-foreground: var(--foreground);
-  --surface-floating: oklch(0.9851036453 0 0);
+  --surface-floating: oklch(0.990872 0.002856 264.54); /* #FBFCFE: menus and previews */
+  --floating-hover: oklch(0.946301 0.010340 247.94); /* #E8EEF4 */
   --surface-elevated: var(--surface-floating);
   --popover: var(--surface-floating);
   --popover-foreground: var(--foreground);
@@ -210,17 +214,17 @@
   --brand-hover: oklch(0.7808460193 0.1687457279 161.948704);
   --brand-active: oklch(0.7488460193 0.1687457279 161.948704);
   --brand-ink: oklch(0.44 0.095 163);
-  --secondary: oklch(0.965 0.002 265);
+  --secondary: var(--control);
   --secondary-foreground: oklch(0.27 0.008 265);
-  --muted: oklch(0.965 0.002 265);
+  --muted: oklch(0.964975 0.005874 239.82);
   --muted-foreground: oklch(0.46 0.012 265);
-  --accent: oklch(0.955 0.003 265);
+  --accent: oklch(0.943285 0.010348 247.94);
   --accent-foreground: var(--foreground);
-  --surface-hover: oklch(0.9674343314 0.0013258589 286.375246);
+  --surface-hover: oklch(0.943285 0.010348 247.94); /* #E7EDF3 */
   --destructive: var(--danger-foreground);
-  --border: oklch(0.9197285496 0.0040314801 286.320232);
-  --border-strong: var(--border);
-  --input: oklch(0.58 0.012 265);
+  --border: oklch(0.902652 0.012907 244.27); /* #D8E0E7 */
+  --border-strong: oklch(0.820254 0.022116 245.91); /* #B9C6D2 */
+  --input: oklch(0.817130 0.022137 245.91); /* #B8C5D1 */
   --ring: oklch(0.49 0.01 265);
   --overlay: oklch(0.13 0.004 265 / 0.42);
   --chart-1: var(--oscar);
@@ -233,10 +237,10 @@
   --sidebar-foreground: var(--muted-foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: oklch(0.935 0.004 265);
+  --sidebar-accent: oklch(0.917871 0.012853 244.26);
   --sidebar-accent-foreground: var(--foreground);
-  --sidebar-selected: var(--sidebar-accent);
-  --sidebar-border: var(--border);
+  --sidebar-selected: oklch(0.892909 0.017483 248.02);
+  --sidebar-border: oklch(0.868800 0.015843 248.01);
   --sidebar-ring: var(--ring);
   --workflow-attention: var(--warning-foreground);
   --workflow-neutral: var(--muted-foreground);
@@ -356,31 +360,35 @@
 }
 
 .dark {
-  /* Phase 1: exact neutral sRGB palette expressed in OKLCH. Semantic states stay unchanged. */
+  /* Restrained cool-graphite ladder. No hue is applied to the semantic state palette. */
   color-scheme: dark;
-  --background: oklch(0.1500354375 0.0021195596 286.141497);
-  --shell: oklch(0.1780747251 0.0020293983 286.191836);
-  --surface: oklch(0.1970565932 0.0059592644 285.840218);
-  --surface-floating: oklch(0.2665377591 0.0092167229 285.757855);
-  --foreground: oklch(0.9701507662 0 0);
+  --background: oklch(0.167554 0.007085 258.37); /* #0D0F12: darkest canvas */
+  --shell: oklch(0.212479 0.010909 260.67); /* #16191E: sidebar + topbar */
+  --surface: oklch(0.253718 0.013511 253.07); /* #1E2329: cards and tables */
+  --control: oklch(0.306721 0.016703 255.65); /* #2A3038: filters and inputs */
+  --surface-floating: oklch(0.364308 0.020338 254.09); /* #373F49: menus, tooltip and previews */
+  --floating-hover: oklch(0.425820 0.023086 248.37); /* #45505B */
+  --foreground: oklch(0.969196 0.003426 247.86);
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
   --primary-hover: var(--brand-hover);
   --brand-ink: var(--brand);
-  --secondary: var(--surface-elevated);
-  --secondary-foreground: oklch(0.8172851113 0.0043162020 271.359945);
-  --muted: var(--surface-elevated);
-  --muted-foreground: oklch(0.7067969696 0.0087266582 278.576729);
-  --accent: oklch(0.2694093689 0.0036615716 286.151393);
-  --surface-hover: oklch(0.2452044934 0.0075236989 285.831851);
-  --border: oklch(0.3115590014 0.0106360449 285.766258);
-  --input: var(--border);
+  --secondary: var(--control);
+  --secondary-foreground: oklch(0.891483 0.013344 251.57);
+  --muted: oklch(0.286174 0.015423 252.36);
+  --muted-foreground: oklch(0.775015 0.019252 250.64);
+  --accent: oklch(0.340378 0.021404 251.19);
+  --surface-hover: oklch(0.340787 0.019192 251.46); /* #313942: row and control hover */
+  --border: oklch(0.382427 0.020801 251.12); /* #3B444E */
+  --border-strong: oklch(0.480044 0.025758 250.46); /* #535F6C */
+  --input: oklch(0.454947 0.026100 250.49); /* #4C5865: control outlines */
   --ring: var(--brand);
   --overlay: oklch(0 0 0 / 0.68);
   /* Navigation-only hover and selection; keep the shared surface palette intact. */
   --sidebar-foreground: var(--muted-foreground);
-  --sidebar-accent: oklch(0.2277133487 0.0057422919 285.934937);
-  --sidebar-selected: oklch(0.2611228862 0.0036907408 286.141366);
+  --sidebar-border: oklch(0.345100 0.020615 254.11);
+  --sidebar-accent: oklch(0.285737 0.017736 251.89);
+  --sidebar-selected: oklch(0.324405 0.023882 251.01);
   --verdict-malicious: oklch(0.7279374952 0.1684458742 19.573172);
   --verdict-suspicious: oklch(0.8532283221 0.1199615176 72.517867);
   --verdict-benign: oklch(0.7927928378 0.1300808921 168.378874);
@@ -442,23 +450,12 @@
   --escalation-solid-foreground: oklch(0.2093 0.0493 300.68);
 }
 
-/* BEGIN GRAPHITE EXPERIMENT — opt in with FORTMIND_VISUAL_EXPERIMENT=graphite.
-   Shared surface roles above apply in both themes, including this experiment.
-   This flag retains the earlier geometry/navigation experiment without defining
-   another table palette. See docs/table-surfaces.md for the current contract. */
+/* BEGIN GRAPHITE GEOMETRY EXPERIMENT — opt in with FORTMIND_VISUAL_EXPERIMENT=graphite.
+   Visual radius/density changes are optional; the palette is always shared.
+   Avoid per-experiment overrides of any canonical background, control, surface,
+   border, sidebar, or text colors. See docs/table-surfaces.md. */
 .dark[data-visual-experiment="graphite"] {
-  --background: oklch(0.1349309438 0.0023989446 286.073855);
-  --shell: oklch(0.1552700913 0.0042143369 285.898735);
-  --accent: oklch(0.2706661037 0.0091803520 285.770455);
-  --border-strong: oklch(0.3930136706 0.0116997960 285.849146);
-  --foreground: oklch(0.9701507662 0 0);
-  --secondary-foreground: oklch(0.8172851113 0.0043162020 271.359945);
-  --muted-foreground: oklch(0.7265067320 0.0175976844 274.726511);
-  --sidebar-accent: var(--surface-hover);
-  --sidebar-selected: var(--accent);
-  /* The strong decorative border alone is below 3:1. Controls use brighter
-     neutral ink, while focus uses the existing full-strength brand ring. */
-  --input: oklch(0.5764333544 0 0);
+  /* Shared palette applies to both default and graphite geometry modes. */
 
   & :where([data-slot="card"], [data-slot="alert"], [data-ui="table-shell"]) {
     border-radius: var(--radius-sm);
