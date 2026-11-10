@@ -74,6 +74,7 @@ import { attentionIntegrations } from "@/lib/preview-integrations";
 import { CaseQuickPreview } from "./case-table";
 import { WorkspaceThemeToggle } from "./theme-toggle";
 import { FortMindLogo, FortMindMark } from "./brand-logo";
+import { PlatformTopBarBreadcrumbs } from "./workspace-breadcrumbs";
 
 export { FortMindMark } from "./brand-logo";
 
@@ -600,17 +601,19 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             {/* Workspace tools stay available while content scrolls. */}
             <header
               data-ui="utility-bar"
-              className="sticky top-0 z-30 flex h-(--workspace-header-height) shrink-0 items-center justify-between gap-3 border-b border-sidebar-border bg-shell px-5 md:px-8"
+              className="sticky top-0 z-30 grid h-(--workspace-header-height) shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] items-center gap-2 border-b border-sidebar-border bg-shell px-3 sm:px-5 md:px-8"
             >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-2">
                 <SidebarTrigger
                   aria-label="Open sidebar"
                   className="size-8 shrink-0 md:hidden"
                 />
                 <CollapsedSidebarTrigger />
-                <span className="truncate text-label font-medium text-foreground">{section}</span>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex min-w-0 items-center justify-center overflow-hidden">
+                <PlatformTopBarBreadcrumbs />
+              </div>
+              <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2">
                 <Button
                   data-ui="global-search"
                   variant="ghost"
