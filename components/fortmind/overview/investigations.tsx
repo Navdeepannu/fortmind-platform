@@ -39,23 +39,18 @@ function PhaseRail({ item }: { item: SecurityCase }) {
  * Selecting a run reveals only supplied activity and phase evidence.
  */
 export function ActiveInvestigations() {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(
+    monitoredInvestigations.find(({ elapsed }) => Boolean(elapsed))?.item.id ?? monitoredInvestigations[0]?.item.id ?? null,
+  );
   return (
     <Card
+      id="running"
       data-ui="card running"
       role="region"
       aria-labelledby="running-heading"
       className="@container h-full min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
     >
-      <div className="relative overflow-hidden bg-[#101916] px-5 py-6 text-white sm:px-6">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-20 -top-32 size-80 rounded-full border border-white/10"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-10 -top-24 size-60 rounded-full border border-white/10"
-        />
+      <div className="relative overflow-hidden bg-[#101417] px-5 py-5 text-white sm:px-6">
         <div className="relative flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-2 text-caption font-medium tracking-[0.07em] text-white/75 uppercase">
             <span className="flex size-7 items-center justify-center rounded-md border border-white/15 bg-white/10 text-[#8DDFC1]">
@@ -85,16 +80,15 @@ export function ActiveInvestigations() {
             <span className="pb-1 text-caption text-white/70">running</span>
           </div>
         </div>
-        <div className="relative mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-white/15 pt-3 text-caption text-white/65">
+        <div className="relative mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-white/15 pt-3 text-caption text-white/65">
           <span className="inline-flex items-center gap-2">
             <ScanLine aria-hidden="true" className="size-3.5" />
             {monitoredInvestigations.length} sample investigations
           </span>
-          <span>Intake → Plan → Collect → Analyze → Report</span>
         </div>
       </div>
 
-      <div className="grid min-w-0 flex-1 grid-cols-1 @min-[740px]:grid-cols-[minmax(0,1fr)_minmax(0,0.93fr)]">
+      <div className="grid min-w-0 flex-1 grid-cols-1 @min-[560px]:grid-cols-[minmax(0,1fr)_minmax(0,0.93fr)]">
         <div className="min-w-0">
           <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 sm:px-6">
             <h3 className="text-label font-semibold">Investigation runs</h3>
@@ -117,7 +111,7 @@ export function ActiveInvestigations() {
                     aria-expanded={expanded}
                     aria-controls={panelId}
                     aria-label={`Activity for ${item.id}: ${item.title}`}
-                    onClick={() => setExpandedId(expanded ? null : item.id)}
+                    onClick={() => setExpandedId(item.id)}
                     className={cn(
                       "group flex w-full cursor-pointer flex-col gap-2 px-5 py-4 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring sm:px-6",
                       expanded ? "bg-surface-hover" : "hover:bg-surface-hover",
@@ -164,7 +158,7 @@ export function ActiveInvestigations() {
 
         <div
           data-ui="run-inspector"
-          className="min-w-0 border-t border-border bg-muted/40 @min-[740px]:border-t-0 @min-[740px]:border-l"
+          className="min-w-0 border-t border-border bg-muted/40 @min-[560px]:border-t-0 @min-[560px]:border-l"
         >
           {expandedId === null && (
             <div className="flex h-full min-h-64 flex-col items-start justify-center gap-3 p-6">
