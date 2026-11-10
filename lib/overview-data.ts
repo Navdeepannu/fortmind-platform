@@ -182,3 +182,34 @@ export function impactSummary(
     estimatedHoursSaved: Math.round((report.oscar * minutesPerClosure / 60) * 10) / 10,
   };
 }
+
+
+// Group existing daily outcomes into display buckets; cumulative effort is an
+// estimate derived from OSCAR closures, NOT recorded analyst time.
+export function impactTrend(
+  report: ImpactReport,
+  minutesPerClosure = assumedMinutesPerAutonomousClosure,
+) {
+  const size = report.daily.length <= 7 ? 1 : 7;
+  let cumulativeMinutes = 0;
+  return Array.from({ length: Math.ceil(report.daily.length / size) }, (_, index) => {
+    const days = report.daily.slice(index * size, (index + 1) * size);
+    const oscar = days.reduce((sum, day) => sum + day.oscar, 0);
+    const analyst = days.reduce((sum, day) => sum + day.analyst, 0);
+    const failed = days.reduce((sum, day) => sum + day.failed, 0);
+    const minutesAdded = oscar * minutesPerClosure;
+    cumulativeMinutes += minutesAdded;
+    return {
+      label: days.length === 1
+        ? days[0].day
+        : `${days[0].day} – ${days[days.length - 1].day}`,
+      axisLabel: days[0].day,
+      oscar,
+      analyst,
+      failed,
+      closed: oscar + analyst,
+      hoursAdded: Math.round(minutesAdded / 60 * 100) / 100,
+      cumulativeHours: Math.round(cumulativeMinutes / 60 * 100) / 100,
+    };
+  });
+}
