@@ -104,11 +104,14 @@ try {
   await page.waitForURL(origin + "/platform/overview");
   report.checks.push("Expanded/collapsed navigation retains state; Knowledge and Reports are pages, Settings has its own shell");
 
-  await page.getByRole("button", { name: "Search workspace", exact: true }).click();
+  await page.locator('[data-ui="global-search"]').click();
   await page.getByRole("textbox", { name: "Search workspace cases" }).fill(caseOverview.id);
   await page.getByRole("dialog").getByRole("link", { name: new RegExp(caseOverview.title) }).click();
   await page.waitForURL(origin + `/platform/cases/${caseOverview.id}`);
-  await page.getByRole("link", { name: "← Back to Cases" }).click();
+  const caseCrumbs = page.locator('[data-ui="topbar-breadcrumbs"]');
+  assert.equal(await caseCrumbs.getByRole("link", { name: "Cases", exact: true }).count(), 1);
+  assert.equal(await page.locator('[data-ui="breadcrumb"]').count(), 0, "no duplicate in-page breadcrumb");
+  await caseCrumbs.getByRole("link", { name: "Cases", exact: true }).click();
   await page.waitForURL(origin + "/platform/cases");
   await page.locator('[data-ui~=case-title][href="/platform/cases/FM-1048"]').click();
   await page.getByRole("heading", { name: "LSASS process accessed by mimikatz.exe", exact: true }).waitFor();
