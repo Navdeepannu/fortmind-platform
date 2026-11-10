@@ -40,11 +40,11 @@ try {
       assert.equal(await page.getByRole("button", { name: /New case|Create new case/i }).count(), 0);
       assert.equal(await running().locator('[data-ui="active-investigation"]').count(), monitoredInvestigations.length);
       assert.deepEqual(
-        await attention().locator("tbody tr").evaluateAll(rows => rows.map(row => row.dataset.caseId)),
+        await attention().locator('[data-ui="attention-item"]').evaluateAll(rows => rows.map(row => row.dataset.caseId)),
         ["FM-1047", "FM-1048", "FM-1039"],
       );
-      assert.equal(await attention().getByRole("link", { name: "Review investigation", exact: true }).count(), 3);
-      assert.equal(await attention().getByRole("columnheader", { name: "Waiting", exact: true }).count(), 0);
+      assert.equal(await attention().getByRole("link", { name: /^Review investigation FM-/ }).count(), 3);
+      assert.equal(await attention().getByRole("table").count(), 0, "Action queue is not a mini-table");
 
       // No empty placeholder: the latest supplied elapsed run is selected.
       const selected = running().getByRole("button", { name: /^Activity for FM-1051:/ });
@@ -52,19 +52,19 @@ try {
       assert.equal(await running().getByText("Inspect a run", { exact: true }).count(), 0);
       await running().getByText("What OSCAR has reported", { exact: true }).waitFor();
       assert.equal(await impact().locator('[data-ui="impact-metrics"]').count(), 1);
-      assert.equal(await page.getByRole("heading", { name: "Closed autonomously over time" }).count(), 1);
-      assert.equal(await page.getByRole("heading", { name: "Estimated analyst time returned" }).count(), 1);
-      assert.equal(await page.getByRole("heading", { name: "Priority distribution" }).count(), 1);
-      assert.equal(await page.getByRole("heading", { name: "Verdict distribution" }).count(), 1);
+      assert.equal(await page.getByRole("heading", { name: "Investigation throughput" }).count(), 1);
+      assert.equal(await page.getByRole("heading", { name: "Priority mix" }).count(), 1);
+      assert.equal(await page.getByRole("heading", { name: "Verdict mix" }).count(), 1);
+      assert.equal(await impact().getByRole("tablist", { name: "Impact visualization" }).count(), 1);
 
       await page.screenshot({ path: resolve(output, `${theme}-${width}.png`), fullPage: true });
 
       if (width === 1440) {
         await impact().locator(".recharts-bar-rectangle path").first().hover();
         const tooltip = await impact().locator(".recharts-tooltip-wrapper").first().innerText();
-        assert.match(tooltip, /OSCAR closed\s+2/);
-        assert.match(tooltip, /Analysts closed\s+4/);
-        assert.match(tooltip, /Total resolved\s+6/);
+        assert.match(tooltip, /Closed by OSCAR\s+2/);
+        assert.match(tooltip, /Closed by analysts\s+4/);
+        assert.match(tooltip, /Total closed\s+6/);
       }
 
       const first = running().getByRole("button", { name: /^Activity for FM-1042:/ });
@@ -90,21 +90,26 @@ try {
       assert.equal(await second.getAttribute("aria-expanded"), "true", "Selection remains visible, no empty state");
 
       await attention().getByRole("button", { name: "Escalations & recovery", exact: true }).click();
-      assert.match(await page.locator("#overview-handoffs").innerText(), /connector timed out/);
+      assert.match(await page.locator("#overview-handoffs").innerText(), /Escalated|Failed/);
       await attention().getByRole("button", { name: /^Preview FM-1041:/ }).click();
       const preview = page.locator('[data-ui="case-preview"]');
       await preview.waitFor();
       await page.keyboard.press("Escape");
       await preview.waitFor({ state: "hidden" });
 
-      // One period controls BOTH charts and summary instead of two independent selectors.
+      // One chart at a time: throughput or estimated capacity.
+      await impact().getByRole("tab", { name: "Time saved" }).click();
+      await impact().getByRole("heading", { name: "Capacity returned" }).waitFor();
+      assert.ok(await impact().locator(".recharts-area").count() > 0);
       await periodTab("30 days").click();
-      assert.match(await impact().innerText(), /Generated demonstration series/);
-      assert.match(await impact().innerText(), new RegExp(`${impactReports["30d"].oscar}\\s*OSCAR`));
+      assert.match(await impact().innerText(), /generated demonstration data/);
+      assert.match(await impact().locator('[data-ui="impact-metrics"]').innerText(), new RegExp(String(impactReports["30d"].oscar)));
       await periodTab("90 days").click();
-      assert.match(await impact().innerText(), new RegExp(`${impactReports["90d"].analyst} analyst closures`));
+      assert.match(await impact().locator('[data-ui="impact-metrics"]').innerText(), new RegExp(String(impactReports["90d"].oscar)));
       await periodTab("7 days").click();
       assert.match(await impact().locator('[data-ui="impact-metrics"]').innerText(), /6h/);
+      await impact().getByRole("tab", { name: "Closures" }).click();
+      await impact().getByRole("heading", { name: "Investigation throughput" }).waitFor();
       await noOverflow();
       report.views.push({ theme, width });
     }
