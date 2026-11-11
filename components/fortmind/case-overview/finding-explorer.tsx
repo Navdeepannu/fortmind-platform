@@ -139,6 +139,9 @@ export function FindingExplorer({ findings }: { findings: OverviewFinding[] }) {
 
   function focusFinding(event: FocusEvent<HTMLDivElement>) {
     const row = (event.target as HTMLElement).closest<HTMLElement>("[data-finding-id]");
+    // Only anchor navigation focuses the row itself. Ordinary button focus
+    // must not reset a deliberate evidence filter.
+    if (event.target !== row) return;
     const id = row?.dataset.findingId;
     if (id && findings.some((item) => item.id === id)) {
       setFilter("all");
