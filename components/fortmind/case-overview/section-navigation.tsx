@@ -205,9 +205,14 @@ export function CaseCategoryTabs({
                   aria-label={`${group.label} sections`}
                   className="hidden min-w-0 @min-[760px]/case:sticky @min-[760px]/case:top-[calc(var(--workspace-header-height)+var(--case-primary-nav-height)+1rem)] @min-[760px]/case:block @min-[760px]/case:w-44 @min-[760px]/case:flex-none @min-[760px]/case:border-r @min-[760px]/case:border-border @min-[760px]/case:py-5 @min-[760px]/case:pr-4"
                 >
-                  <p className="mb-3 px-3 text-caption font-medium text-muted-foreground">
-                    Sections
-                  </p>
+                  <div className="mb-3 flex items-center justify-between gap-2 px-3">
+                    <p className="text-caption font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      {group.label}
+                    </p>
+                    <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                      {group.sections.length} views
+                    </span>
+                  </div>
                   <TabsList
                     variant="line"
                     activateOnFocus
@@ -220,7 +225,7 @@ export function CaseCategoryTabs({
                         value={section.id}
                         data-ui="case-section-link"
                         data-section-id={section.id}
-                        className="group/subview relative h-9 w-full flex-none justify-between rounded-md border-0 px-3 text-left text-label font-normal after:hidden hover:bg-muted/50 data-active:bg-muted data-active:font-medium data-active:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                        className="group/subview relative h-9 w-full flex-none justify-between rounded-md border-0 px-3 text-left text-label font-normal after:hidden before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-transparent hover:bg-muted/50 data-active:bg-muted/70 data-active:font-medium data-active:text-foreground data-active:before:bg-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <span className="min-w-0 truncate">{section.label}</span>
                         {counts[section.id] !== undefined && (
