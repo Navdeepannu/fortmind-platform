@@ -78,53 +78,42 @@ async function sidebar(state) {
 
 async function caseViews(route, state) {
   for (const group of caseSectionGroups) {
-    const primary = page.getByRole("tablist", { name: "Case categories", exact: true }).getByRole("tab", { name: group.label, exact: true });
-    await primary.click();
-    await page.waitForFunction(tab => document.querySelector(`[data-case-category="${tab}"]`)?.getClientRects().length > 0, group.id);
-    for (const section of group.sections) {
-      if (group.sections.length > 1) {
-        const rail = page.locator(`[data-case-category="${group.id}"] [data-ui="secondary-nav"]`);
-        if (await rail.isVisible()) {
-          await rail.locator(`[data-section-id="${section.id}"]`).click();
-        } else {
-          const picker = page.locator(`[data-case-category="${group.id}"] [data-ui="mobile-section-nav"]`);
-          await picker.getByRole("combobox").click();
-          await page.getByRole("option", { name: new RegExp("^" + section.label) }).click();
-        }
-      }
-      await page.waitForFunction(view => document.querySelector(`[data-case-view="${view}"]`)?.getClientRects().length > 0, section.id);
-      const dimensions = await measure(`${route} ${group.label}/${section.label} ${state}`);
-      const alignment = await page.evaluate(view => {
-        const fullWidthNodes = [
-          document.querySelector('[data-ui="header"]'),
-          document.querySelector('[data-ui="header-meta"]'),
-          document.querySelector('[data-ui="page-nav"]'),
-          document.querySelector('[data-ui="preview-footnote"]'),
-        ].filter(Boolean);
-        const fullWidth = fullWidthNodes.map(node => {
-          const rect = node.getBoundingClientRect(), css = getComputedStyle(node);
-          return { name: node.dataset.ui, x: rect.x, width: rect.width, paddingLeft: parseFloat(css.paddingLeft), paddingRight: parseFloat(css.paddingRight) };
-        });
-        const section = document.querySelector(`[data-case-view="${view}"]`);
-        const area = section?.getBoundingClientRect();
-        const rail = [...document.querySelectorAll('[data-ui="secondary-nav"]')].find(node => node.getClientRects().length);
-        const railBox = rail?.getBoundingClientRect();
-        return { fullWidth, area: { x: area.x, right: area.right, width: area.width }, rail: railBox ? { x: railBox.x, right: railBox.right } : null };
-      }, section.id);
-      for (const item of alignment.fullWidth) {
-        near(item.x, dimensions.container.x, `${item.name}: horizontal origin`);
-        near(item.width, dimensions.container.width, `${item.name}: horizontal width`);
-        near(item.paddingLeft, 0, `${item.name}: no second gutter`);
-        near(item.paddingRight, 0, `${item.name}: no second gutter`);
-      }
-      assert.ok(alignment.area.width > 0, "active case section must be visible");
-      assert.ok(alignment.area.x >= dimensions.container.x - 1, "case section inside content bounds");
-      assert.ok(alignment.area.right <= dimensions.container.x + dimensions.container.width + 1, "case section right aligned within content bounds");
-      if (alignment.rail) {
-        assert.ok(alignment.area.x >= alignment.rail.right - 1, "section content must follow side navigation");
-      }
-      report.caseViews.push({ route, state, tab: group.id, view: section.id, viewport: dimensions.viewport, theme: dimensions.theme, width: dimensions.container.width, x: dimensions.container.x });
+    await page.getByRole("tablist", { name: "Case categories", exact: true })
+      .getByRole("tab", { name: group.label, exact: true }).click();
+    await page.waitForFunction(tab =>
+      document.querySelector(`[data-case-category="${tab}"]`)?.getClientRects().length > 0, group.id);
+    assert.equal(await page.locator('[data-ui="secondary-nav"]:visible').count(), 0);
+    assert.equal(await page.locator('[data-ui="mobile-section-nav"]:visible').count(), 0);
+    const sections = page.locator(`[data-case-category="${group.id}"] section[data-ui="section"]:visible`);
+    assert.equal(await sections.count(), group.sections.length);
+    const dimensions = await measure(`${route} ${group.label} ${state}`);
+    const alignment = await page.evaluate(() => {
+      const names = ["header", "header-meta", "page-nav", "preview-footnote"];
+      const full = names.map(name => document.querySelector(`[data-ui="${name}"]`)).filter(Boolean);
+      const container = document.querySelector('[data-ui="page-container"]').getBoundingClientRect();
+      const stack = [...document.querySelectorAll('[data-ui="case-section-stack"]')]
+        .find(node => node.getClientRects().length)?.getBoundingClientRect();
+      return {
+        full: full.map(node => ({ name: node.dataset.ui, x: node.getBoundingClientRect().x, width: node.getBoundingClientRect().width })),
+        stack: stack && { x: stack.x, right: stack.right, width: stack.width },
+        container: { x: container.x, right: container.right },
+        sectionBoxes: [...document.querySelectorAll('[data-case-category] section[data-ui="section"]')]
+          .filter(node => node.getClientRects().length)
+          .map(node => ({ id: node.id, x: node.getBoundingClientRect().x, right: node.getBoundingClientRect().right })),
+      };
+    });
+    for (const item of alignment.full) {
+      near(item.x, dimensions.container.x, `${item.name}: aligned origin`);
+      near(item.width, dimensions.container.width, `${item.name}: full-width header`);
     }
+    assert.ok(alignment.stack.width > 0 && alignment.stack.width <= 1121);
+    assert.ok(alignment.stack.x >= alignment.container.x - 1);
+    assert.ok(alignment.stack.right <= alignment.container.right + 1);
+    for (const section of alignment.sectionBoxes) {
+      assert.ok(section.x >= alignment.stack.x - 1, `${section.id} inside stack left`);
+      assert.ok(section.right <= alignment.stack.right + 1, `${section.id} inside stack right`);
+    }
+    report.caseViews.push({ route, state, tab: group.id, sectionCount: group.sections.length, viewport: dimensions.viewport, theme: dimensions.theme });
   }
 }
 
