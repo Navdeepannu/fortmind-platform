@@ -41,7 +41,7 @@ import type {
 import { CopyIdentifier } from "./copy-identifier";
 import { InvestigationSection } from "./investigation-section";
 import { ReviewVerdict } from "./review-verdict";
-import { CaseCategoryTabs } from "./section-navigation";
+import { CaseReferenceTabs } from "./client-reference-tabs";
 import {
   Table,
   TableBody,
@@ -55,7 +55,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
   return (
     <header
       data-ui="header"
-      className="flex-none min-w-0 py-5 border-b border-border bg-background @max-[501px]/case:py-4"
+      className="flex-none min-w-0 pb-4 pt-5 bg-background @max-[501px]/case:py-4"
     >
       <div
         data-ui="breadcrumb-row"
@@ -97,7 +97,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           Case preview
         </span>
       </div>
-      <h1 className="mt-3 text-page-title">
+      <h1 className="mt-2 text-page-title">
         {data.title}
       </h1>
       <p
@@ -130,9 +130,11 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           />
         </span>
       </div>
+      <details data-ui="case-context-disclosure" className="mt-4 rounded-lg border border-border bg-card">
+        <summary className="cursor-pointer px-4 py-2.5 text-label font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring">Case details and context</summary>
       <dl
         data-ui="header-context"
-        className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,.8fr)_minmax(0,.8fr)_minmax(0,1.1fr)] gap-y-3 gap-x-5.5 mt-3.5 pt-3.25 border-t border-border [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1.25 @max-[861px]/case:grid-cols-2 @max-[501px]/case:grid-cols-2 @max-[501px]/case:mt-3 @max-[501px]/case:pt-2.5 [&_a:hover]:underline [&_a:hover]:underline-offset-3 @max-[501px]/case:[&>_div:first-child]:col-span-full @max-[501px]/case:[&>_div:last-child]:col-span-full"
+        className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,.8fr)_minmax(0,.8fr)_minmax(0,1.1fr)] gap-y-3 gap-x-5.5 border-t border-border px-4 py-4 [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1.25 @max-[861px]/case:grid-cols-2 @max-[501px]/case:grid-cols-2 @max-[501px]/case:mt-3 @max-[501px]/case:pt-2.5 [&_a:hover]:underline [&_a:hover]:underline-offset-3 @max-[501px]/case:[&>_div:first-child]:col-span-full @max-[501px]/case:[&>_div:last-child]:col-span-full"
       >
         <div>
           <dt className="mb-1 text-muted-foreground text-caption">
@@ -193,6 +195,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           </dd>
         </div>
       </dl>
+      </details>
     </header>
   );
 }
@@ -1058,7 +1061,7 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
             <Skeleton className="h-80 w-full" />
           </div>
         }>
-          <CaseCategoryTabs
+          <CaseReferenceTabs
             status={data.status}
             counts={{
               entities: data.entities.length,

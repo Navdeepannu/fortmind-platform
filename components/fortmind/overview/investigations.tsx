@@ -47,45 +47,37 @@ export function ActiveInvestigations() {
       aria-labelledby="running-heading"
       className="@container h-full min-w-0 gap-0 overflow-hidden rounded-lg border border-border bg-card py-0 shadow-none"
     >
-      <div className="relative overflow-hidden bg-[#101916] px-5 py-6 text-white sm:px-6">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-20 -top-32 size-80 rounded-full border border-white/10"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-10 -top-24 size-60 rounded-full border border-white/10"
-        />
-        <div className="relative flex flex-wrap items-center justify-between gap-3">
-          <span className="flex items-center gap-2 text-caption font-medium tracking-[0.07em] text-white/75 uppercase">
-            <span className="flex size-7 items-center justify-center rounded-md border border-white/15 bg-white/10 text-[#8DDFC1]">
+      <div className="border-b border-border bg-card px-5 py-5 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="flex items-center gap-2 text-caption font-medium text-muted-foreground">
+            <span className="flex size-7 items-center justify-center rounded-sm border border-border bg-surface text-oscar-foreground">
               <OscarMark className="size-4" />
             </span>
             OSCAR · Agent activity
           </span>
-          <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-caption text-white/75">
-            <span aria-hidden="true" className="size-1.5 rounded-full bg-[#8DDFC1]" />
+          <span className="flex items-center gap-2 rounded-sm border border-border bg-background px-2.5 py-1 text-caption text-muted-foreground">
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-oscar" />
             Snapshot, not live telemetry
           </span>
         </div>
-        <div className="relative mt-5 flex flex-wrap items-end justify-between gap-5">
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-lg">
-            <h2 id="running-heading" className="text-section-title font-medium text-white">
+            <h2 id="running-heading" className="text-section-title font-semibold text-foreground">
               OSCAR is investigating
             </h2>
-            <p className="mt-2 text-prose text-white/70">
+            <p className="mt-1.5 text-prose text-muted-foreground">
               Follow an investigation from signal to evidence. Select a run to
               inspect the recorded phase, activity and next destination.
             </p>
           </div>
           <div className="flex items-baseline gap-2">
-            <strong className="text-metric font-medium tabular-nums text-white">
+            <strong className="text-metric font-semibold tabular-nums text-foreground">
               {operations.running}
             </strong>
-            <span className="pb-1 text-caption text-white/70">running</span>
+            <span className="pb-1 text-caption text-muted-foreground">running</span>
           </div>
         </div>
-        <div className="relative mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-white/15 pt-3 text-caption text-white/65">
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-3 text-caption text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <ScanLine aria-hidden="true" className="size-3.5" />
             {monitoredInvestigations.length} sample investigations
@@ -98,7 +90,7 @@ export function ActiveInvestigations() {
         <div className="min-w-0">
           <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 sm:px-6">
             <h3 className="text-label font-semibold">Investigation runs</h3>
-            <span className="text-caption text-muted-foreground">Select for details</span>
+            <span className="text-caption text-muted-foreground">Select for details <span className="@min-[740px]:hidden">below</span></span>
           </div>
           <ul className="divide-y divide-border">
             {monitoredInvestigations.map(({ item, stage, elapsed, activity }) => {
@@ -164,7 +156,7 @@ export function ActiveInvestigations() {
 
         <div
           data-ui="run-inspector"
-          className="min-w-0 border-t border-border bg-muted/40 @min-[740px]:border-t-0 @min-[740px]:border-l"
+          className="min-w-0 border-t border-border bg-surface @min-[740px]:border-t-0 @min-[740px]:border-l"
         >
           {expandedId === null && (
             <div className="flex h-full min-h-64 flex-col items-start justify-center gap-3 p-6">

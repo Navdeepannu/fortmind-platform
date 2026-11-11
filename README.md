@@ -7,7 +7,7 @@ pnpm install
 pnpm dev
 ```
 
-Open [the platform](http://localhost:3000/platform). See [platform structure and validation](docs/platform-structure.md) for the route map, fixture boundaries and cleanup record.
+Open [the platform](http://localhost:3000/platform). See [platform structure and validation](docs/platform-structure.md) for the route map, fixture boundaries and cleanup record. The current design handoff is in [design.md](design.md) and the [client reference alignment guide](docs/client-reference-alignment.md), which maps the November 11 reference screenshots to individual pages and implementation prompts.
 
 ```bash
 pnpm typecheck
@@ -25,6 +25,9 @@ PLATFORM_ORIGIN=http://localhost:3000 node scripts/sections-browser-check.mjs
 PREVIEW_ORIGIN=http://localhost:3000 node scripts/case-queue-browser-check.mjs
 CASE_PREVIEW_URL=http://localhost:3000/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c node scripts/case-overview-browser-check.mjs
 PREVIEW_ORIGIN=http://localhost:3000 node scripts/semantic-browser-check.mjs
+PLATFORM_ORIGIN=http://localhost:3000 node scripts/client-reference-browser-check.mjs
 ```
 
 The platform uses local demonstration data. Newly created cases are stored in the current browser tab's session storage; they survive refresh but are not shared or saved to a server. Knowledge facts and the seven Settings forms persist in this browser's local storage with explicit save feedback. Reports use illustrative events attached to existing case IDs and support CSV export. Integration tests and verdict reviews remain illustrative local interactions. Notification delivery, organization policy enforcement, secret management, response execution and PDF export require backend services and are shown as unavailable.
+
+The client-reference browser check captures Home, Cases, Case Detail, Integrations, Reports and Settings at mobile/desktop widths in both themes. Its screenshots are written to `/tmp/fortmind-reference-qa/` by default. Legacy browser checks may assert the superseded navigation and must be updated before they can serve as a merge gate for the alignment branch.

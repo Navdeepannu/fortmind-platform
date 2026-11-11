@@ -107,10 +107,26 @@ test("work views include intervention and responsibility without changing lifecy
   assert.equal(example.owner, null);
   assert.equal(example.status, "Failed");
 });
-test("lifecycle entry links retain exact running, failed and closed filters", () => {
-  for (const status of ["Running", "Failed", "Closed"]) assert.deepEqual(caseListEntry(status), {view: "all", status});
-  assert.deepEqual(caseListEntry("Needs you"), {view: "attention", status: ""});
+test("lifecycle entry links select the corresponding first-class queue tabs", () => {
+  for (const [queue, view] of [
+    ["Needs you", "needs"],
+    ["Running", "running"],
+    ["Closed", "closed"],
+    ["Failed", "failed"],
+    ["All", "all"],
+  ]) assert.deepEqual(caseListEntry(queue), {view, status: ""});
   assert.equal(isCaseListView("unassigned"), true);
+  assert.equal(isCaseListView("closed"), true);
   assert.equal(isCaseListView("Closed"), false);
   assert.equal(isCaseListView(null), false);
+});
+
+test("primary lifecycle tabs remain disjoint while attention work view includes recovery", () => {
+  const samples = ["Needs you", "Escalated", "Running", "Closed", "Failed", "Queued"]
+    .map(status => ({ ...base, status }));
+  assert.deepEqual(samples.filter(item => matchesCaseListView(item, "needs", "Analyst")).map(item => item.status), ["Needs you", "Escalated"]);
+  assert.deepEqual(samples.filter(item => matchesCaseListView(item, "running", "Analyst")).map(item => item.status), ["Running"]);
+  assert.deepEqual(samples.filter(item => matchesCaseListView(item, "closed", "Analyst")).map(item => item.status), ["Closed"]);
+  assert.deepEqual(samples.filter(item => matchesCaseListView(item, "failed", "Analyst")).map(item => item.status), ["Failed"]);
+  assert.deepEqual(samples.filter(item => matchesCaseListView(item, "attention", "Analyst")).map(item => item.status), ["Needs you", "Escalated", "Failed"]);
 });

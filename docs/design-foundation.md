@@ -4,7 +4,7 @@ This exploration keeps the existing routes, data, component hierarchy and workfl
 
 ## Typography
 
-Inter is the interface font. Technical identifiers retain the existing monospace font. Sizes stay stable at laptop and mobile widths; headings and actions wrap instead of shrinking the body copy.
+Geist Sans is the interface font (November 11 visual alignment). Technical identifiers retain Geist Mono. Sizes stay stable at laptop and mobile widths; headings and actions wrap instead of shrinking the body copy.
 
 | Role | Utility | Size / line height | Weight |
 | --- | --- | --- | --- |
@@ -21,11 +21,13 @@ The UI starts at 13 px. Each hierarchy step multiplies the preceding size by 1.2
 
 12 px is the minimum rendered dashboard text, including avatar initials and chart labels. Standard shadcn/Tailwind size aliases resolve to these tokens. Inputs retain a 16 px mobile value to avoid mobile-browser zoom; desktop inputs use the body role.
 
-Inter and Geist Mono share the same size and line-height roles. Inline code inherits the surrounding text size and aligns on the baseline. Mixed metadata uses baseline-aligned flex rows; leading icons are centered independently so their SVG boxes cannot shift text. Copy controls align to their technical value, and numbered investigation items no longer rely on pixel padding offsets. Chart tooltip labels and monospace values share one baseline row. Intentional stacked field labels remain stacked.
+Geist Sans and Geist Mono share the same size and line-height roles. Inline code inherits the surrounding text size and aligns on the baseline. Mixed metadata uses baseline-aligned flex rows; leading icons are centered independently so their SVG boxes cannot shift text. Copy controls align to their technical value, and numbered investigation items no longer rely on pixel padding offsets. Chart tooltip labels and monospace values share one baseline row. Intentional stacked field labels remain stacked.
 
 `lib/utils.ts` registers these font-size utilities with the existing class merger. Components use that shared helper so a typography override cannot remove semantic text colors.
 
 ## Neutral surfaces and restrained branding
+
+The interface uses a neutral, high-contrast focus ring in dark mode (`--ring`), distinct from the OSCAR/brand accent. This improves keyboard discoverability without turning every focus treatment green.
 
 The foundation uses the requested sRGB palette, converted to OKLCH in `app/globals.css`. The workspace-inspector refinement adopts **#00D492** for brand actions, superseding the earlier #01CC88 override. Neutral surfaces and the independent semantic palette are retained.
 
@@ -39,7 +41,7 @@ The foundation uses the requested sRGB palette, converted to OKLCH in `app/globa
 | Primary text / `foreground`, `card-foreground`, `popover-foreground` | Existing dark text | #F5F5F5 |
 | Secondary text / `secondary-foreground`, `sidebar-foreground` | Existing dark/muted text | #C2C3C6 |
 | Muted text / `muted-foreground` | Existing muted text | #9FA0A6 |
-| Brand / `brand`, dark `primary`, dark `ring` | Brand buttons use #00D492 | #00D492 |
+| Brand / `brand`, dark `primary` | Brand buttons use #00D492 | #00D492 |
 | Text on brand / `brand-foreground`, dark `primary-foreground` | #09251B | #09251B |
 | Secondary / `secondary`, `muted` | Existing neutral surfaces | Elevated surface |
 | Neutral hover / `surface-hover` | Existing subtle hover | #1D1D1F |

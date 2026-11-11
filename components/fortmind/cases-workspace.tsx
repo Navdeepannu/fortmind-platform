@@ -1,6 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { operations } from "@/lib/overview-data";
+import { previewIntegrations } from "@/lib/preview-integrations";
 import { CaseTable } from "./case-table";
 import { isCaseListView, type CaseListView } from "@/lib/case-list-views";
 import type { Queue } from "@/lib/preview-data";
@@ -16,12 +21,19 @@ function CasesContent({ queue, view }: { queue: Queue; view?: CaseListView }) {
         data-ui="page-heading"
         className="flex flex-wrap justify-between max-[1101px]:items-start max-md:items-start max-md:gap-3 items-end gap-5 max-[761px]:items-start"
       >
-        <div>
-          <h1 className="text-page-title">Fortcases</h1>
-          <p className="mt-1 text-prose text-muted-foreground">
-            Review investigations and move the next decision forward.
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1.5">
+          <h1 className="text-page-title">Cases</h1>
+          <p className="text-caption text-muted-foreground">
+            {previewIntegrations.filter((item) => item.availability === "connected").length} sample tools connected
+            <span aria-hidden="true"> · </span>
+            <Link href="/platform/cases?queue=Needs%20you" className="text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground">
+              {operations.needsYou} need attention
+            </Link>
           </p>
         </div>
+        <Button variant="outline" size="sm" nativeButton={false} role="link" render={<Link href="/platform/integrations" />} className="shrink-0">
+          Connect tools <ArrowRight data-icon="inline-end" />
+        </Button>
       </div>
       <CaseTable
         key={`${queue}-${view ?? "legacy"}`}

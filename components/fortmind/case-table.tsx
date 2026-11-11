@@ -137,12 +137,12 @@ const initialFilters: CaseFilters = {
   autonomous: false,
 };
 const optionalColumns = [
-  "verdict",
   "priority",
+  "source",
+  "verdict",
   "status",
   "owner",
   "age",
-  "source",
 ] as const;
 type OptionalColumn = (typeof optionalColumns)[number];
 type SortKey = OptionalColumn | "title" | "attention";
@@ -444,15 +444,15 @@ export function CaseTable({
   const [view, setView] = useState<CaseListView>(initialView ?? entry.view);
   const [caseStatus, setCaseStatus] = useState<CaseStatus | "">(entry.status);
   const [filters, setFilters] = useState<CaseFilters>(initialFilters);
-  const [density, setDensity] = useState("comfortable");
+  const [density, setDensity] = useState("compact");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [columns, setColumns] = useState<Record<OptionalColumn, boolean>>({
     priority: true,
     verdict: true,
-    status: true,
+    status: false,
     owner: true,
     age: true,
-    source: false,
+    source: true,
   });
   const [sort, setSort] = useState<{ key: SortKey; descending: boolean }>({
     key: "attention",
@@ -587,9 +587,9 @@ export function CaseTable({
         }),
     [tableCases, filters, sort, view, caseStatus],
   );
-  const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
+  const pageCount = Math.max(1, Math.ceil(filtered.length / 20));
   const currentPage = Math.min(page, pageCount - 1);
-  const visible = filtered.slice(currentPage * 8, currentPage * 8 + 8);
+  const visible = filtered.slice(currentPage * 20, currentPage * 20 + 20);
   const previewIndex = preview
     ? filtered.findIndex((item) => item.id === preview.id)
     : -1;
@@ -757,7 +757,7 @@ export function CaseTable({
       <section
         ref={sectionRef}
         data-ui="case-section"
-        className="mt-8 scroll-mt-5"
+        className="mt-5 scroll-mt-5"
         aria-label="Case queue"
       >
         <Tabs
@@ -772,16 +772,17 @@ export function CaseTable({
         >
           <div
             data-ui="table-shell"
-            className="overflow-hidden rounded-lg bg-surface border border-border"
+            className="overflow-hidden rounded-lg border border-border bg-card"
           >
-            <div data-ui="queue-top" className="border-b bg-surface px-5 max-md:px-3">
-              <div className="max-w-full overflow-x-auto">
+            <div data-ui="queue-top" className="border-b border-border bg-card px-3 sm:px-4">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
                 <TabsList
                   variant="line"
                   aria-label="Case queue views"
                   className="gap-5 border-0 p-0 group-data-horizontal/tabs:h-14"
                 >
-                  {caseListViews.map((option) => (
+                  {caseListViews.slice(0, 5).map((option) => (
                     <TabsTrigger
                       key={option.value}
                       value={option.value}
@@ -806,15 +807,37 @@ export function CaseTable({
                     </TabsTrigger>
                   ))}
                 </TabsList>
+                </div>
+                <div className="flex shrink-0 flex-wrap items-center gap-1.5 py-1">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger render={<Button variant="ghost" size="sm" aria-label="Analyst work views" />}>
+                      Work views <ChevronDown data-icon="inline-end" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>Analyst views</DropdownMenuLabel>
+                        {caseListViews.slice(5).map((option) => (
+                          <DropdownMenuItem key={option.value} onClick={() => { setView(option.value); setPage(0); setPreview(null); }}>
+                            {option.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <div role="group" aria-label="Row density" className="inline-flex rounded-md border border-border p-0.5">
+                    <Button variant={density === "comfortable" ? "secondary" : "ghost"} size="xs" onClick={() => setDensity("comfortable")}>Comfortable</Button>
+                    <Button variant={density === "compact" ? "secondary" : "ghost"} size="xs" onClick={() => setDensity("compact")}>Compact</Button>
+                  </div>
+                </div>
               </div>
             </div>
             <div
               data-ui="filter-row"
-              className="flex flex-wrap items-center gap-3 border-b bg-surface px-5 py-3 max-md:px-3"
+              className="flex flex-col items-stretch gap-3 border-b border-border bg-surface px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:px-5"
             >
               <div
                 data-ui="search"
-                className="relative min-w-40 flex-1 sm:max-w-80 max-sm:basis-full"
+                className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-48 sm:max-w-80"
               >
                 <Search
                   aria-hidden="true"
@@ -822,7 +845,7 @@ export function CaseTable({
                 />
                 <Input
                   aria-label="Search titles, case IDs, IPs, hosts, or users"
-                  placeholder="Search cases…"
+                  placeholder="Search by title, identifier or address"
                   value={filters.search}
                   onChange={(event) =>
                     updateFilter("search", event.target.value)
@@ -830,9 +853,26 @@ export function CaseTable({
                   className="pl-9"
                 />
               </div>
+              <div data-ui="quick-filters" className="flex min-w-0 flex-wrap items-center gap-2">
+                <select aria-label="Filter by owner" value={filters.assignment} onChange={(event) => updateFilter("assignment", event.target.value)} className="h-9 min-w-28 rounded-md border border-input bg-background px-2.5 text-label text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <option value="">Owner</option>
+                  <option value={currentAnalyst}>Assigned to me</option>
+                  <option value="unassigned">Unassigned</option>
+                  {owners.filter((name) => name !== currentAnalyst).map((name) => <option key={name} value={name}>{name}</option>)}
+                </select>
+                <select aria-label="Filter by priority" value={filters.priority} onChange={(event) => updateFilter("priority", event.target.value)} className="h-9 min-w-28 rounded-md border border-input bg-background px-2.5 text-label text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <option value="">Priority</option>
+                  {priorities.map((priority) => <option key={priority} value={priority}>{priority}</option>)}
+                </select>
+                <select aria-label="Filter by source" value={filters.source} onChange={(event) => updateFilter("source", event.target.value)} className="h-9 min-w-28 rounded-md border border-input bg-background px-2.5 text-label text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <option value="">Source</option>
+                  {sources.map((source) => <option key={source} value={source}>{source}</option>)}
+                </select>
+                <Button variant={filters.autonomous ? "secondary" : "outline"} aria-pressed={filters.autonomous} size="sm" onClick={() => updateFilter("autonomous", !filters.autonomous)}>Autonomous only</Button>
+              </div>
               <div
                 data-ui="table-view-tools"
-                className="ml-auto flex flex-wrap items-center gap-2 max-sm:w-full"
+                className="flex w-full flex-wrap items-center gap-2 max-sm:justify-between max-sm:[&_button]:min-h-10 sm:ml-auto sm:w-auto"
               >
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -1155,7 +1195,10 @@ export function CaseTable({
                 >
                   <div
                     data-ui="case-table-scroll"
-                    className="min-h-0 flex-1 overflow-y-auto overscroll-contain [&>[data-slot=table-container]]:overflow-visible"
+                    role="region"
+                    aria-label="Cases table, scroll horizontally to access additional columns"
+                    tabIndex={0}
+                    className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [&>[data-slot=table-container]]:overflow-visible"
                   >
                     <Table
                       data-ui="case-table"
@@ -1192,6 +1235,16 @@ export function CaseTable({
                               }
                             />
                           </TableHead>
+                          {columns.priority && (
+                            <TableHead
+                              data-ui="col-priority"
+                              scope="col"
+                              className={cn("px-3", columnClasses.priority)}
+                              aria-sort={sort.key === "priority" ? sort.descending ? "descending" : "ascending" : "none"}
+                            >
+                              {sortHeader("priority", "Priority")}
+                            </TableHead>
+                          )}
                           <TableHead
                             data-ui="col-case"
                             className="px-3"
@@ -1207,7 +1260,7 @@ export function CaseTable({
                             {sortHeader("title", "Case")}
                           </TableHead>
                           {optionalColumns
-                            .filter((column) => columns[column])
+                            .filter((column) => columns[column] && column !== "priority")
                             .map((column) => (
                               <TableHead
                                 key={column}
@@ -1275,6 +1328,16 @@ export function CaseTable({
                                 }
                               />
                             </TableCell>
+                            {columns.priority && (
+                              <TableCell
+                                data-ui="col-priority"
+                                className={cn("px-3", columnClasses.priority)}
+                              >
+                                <CasePriorityTooltip item={item}>
+                                  <PriorityBadge value={item.priority} queue />
+                                </CasePriorityTooltip>
+                              </TableCell>
+                            )}
                             <TableCell
                               data-ui="case-cell col-case"
                               className="px-3"
@@ -1417,6 +1480,14 @@ export function CaseTable({
                                 )}
                               </div>
                             </TableCell>
+                            {columns.source && (
+                              <TableCell
+                                data-ui="col-source"
+                                className={cn("px-3", columnClasses.source)}
+                              >
+                                {item.source}
+                              </TableCell>
+                            )}
                             {columns.verdict && (
                               <TableCell
                                 data-ui="col-verdict"
@@ -1425,16 +1496,6 @@ export function CaseTable({
                                 <CaseVerdictTooltip item={item}>
                                   <QueueVerdictBadge item={item} />
                                 </CaseVerdictTooltip>
-                              </TableCell>
-                            )}
-                            {columns.priority && (
-                              <TableCell
-                                data-ui="col-priority"
-                                className={cn("px-3", columnClasses.priority)}
-                              >
-                                <CasePriorityTooltip item={item}>
-                                  <PriorityBadge value={item.priority} queue />
-                                </CasePriorityTooltip>
                               </TableCell>
                             )}
                             {columns.status && (
@@ -1463,14 +1524,6 @@ export function CaseTable({
                                 <CaseTimestampTooltip
                                   ageMinutes={item.ageMinutes}
                                 />
-                              </TableCell>
-                            )}
-                            {columns.source && (
-                              <TableCell
-                                data-ui="col-source"
-                                className={cn("px-3", columnClasses.source)}
-                              >
-                                {item.source}
                               </TableCell>
                             )}
                             <TableCell
