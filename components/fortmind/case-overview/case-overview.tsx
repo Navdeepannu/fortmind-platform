@@ -926,39 +926,72 @@ function AnalystNotes() {
   );
 }
 
+function TimelineEvent({
+  item,
+  index,
+}: {
+  item: CaseOverviewData["activity"][number];
+  index: number;
+}) {
+  return (
+    <li className="grid min-w-0 grid-cols-[14px_minmax(0,1fr)] gap-3 border-b border-border py-3 last:border-b-0 @min-[650px]/case:grid-cols-[14px_190px_minmax(0,1fr)]">
+      <span className="relative flex justify-center pt-1.5" aria-hidden="true">
+        <span className={`size-2 rounded-full ${item.actor === "OSCAR" ? "bg-oscar" : "bg-muted-foreground"}`} />
+      </span>
+      <time className="text-caption tabular-nums text-muted-foreground">
+        {item.time}
+      </time>
+      <div className="min-w-0">
+        <p className="text-label">
+          <strong className="font-semibold">{item.actor}</strong>
+          <span className="ml-2 text-muted-foreground">{item.event}</span>
+        </p>
+      </div>
+      <span className="sr-only">Event {index + 1}</span>
+    </li>
+  );
+}
+
 function Timeline({ data }: { data: CaseOverviewData }) {
+  const recent = data.activity.slice(0, 5);
+  const earlier = data.activity.slice(5);
   return (
     <InvestigationSection
       id="timeline"
-      title="Timeline"
-      description="Visible events from the captured investigation and later analyst activity"
+      title="Case activity"
+      description="Newest first · OSCAR execution and later analyst events"
     >
-      <ol
-        data-ui="timeline"
-        className="flex flex-col [&_li:first-child]:pt-0 [&_li:last-child]:pb-0 [&_li:last-child]:border-b-0"
-      >
-        {data.activity.map((item, index) => (
-          <li
-            key={`${item.event}-${index}`}
-            className="grid grid-cols-[190px_minmax(0,1fr)] gap-4 pt-2.5 pr-0 pb-2.5 pl-0 border-b border-border text-label @max-[501px]/case:grid-cols-1 @max-[501px]/case:gap-0.5"
-          >
-            <time className="text-muted-foreground tabular-nums">
-              {item.time}
-            </time>
-            <span>
-              <strong className="[font-weight:550]">{item.actor}</strong> ·{" "}
-              {item.event}
-            </span>
-          </li>
+      <div data-ui="timeline-summary" className="mb-3 flex flex-wrap items-center justify-between gap-2 text-caption text-muted-foreground">
+        <span>{data.activity.length} visible events</span>
+        <span className="inline-flex items-center gap-3">
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="size-2 rounded-full bg-oscar" /> OSCAR
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="size-2 rounded-full bg-muted-foreground" /> Analyst
+          </span>
+        </span>
+      </div>
+      <ol data-ui="timeline" className="border-t border-border">
+        {recent.map((item, index) => (
+          <TimelineEvent key={`${index}-${item.event}`} item={item} index={index} />
         ))}
       </ol>
-      <p
-        data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
-      >
-        The captured interface lists 17 events; the 12 legible events are
-        reproduced here. The later analyst confirmation is historical and is not
-        applied to this pre-confirmation preview.
+      {earlier.length > 0 && (
+        <details data-ui="timeline-history" className="group/history border-b border-border">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 py-3 text-label font-medium hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+            Show {earlier.length} earlier events
+            <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform group-open/history:rotate-180" />
+          </summary>
+          <ol start={recent.length + 1} className="border-t border-border">
+            {earlier.map((item, index) => (
+              <TimelineEvent key={`${index + recent.length}-${item.event}`} item={item} index={index + recent.length} />
+            ))}
+          </ol>
+        </details>
+      )}
+      <p data-ui="section-note" className="mt-4 text-caption text-muted-foreground">
+        The source lists 17 events; only the 12 legible events are reproduced. Historical analyst confirmation is not applied to this pre-confirmation preview.
       </p>
     </InvestigationSection>
   );
