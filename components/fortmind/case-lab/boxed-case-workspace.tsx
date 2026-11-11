@@ -4,9 +4,8 @@ import {
   useCallback, useEffect, useRef, useState,
   type MouseEvent, type ReactNode,
 } from "react";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import {
   caseSectionGroups, caseViewForTarget, resolveCaseView,
   type CaseCategoryId, type CaseSectionId,
@@ -48,7 +47,8 @@ const initialOpen = caseSectionGroups.map((group) => group.sections[0].id);
 
 function locationSelection() {
   const url = new URL(window.location.href);
-  const hash = decodeURIComponent(url.hash.slice(1));
+  let hash = "";
+  try { hash = decodeURIComponent(url.hash.slice(1)); } catch { /* Ignore malformed fragments. */ }
   return {
     group: caseViewForTarget(hash)?.tab ?? resolveCaseView(url.searchParams).tab,
     section: caseViewForTarget(hash)?.view ?? resolveCaseView(url.searchParams).view,
