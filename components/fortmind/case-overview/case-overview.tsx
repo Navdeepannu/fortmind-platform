@@ -627,123 +627,81 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
   return (
     <InvestigationSection
       id="how-oscar-decided"
-      title="How OSCAR decided"
-      description="Investigation completion, confidence by stage, and review handoff"
+      title="OSCAR investigation trace"
+      description="Execution completed; the analyst decision is still outstanding"
       metadata={
         <SemanticBadge
           definition={outcomeStates["Investigation complete"]}
           treatment="inline"
-          label="Complete"
+          label="Completed"
         />
       }
-      footer={
-        <p className="text-caption">
-          OSCAR completed its investigation. The case workflow still requires
-          analyst review.
-        </p>
-      }
+      contentClassName="px-5 py-5 @max-[501px]/case:px-4 @min-[760px]/case:px-6"
     >
-      <div
-        data-ui="investigation-summary"
-        className="grid grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] gap-8.5 @max-[861px]/case:grid-cols-1 @max-[861px]/case:gap-5.75"
-      >
-        <div data-ui="process-summary">
-          <h3 className="text-panel-title">
-            Investigation handoff
-          </h3>
-          <p className="max-w-[65ch] mt-2 text-muted-foreground text-label">
-            {data.reviewReason}
-          </p>
-          <dl
-            data-ui="investigation-times"
-            className="flex flex-col gap-2.25 mt-4.25 text-caption"
-          >
-            <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2.5">
-              <dt className="text-muted-foreground">Received</dt>
-              <dd>
-                <time dateTime={data.investigation.receivedAt}>
-                  {data.investigation.dateLabel} ·{" "}
-                  {data.investigation.receivedLabel}
-                </time>
-              </dd>
-            </div>
-            <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2.5">
-              <dt className="text-muted-foreground">Concluded</dt>
-              <dd>
-                <time dateTime={data.investigation.concludedAt}>
-                  {data.investigation.dateLabel} ·{" "}
-                  {data.investigation.concludedLabel}
-                </time>
-              </dd>
-            </div>
-            <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2.5">
-              <dt className="text-muted-foreground">Reported duration</dt>
-              <dd>{data.investigation.durationLabel}</dd>
-            </div>
-          </dl>
+      <div data-ui="completed-phases">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-panel-title">Investigation phases</h3>
+          <span className="text-caption text-muted-foreground">
+            {data.investigation.durationLabel}
+          </span>
         </div>
-        <div
-          data-ui="stage-confidence"
-          className="[&_:is(th,td)]:pt-1.75 [&_:is(th,td)]:pr-1.75 [&_:is(th,td)]:pb-1.75 [&_:is(th,td)]:pl-1.75 [&_:is(th,td)]:border-b [&_:is(th,td)]:border-border [&_:is(th,td)]:text-left [&_th:first-child]:pl-0 [&_td:nth-child(2)]:tabular-nums"
-        >
-          <table className="w-full border-collapse text-caption">
-            <caption className="mb-1.5 text-left text-base font-medium">
-              Confidence by stage
-            </caption>
-            <thead className="text-muted-foreground">
-              <tr>
-                <th scope="col" className="font-normal">
-                  Stage
-                </th>
-                <th scope="col" className="font-normal">
-                  Score
-                </th>
-                <th scope="col" className="font-normal">
-                  Level
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.investigation.confidence.map((stage) => (
-                <tr key={stage.phase}>
-                  <th scope="row" className="font-normal">
-                    {stage.phase}
-                  </th>
-                  <td>{stage.value}</td>
-                  <td>
-                    <ConfidenceIndicator level={stage.level} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="mt-2.25 text-muted-foreground text-caption">
-            Plan is a pre-lookup estimate. Analyze and Report are the scores
-            relevant to OSCAR’s review handoff.
-          </p>
-        </div>
-      </div>
-      <div
-        data-ui="completed-phases"
-        className="mt-6 pt-5 border-t border-border [&_svg]:w-3.25 [&_svg]:h-3.25"
-      >
-        <h3 className="text-panel-title">
-          Investigation phases
-        </h3>
-        <ol className="flex flex-wrap gap-y-1.75 gap-x-4.5 mt-2.25">
-          {data.investigation.phases.map((phase) => (
-            <li
-              key={phase.name}
-              className="inline-flex items-center gap-1.25 text-muted-foreground text-caption"
-            >
-              <SemanticIcon definition={phaseStates[phase.state]} />
-              <span>
-                {phase.name}
-                <span className="sr-only">: {phase.state}</span>
-              </span>
+        <ol className="mt-4 grid grid-cols-5 gap-1.5 sm:gap-3">
+          {data.investigation.phases.map((phase, index) => (
+            <li key={phase.name} data-phase-state={phase.state} className="min-w-0">
+              <div className={`mb-2 h-1.5 rounded-sm ${phase.state === "completed" ? "bg-oscar" : phase.state === "failed" ? "bg-danger" : "bg-muted"}`} />
+              <div className="flex items-center gap-1 text-caption">
+                <SemanticIcon definition={phaseStates[phase.state]} />
+                <span className="min-w-0 truncate">{phase.name}</span>
+              </div>
+              <span className="sr-only">Step {index + 1}: {phase.state}</span>
             </li>
           ))}
         </ol>
+      </div>
+
+      <div data-ui="investigation-summary" className="mt-5 grid min-w-0 gap-6 border-t border-border pt-5 @min-[700px]/case:grid-cols-2">
+        <section data-ui="stage-confidence" aria-labelledby="stage-confidence-heading" className="min-w-0">
+          <h3 id="stage-confidence-heading" className="text-panel-title">Confidence by phase</h3>
+          <p className="mt-1 text-caption text-muted-foreground">
+            Stage assessments, not verdict probabilities
+          </p>
+          <dl className="mt-4 flex flex-col gap-4">
+            {data.investigation.confidence.map((stage) => (
+              <div key={stage.phase} className="flex min-w-0 flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-3 text-label">
+                  <dt>{stage.phase}</dt>
+                  <dd className="flex items-center gap-2 text-caption">
+                    <ConfidenceIndicator level={stage.level} />
+                    <strong className="font-medium tabular-nums text-foreground">{stage.value}/100</strong>
+                  </dd>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="meter" aria-label={`${stage.phase} stage score`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={stage.value}>
+                  <div className="h-full rounded-full bg-oscar" style={{ width: `${Math.min(100, Math.max(0, stage.value))}%` }} />
+                </div>
+              </div>
+            ))}
+          </dl>
+        </section>
+        <section data-ui="process-summary" aria-labelledby="handoff-heading" className="min-w-0">
+          <h3 id="handoff-heading" className="text-panel-title">Why it was handed off</h3>
+          <p className="mt-2 text-label text-muted-foreground">
+            {data.reviewReason}
+          </p>
+          <dl data-ui="investigation-times" className="mt-4 divide-y divide-border border-t border-border text-caption">
+            <div className="grid grid-cols-[105px_minmax(0,1fr)] gap-3 py-2.5">
+              <dt className="text-muted-foreground">Received</dt>
+              <dd><time dateTime={data.investigation.receivedAt}>{data.investigation.dateLabel} · {data.investigation.receivedLabel}</time></dd>
+            </div>
+            <div className="grid grid-cols-[105px_minmax(0,1fr)] gap-3 py-2.5">
+              <dt className="text-muted-foreground">Concluded</dt>
+              <dd><time dateTime={data.investigation.concludedAt}>{data.investigation.dateLabel} · {data.investigation.concludedLabel}</time></dd>
+            </div>
+            <div className="grid grid-cols-[105px_minmax(0,1fr)] gap-3 py-2.5">
+              <dt className="text-muted-foreground">Duration</dt>
+              <dd>{data.investigation.durationLabel}</dd>
+            </div>
+          </dl>
+        </section>
       </div>
     </InvestigationSection>
   );
