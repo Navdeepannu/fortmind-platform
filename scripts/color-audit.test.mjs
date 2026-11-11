@@ -103,7 +103,7 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
     "--surface-floating": ["oklch(1 0 0)", "oklch(0.255182 0.010408 260.70)"],
     "--border": ["oklch(0.924740 0.002906 264.54)", "oklch(0.270684 0.002912 196.98)"],
     "--control": ["oklch(0.976419 0.001323 286.38)", "oklch(0.217386 0.008416 264.38)"],
-    "--floating-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.270684 0.002912 196.98)"],
+    "--floating-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.296183 0.010017 260.71)"],
     "--shell": ["var(--background)", "var(--background)"],
     "--border-strong": ["oklch(0.866175 0.004672 258.33)", "oklch(0.359444 0.011117 264.43)"],
     "--input": ["oklch(0.866175 0.004672 258.33)", "oklch(0.359444 0.011117 264.43)"],
