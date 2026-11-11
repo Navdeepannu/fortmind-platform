@@ -402,57 +402,42 @@ function SimilarCases({ data }: { data: CaseOverviewData }) {
   return (
     <InvestigationSection
       id="similar-cases"
-      title="Similar past cases"
+      title="Related cases"
       count={data.relatedCases.length}
-      description="Earlier investigations sharing the host named in this alert"
+      description="Earlier investigations that reference the same host"
+      contentClassName="p-0"
+      footer={
+        <p data-ui="section-note" className="max-w-[72ch] text-caption text-muted-foreground">
+          Shared entities do not establish the same cause or outcome. The original
+          capture did not include historical case IDs or direct links.
+        </p>
+      }
     >
-      <div
-        data-ui="related-list"
-        className="grid grid-cols-2 @max-[641px]/case:grid-cols-1"
-      >
-        {data.relatedCases.map((item) => (
-          <article
-            data-ui="related-item"
-            key={item.id}
-            className="flex flex-col gap-2.5 min-w-0 pt-px pr-0 pb-0.5 pl-5.5 border-l border-border @max-[641px]/case:pt-4.5 @max-[641px]/case:pr-0 @max-[641px]/case:pb-0 @max-[641px]/case:pl-0 @max-[641px]/case:border-t @max-[641px]/case:border-border @max-[641px]/case:border-l-0 [&_h3_a:hover]:text-primary [&_h3_a:hover]:underline [&_h3_a:hover]:underline-offset-3"
-          >
-            <div
-              data-ui="related-topline"
-              className="flex justify-between flex-wrap gap-y-0.75 gap-x-3 text-muted-foreground text-caption"
-            >
-              <span>
-                {item.caseId ? `Case ${item.caseId}` : "Case ID unavailable"}
-              </span>
-              <time dateTime={item.receivedAt}>{item.receivedLabel}</time>
-            </div>
-            <h3 className="text-panel-title">
-              {item.href ? (
-                <Link href={item.href}>{item.title}</Link>
-              ) : (
-                item.title
-              )}
-            </h3>
-            <div
-              data-ui="related-states"
-              className="flex items-center flex-wrap gap-1.75"
-            >
-              <VerdictBadge value={item.verdict} />
-              <CaseStatusBadge value={item.status} />
-            </div>
-            <p className="mt-auto text-muted-foreground text-caption">
-              Similar because both cases name <code>{item.sharedEntity}</code>.
-              No analyst-confirmed outcome is supplied.
-            </p>
-          </article>
+      <ol data-ui="related-list" className="min-w-0 divide-y divide-border">
+        {data.relatedCases.map((item, index) => (
+          <li key={item.id} data-ui="related-item" className="min-w-0 px-4 py-4 sm:px-5">
+            <article className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+              <div className="min-w-0">
+                <p className="text-caption text-muted-foreground">
+                  <span className="font-mono tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="mx-2" aria-hidden="true">·</span>
+                  Shared host <code className="text-foreground">{item.sharedEntity}</code>
+                </p>
+                <h3 className="mt-1 max-w-[65ch] break-words text-body font-medium leading-snug" title={item.title}>
+                  {item.href ? <Link className="hover:underline" href={item.href}>{item.title}</Link> : item.title}
+                </h3>
+                <div data-ui="related-states" className="mt-2.5 flex flex-wrap items-center gap-3 text-caption">
+                  <VerdictBadge value={item.verdict} />
+                  <CaseStatusBadge value={item.status} />
+                </div>
+              </div>
+              <time dateTime={item.receivedAt} className="shrink-0 text-caption tabular-nums text-muted-foreground">
+                {item.receivedLabel}
+              </time>
+            </article>
+          </li>
         ))}
-      </div>
-      <p
-        data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
-      >
-        A shared host does not establish this case’s intent. Historical case IDs
-        and direct links were not present in the supplied capture.
-      </p>
+      </ol>
     </InvestigationSection>
   );
 }
