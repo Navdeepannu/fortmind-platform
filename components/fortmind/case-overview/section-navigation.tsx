@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   caseSectionGroups,
   caseViewForTarget,
@@ -98,8 +99,9 @@ export function CaseCategoryTabs({
         focus?.focus({ preventScroll: true });
       }
       focusTarget.current = null;
-      const nav = [...workspace.querySelectorAll<HTMLElement>('[data-ui="secondary-nav"]')].find((node) => node.getClientRects().length)
-        ?? workspace.querySelector<HTMLElement>('[data-ui="page-nav"]');
+      // Only the primary category row sits above the content. Contextual
+      // subnavigation is a side rail, not a second sticky horizontal bar.
+      const nav = workspace.querySelector<HTMLElement>('[data-ui="page-nav"]');
       const boundary = nav?.getBoundingClientRect().bottom ?? 0;
       // Switching a workspace never scrolls through other views. Only recover
       // its heading when a previously long view left the document scrolled down.
@@ -153,27 +155,96 @@ export function CaseCategoryTabs({
           <TabsContent key={group.id} value={group.id} keepMounted hidden={selection.tab !== group.id} data-case-category={group.id} className="min-w-0 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2">
             {group.sections.length > 1 ? (
               <Tabs
+                orientation="vertical"
                 value={selection.tab === group.id ? selection.view : group.sections[0].id}
                 onValueChange={(value) => {
                   const view = group.sections.find((section) => section.id === value);
                   if (view) navigate({ tab: group.id, view: view.id });
                 }}
-                className="min-w-0 gap-0"
+                className="min-w-0 flex-col items-stretch gap-0 @min-[760px]/case:flex-row @min-[760px]/case:items-start"
+                data-ui="case-subview-layout"
               >
-                <div data-ui="secondary-nav" className="sticky top-[calc(var(--workspace-header-height)+var(--case-primary-nav-height))] z-10 border-b bg-background">
-                  <div data-case-tab-scroll className="relative min-w-0 overflow-x-auto [scrollbar-width:thin]">
-                    <TabsList variant="line" activateOnFocus aria-label={`${group.label} views`} className="min-w-max gap-5 border-0 p-0 group-data-horizontal/tabs:h-10">
-                      {group.sections.map((section) => (
-                        <TabsTrigger key={section.id} value={section.id} className="h-10 flex-none rounded-none px-0 group-data-horizontal/tabs:after:bottom-0">
-                          {section.label}
-                          {counts[section.id] !== undefined && <span className="text-caption tabular-nums"> ({counts[section.id]})</span>}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+                <div
+                  data-ui="mobile-section-nav"
+                  className="min-w-0 border-b border-border py-3 @min-[760px]/case:hidden"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="shrink-0 text-caption font-medium text-muted-foreground">
+                      View
+                    </span>
+                    <Select
+                      value={selection.tab === group.id ? selection.view : group.sections[0].id}
+                      onValueChange={(value) => {
+                        const view = group.sections.find((section) => section.id === value);
+                        if (view) navigate({ tab: group.id, view: view.id });
+                      }}
+                    >
+                      <SelectTrigger
+                        size="sm"
+                        aria-label={`${group.label} section`}
+                        className="min-w-0 flex-1 justify-between bg-background text-label"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="end">
+                        {group.sections.map((section) => (
+                          <SelectItem key={section.id} value={section.id}>
+                            {section.label}
+                            {counts[section.id] !== undefined
+                              ? ` · ${counts[section.id]}`
+                              : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
+
+                <aside
+                  data-ui="secondary-nav"
+                  aria-label={`${group.label} sections`}
+                  className="hidden min-w-0 @min-[760px]/case:sticky @min-[760px]/case:top-[calc(var(--workspace-header-height)+var(--case-primary-nav-height)+1rem)] @min-[760px]/case:block @min-[760px]/case:w-48 @min-[760px]/case:flex-none @min-[760px]/case:border-r @min-[760px]/case:border-border @min-[760px]/case:py-5 @min-[760px]/case:pr-4"
+                >
+                  <p className="mb-3 px-3 text-caption font-medium text-muted-foreground">
+                    {group.label} views
+                  </p>
+                  <TabsList
+                    variant="line"
+                    activateOnFocus
+                    aria-label={`${group.label} views`}
+                    className="flex h-auto w-full flex-col items-stretch gap-1 border-0 bg-transparent p-0"
+                  >
+                    {group.sections.map((section) => (
+                      <TabsTrigger
+                        key={section.id}
+                        value={section.id}
+                        data-ui="case-section-link"
+                        className="group/subview relative h-9 w-full flex-none justify-between rounded-md border-0 px-3 text-left text-label font-normal after:hidden hover:bg-muted/50 data-active:bg-muted data-active:font-medium data-active:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <span className="min-w-0 truncate">{section.label}</span>
+                        {counts[section.id] !== undefined && (
+                          <span
+                            data-ui="section-count"
+                            aria-label={`${counts[section.id]} items`}
+                            className="ml-2 shrink-0 rounded-md bg-background px-1.5 py-0.5 text-caption font-normal tabular-nums text-muted-foreground"
+                          >
+                            {counts[section.id]}
+                          </span>
+                        )}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </aside>
+
                 {group.sections.map((section) => (
-                  <TabsContent key={section.id} value={section.id} keepMounted hidden={selection.tab !== group.id || selection.view !== section.id} data-case-view={section.id} className="min-w-0 pb-12 pt-6 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 @max-[501px]/case:pt-5">
+                  <TabsContent
+                    key={section.id}
+                    value={section.id}
+                    keepMounted
+                    hidden={selection.tab !== group.id || selection.view !== section.id}
+                    data-case-view={section.id}
+                    className="min-w-0 w-full flex-1 pb-12 pt-5 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 @min-[760px]/case:pl-6 @max-[501px]/case:pt-4"
+                  >
                     {views[section.id]}
                   </TabsContent>
                 ))}
