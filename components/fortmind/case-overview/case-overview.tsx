@@ -874,45 +874,40 @@ function Actions({ data }: { data: CaseOverviewData }) {
   return (
     <InvestigationSection
       id="actions"
-      title="Actions"
+      title="Recommended response"
       count={data.actions.length}
-      description="OSCAR recommendations awaiting approval in the captured case"
+      description="Proposals from OSCAR, not executed controls"
+      footer={
+        <p className="text-caption text-muted-foreground">
+          Only an authorized administrator can approve or reject these recommendations in the source interface. This preview does not execute any response.
+        </p>
+      }
+      contentClassName="p-0"
     >
-      <div data-ui="record-list" className="flex flex-col">
+      <ol data-ui="record-list" className="divide-y divide-border">
         {data.actions.map((item, index) => (
-          <div
+          <li
             data-ui="action-row"
-            className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-baseline gap-2.5 text-label pt-4.25 mt-4.25 border-t border-border @max-[501px]/case:grid-cols-[22px_minmax(0,1fr)] [&>_span:last-child]:text-muted-foreground [&>_span:last-child]:text-caption [&>_span:last-child]:whitespace-nowrap @max-[501px]/case:[&>_span:last-child]:col-start-2"
             key={item.title}
+            className="grid grid-cols-[2rem_minmax(0,1fr)] gap-3 px-4 py-4 sm:px-5 @min-[720px]/case:grid-cols-[2rem_minmax(0,1fr)_8rem]"
           >
-            <span
-              data-ui="evidence-index"
-              className="text-muted-foreground font-mono text-caption"
-            >
+            <span className="flex size-7 items-center justify-center rounded-md border border-border bg-muted/40 font-mono text-caption text-muted-foreground">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <div>
-              <strong className="text-body font-medium">
-                {item.title}
-              </strong>
+            <div className="min-w-0">
+              <p className="text-label font-medium">{item.title}</p>
               {item.condition && (
-                <p className="mt-0.75 text-muted-foreground">
-                  {item.condition}
+                <p className="mt-1 text-caption font-medium text-warning-foreground">
+                  Condition: {item.condition}
                 </p>
               )}
             </div>
-            <span>Waiting for approval</span>
-          </div>
+            <span className="col-start-2 self-start text-caption text-muted-foreground @min-[720px]/case:col-start-3 @min-[720px]/case:text-right">
+              Not executed
+            </span>
+          </li>
         ))}
-      </div>
-      <p
-        data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
-      >
-        The source interface says only an administrator can approve or reject
-        these recommendations. No response has been approved or executed in this
-        preview.
-      </p>
+      </ol>
     </InvestigationSection>
   );
 }
