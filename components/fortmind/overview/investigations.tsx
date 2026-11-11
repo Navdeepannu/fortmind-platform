@@ -6,7 +6,6 @@ import { ArrowRight, ChevronRight, Clock3, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter } from "@/components/ui/card";
 import { monitoredInvestigations, operations } from "@/lib/overview-data";
-import { caseHref } from "@/lib/platform-routes";
 import { formatAge } from "@/lib/preview-data";
 import { investigationProgress } from "@/lib/investigation-progress";
 import type { SecurityCase } from "@/lib/preview-data";
