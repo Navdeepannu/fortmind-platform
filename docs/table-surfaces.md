@@ -16,11 +16,11 @@ Source references:
 | Canvas and workspace chrome | `--background`, `--shell: var(--background)` | `#080A0A` | `#FAFAFA` | Main area, sidebar, topbar |
 | Border-led cards | `--card: var(--background)` | canvas color | canvas color | Dashboard cards/panels with an outline instead of another filled layer |
 | Selectively filled surface | `--surface` | `#0F1010` | `#FFFFFF` | Cases table, dense data sections |
-| Subtle alternate case row | `--table-stripe` | `#141619` | approximately `#F8F8F9` | Even rows in FortCases only |
+| Subtle alternate case row | `--table-stripe` | `#141619` | approximately `#FAFAFA` | Even rows in FortCases only |
 | Inputs and filters | `--control` | `#181A1E` | `#F7F7F8` | Text inputs, selects, secondary controls |
 | Hover or selected | `--surface-hover` | `#1B1E22` | `#F0F1F2` | Hovered/selected rows and controls |
-| Floating material | `--surface-floating` | `#202328` | `#FFFFFF` | Popovers, dropdowns, tooltips |
-| Floating hover | `--floating-hover` | `#2A2D32` | `#F0F1F2` | Items inside floating menus |
+| Floating material | `--surface-floating` | `#080A0A` | `#FFFFFF` | Popovers, dropdowns, tooltips |
+| Floating hover | `--floating-hover` | `#191B1D` | `#F5F5F6` | Items inside floating menus |
 | Default border | `--border` | `#252727` | `#E5E6E8` | Cards, separators, table lines |
 | Interactive / elevated border | `--border-strong` | `#3A3D43` | `#D1D3D6` | Outline buttons and floating menus |
 | Primary text | `--foreground` | `#F2F2F3` | `#17181B` | Reading and hierarchy |
@@ -52,3 +52,7 @@ Hex references are for design review; actual source values remain precision-safe
 Run `pnpm test:colors`, `pnpm test:preview`, `pnpm typecheck`, `pnpm lint`, and `pnpm build`. Review the resulting Vercel preview for Overview, Cases, Details, both themes, hover/selection, keyboard focus and small screens.
 
 The PR intentionally avoids changing platform information architecture, case logic, semantic decisions or API contracts. A source-level review does not substitute for production build and browser checks.
+
+## November 11 integration
+
+Preserve the dark canvas `#080A0A`, filled surface `#0F1010`, and structural border `#252727`, while applying the inset-sidebar and floating-hover refinements. The brand accent remains unchanged. `border-border-secondary` maps to `#23252A` in dark mode and aliases the regular border in light mode. Stronger illustration outlines remain separate from routine platform borders.
