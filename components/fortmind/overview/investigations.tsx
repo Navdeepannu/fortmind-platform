@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, ChevronRight, Clock3, ScanLine } from "lucide-react";
+import { ArrowRight, ChevronRight, Clock3, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter } from "@/components/ui/card";
 import { monitoredInvestigations, operations } from "@/lib/overview-data";
@@ -12,7 +12,7 @@ import { investigationProgress } from "@/lib/investigation-progress";
 import type { SecurityCase } from "@/lib/preview-data";
 import { cn } from "@/lib/utils";
 import { OscarMark } from "../oscar-mark";
-import { InvestigationProgress } from "../investigation-progress";
+import { OscarCaseLifecyclePreview } from "./oscar-case-lifecycle-preview";
 
 /** Display only recorded phase states. Unknown does not imply pending or complete. */
 function PhaseRail({ item }: { item: SecurityCase }) {
@@ -182,45 +182,11 @@ export function ActiveInvestigations() {
                 className="h-full p-5 sm:p-6"
               >
                 {expanded && (
-                  <div className="flex flex-col gap-5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-caption font-medium uppercase tracking-wide text-muted-foreground">
-                        Selected run · {item.id}
-                      </span>
-                      <span className="text-caption font-medium text-oscar-foreground">
-                        {stage}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-panel-title">{item.title}</h3>
-                      <p className="mt-1 text-caption text-muted-foreground">
-                        {item.entities.hostname} · {elapsed
-                          ? `Elapsed ${elapsed}`
-                          : `Case age ${formatAge(item.ageMinutes)}`}
-                      </p>
-                    </div>
-                    <div className="border-y border-border py-4">
-                      <InvestigationProgress item={item} />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <h4 className="text-label font-semibold">What OSCAR has reported</h4>
-                      <p className="text-prose text-muted-foreground">{item.summary}</p>
-                      <p className="text-caption text-muted-foreground">
-                        Event history and step durations are not recorded in this sample.
-                        {!elapsed && " Investigation elapsed time is unavailable."}
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      nativeButton={false}
-                      role="link"
-                      render={<Link href={caseHref(item.id)} />}
-                      className="self-start"
-                    >
-                      Open investigation <ArrowUpRight data-icon="inline-end" />
-                    </Button>
-                  </div>
+                  <OscarCaseLifecyclePreview
+                    item={item}
+                    stage={stage}
+                    elapsed={elapsed}
+                  />
                 )}
               </div>
             );
