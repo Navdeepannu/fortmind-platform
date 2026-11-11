@@ -39,7 +39,7 @@ function PhaseRail({ item }: { item: SecurityCase }) {
  * Selecting a run reveals only supplied activity and phase evidence.
  */
 export function ActiveInvestigations() {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(monitoredInvestigations[0]?.item.id ?? null);
   return (
     <Card
       data-ui="card running"
