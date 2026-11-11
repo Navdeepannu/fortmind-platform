@@ -313,11 +313,29 @@ export function CaseNavigationLab({ data = caseOverview }: { data?: CaseOverview
   const sections = useMemo(() => buildCaseOverviewViews(data), [data]);
 
   useEffect(() => {
-    const target = decodeURIComponent(window.location.hash.slice(1));
-    const match = caseViewForTarget(target);
-    if (!match) return;
-    setActive(match.view);
-    setExpanded((current) => new Set([...current, match.view]));
+    let mounted = true;
+    const syncHashSelection = () => {
+      if (!mounted) return;
+      let target: string;
+      try {
+        target = decodeURIComponent(window.location.hash.slice(1));
+      } catch {
+        return;
+      }
+      const match = caseViewForTarget(target);
+      if (!match) return;
+      setActive(match.view);
+      setExpanded((current) => new Set([...current, match.view]));
+    };
+
+    window.addEventListener("hashchange", syncHashSelection);
+    // Read the initial URL after hydration, without synchronous effect-state updates.
+    queueMicrotask(syncHashSelection);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("hashchange", syncHashSelection);
+    };
   }, []);
 
   function followReference(event: MouseEvent<HTMLDivElement>) {
