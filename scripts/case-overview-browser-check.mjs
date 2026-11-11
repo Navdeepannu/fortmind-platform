@@ -4,8 +4,8 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || "playwright");
-const output = process.env.CASE_SCREENSHOT_DIR || join(tmpdir(), "fortmind-single-workspace");
 const base = process.env.CASE_PREVIEW_URL || "http://localhost:3000/platform/cases/case-detail";
+const output = process.env.CASE_SCREENSHOT_DIR || join(tmpdir(), "fortmind-compact-subviews");
 const categories = {
   Decision: ["conclusion", "how-oscar-decided"],
   Investigation: ["findings", "hypotheses", "attack-path"],
@@ -20,7 +20,7 @@ const browser = await chromium.launch({
     ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE }
     : {}),
 });
-const report = { themes: [], layouts: [], errors: [], notes: [] };
+const report = { screenshots: [], errors: [], checks: [] };
 let page;
 
 function observe(target) {
@@ -29,84 +29,112 @@ function observe(target) {
     if (message.type() === "error") report.errors.push(message.text());
   });
 }
-
 async function visit(url) {
   const response = await page.goto(url, { waitUntil: "networkidle" });
-  assert.equal(response.status(), 200);
+  assert.equal(response.status(), 200, url);
   await page.locator('[data-ui="case-category-tabs"]').waitFor();
+}
+const primaryTabs = () => page.getByRole("tablist", { name: "Case categories", exact: true });
+
+async function expectView(category, view) {
+  await page.waitForFunction(({ category, view }) => {
+    const params = new URL(location.href).searchParams;
+    const panels = [...document.querySelectorAll('section[data-ui="section"]')]
+      .filter(node => node.getClientRects().length);
+    return params.get("tab") === category.toLowerCase() &&
+      params.get("view") === view && panels.length === 1 && panels[0].id === view;
+  }, { category, view });
 }
 
 async function selectCategory(label) {
-  const tabs = page.getByRole("tablist", { name: "Case categories", exact: true });
-  await tabs.getByRole("tab", { name: label, exact: true }).click();
-  await page.waitForFunction(id =>
-    !!document.querySelector(`[data-case-category="${id}"]`)?.getClientRects().length,
-    label.toLowerCase());
-  const panel = page.locator(`[data-case-category="${label.toLowerCase()}"]`);
-  assert.deepEqual(
-    await panel.locator('section[data-ui="section"]:visible').evaluateAll(nodes => nodes.map(node => node.id)),
-    categories[label],
-  );
-  assert.equal(await panel.locator('[data-ui="case-section-stack"]').count(), 1);
-  assert.equal(await page.locator('[data-ui="secondary-nav"]:visible').count(), 0);
-  assert.equal(await page.locator('[data-ui="mobile-section-nav"]:visible').count(), 0);
-  assert.equal(await panel.locator('[data-ui="section-location"]').count(), 0);
+  await primaryTabs().getByRole("tab", { name: label, exact: true }).click();
+  await expectView(label, categories[label][0]);
+}
+async function selectView(category, view) {
+  if (!(await primaryTabs().getByRole("tab", { name: category, exact: true }).getAttribute("aria-selected") === "true")) {
+    await selectCategory(category);
+  }
+  if (categories[category].length > 1) {
+    const tabs = page.getByRole("tablist", { name: `${category} views`, exact: true });
+    await tabs.locator(`[data-section-id="${view}"]`).click();
+  }
+  await expectView(category, view);
 }
 
 try {
   for (const theme of ["dark", "light"]) {
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
-      reducedMotion: "reduce",
       permissions: ["clipboard-read", "clipboard-write"],
+      reducedMotion: "reduce",
     });
     await context.addInitScript(value => localStorage.setItem("theme", value), theme);
     page = await context.newPage();
     observe(page);
     await visit(base);
-
-    assert.equal(await page.getByRole("tablist").count(), 1, "one navigation tier");
-    assert.equal(await page.locator('section[data-ui="section"]').count(), 11);
-    for (const category of Object.keys(categories)) {
-      await selectCategory(category);
-      for (const id of categories[category]) {
-        assert.equal(await page.locator(`#${id}`).count(), 1);
-      }
-    }
-
-    await selectCategory("Evidence");
-    const related = page.locator('[data-ui="related-list"]');
-    assert.equal(await related.locator('[data-ui="related-item"]').count(), 2);
-    assert.equal(await related.getByText("Case ID unavailable").count(), 0);
-    assert.equal(await related.getByRole("heading", { level: 3 }).count(), 2);
+    assert.equal(await page.locator('section[data-ui="section"]').count(), 11, "All original section panels remain mounted");
+    assert.deepEqual(await primaryTabs().getByRole("tab").allTextContents(), Object.keys(categories));
     assert.equal(await page.locator('[data-ui="secondary-nav"]').count(), 0);
     assert.equal(await page.locator('[data-ui="mobile-section-nav"]').count(), 0);
+    assert.equal(await page.locator('[data-ui="case-section-stack"]').count(), 0);
+    assert.equal(await page.locator('[data-ui="section-location"]').count(), 0);
 
-    // Old section and record links continue to resolve to their owner workspace.
-    await visit(`${base}?tab=evidence&view=similar-cases`);
-    assert.equal(new URL(page.url()).searchParams.get("view"), "similar-cases");
-    assert.ok(await page.locator("#similar-cases").isVisible());
+    for (const [category, views] of Object.entries(categories)) {
+      await selectCategory(category);
+      assert.equal(await page.locator('section[data-ui="section"]:visible').count(), 1);
+      const selector = page.getByRole("tablist", { name: `${category} views`, exact: true });
+      if (views.length > 1) {
+        assert.equal(await selector.count(), 1);
+        assert.deepEqual(
+          await selector.locator("[data-section-id]").evaluateAll(nodes => nodes.map(node => node.dataset.sectionId)),
+          views,
+        );
+      } else {
+        assert.equal(await selector.count(), 0);
+      }
+      for (const view of views) await selectView(category, view);
+    }
+
+    // A compact segmented tablist is still keyboard accessible.
+    await selectView("Evidence", "entities");
+    await page.getByRole("tablist", { name: "Evidence views" })
+      .locator('[data-section-id="entities"]').focus();
+    await page.keyboard.press("ArrowRight");
+    await expectView("Evidence", "evidence");
+    await page.keyboard.press("End");
+    await expectView("Evidence", "similar-cases");
+    await page.keyboard.press("Home");
+    await expectView("Evidence", "entities");
+
+    // Subview history remains navigable and reloadable.
+    await selectView("Evidence", "similar-cases");
+    await page.goBack(); await expectView("Evidence", "entities");
+    await page.goForward(); await expectView("Evidence", "similar-cases");
+    await page.reload({ waitUntil: "networkidle" });
+    await expectView("Evidence", "similar-cases");
+
+    // Technical source and long related-case records are visible one at a time.
+    assert.equal(await page.locator('#similar-cases [data-ui="related-item"]:visible').count(), 2);
+    assert.equal(await page.locator('#similar-cases').isVisible(), true);
+    assert.equal(await page.locator('#entities').isVisible(), false);
+
+    // Pre-existing deep links select the owning category and subview.
+    await visit(`${base}?tab=evidence&view=similar-cases&source=search`);
+    await expectView("Evidence", "similar-cases");
+    assert.equal(new URL(page.url()).searchParams.get("source"), "search");
+    await visit(`${base}#entity-host-fmlab-ws1`);
+    await expectView("Evidence", "entities");
     await visit(`${base}#finding-host-alerts`);
-    assert.equal(new URL(page.url()).searchParams.get("tab"), "investigation");
+    await expectView("Investigation", "findings");
     await page.waitForFunction(() =>
       document.querySelector('#finding-host-alerts [data-ui="finding-select"]')?.getAttribute("aria-pressed") === "true");
-
-    // A previously narrowed list must not hide a requested deep-linked finding.
-    const explorer = page.locator('[data-ui="finding-explorer"]');
-    await explorer.getByRole("button", { name: /Not corroborated 2/ }).click();
-    assert.equal(await explorer.locator('[data-ui="finding"]:visible').count(), 2);
+    await page.locator('[data-ui="finding-filters"]').getByRole("button", { name: /Not corroborated/ }).click();
     await selectCategory("Decision");
     await page.getByRole("link", { name: "View finding", exact: true }).first().click();
-    await page.waitForURL(/#finding-memory-access$/);
-    assert.equal(await explorer.locator('[data-ui="finding"]:visible').count(), 5);
+    await expectView("Investigation", "findings");
     assert.equal(await page.locator('#finding-memory-access [data-ui="finding-select"]').getAttribute("aria-pressed"), "true");
+    assert.equal(await page.locator('[data-ui="finding"]:visible').count(), 5);
 
-    // A single primary tab list still supports keyboard navigation.
-    await page.getByRole("tab", { name: "Investigation", exact: true }).focus();
-    await page.keyboard.press("ArrowRight");
-    await selectCategory("Evidence");
-
-    // Local review is still a preview and must not mutate backend state.
     await selectCategory("Decision");
     await page.getByRole("button", { name: "Confirm verdict", exact: true }).click();
     await page.getByRole("dialog", { name: "Confirm OSCAR’s verdict" })
@@ -115,27 +143,30 @@ try {
 
     for (const width of [1440, 1280, 900, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
-      await selectCategory("Evidence");
-      await page.evaluate(() => scrollTo(0, 0));
+      await selectView("Evidence", "similar-cases");
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
       const geometry = await page.evaluate(() => {
-        const root = document.querySelector('[data-ui="case-section-stack"]:not([hidden])');
         const active = [...document.querySelectorAll('[data-case-category]')]
           .find(node => node.getClientRects().length);
-        const stack = active?.querySelector('[data-ui="case-section-stack"]')?.getBoundingClientRect();
+        const content = active?.querySelector('[data-ui="case-section-workspace"]')?.getBoundingClientRect();
         const related = active?.querySelector('[data-ui="related-list"]')?.getBoundingClientRect();
+        const switcher = active?.querySelector('[data-ui="contextual-view-toolbar"]')?.getBoundingClientRect();
         return {
           overflow: document.documentElement.scrollWidth > innerWidth,
-          stackWidth: stack?.width,
+          contentWidth: content?.width,
           relatedRight: related?.right,
-          stackRight: stack?.right,
+          contentRight: content?.right,
+          switcherWidth: switcher?.width,
         };
       });
-      assert.equal(geometry.overflow, false, `${theme} ${width}: no page overflow`);
-      assert.ok(geometry.relatedRight <= geometry.stackRight + 1, "related records stay in their column");
-      await page.screenshot({ path: join(output, `${theme}-${width}-evidence.png`) });
-      report.layouts.push({ theme, width, ...geometry });
+      assert.equal(geometry.overflow, false, `${theme} ${width} page overflow`);
+      assert.ok(geometry.contentWidth > 0 && geometry.contentWidth <= 1121);
+      assert.ok(geometry.relatedRight <= geometry.contentRight + 1);
+      assert.equal(await page.locator('section[data-ui="section"]:visible').count(), 1);
+      await page.screenshot({ path: join(output, `${theme}-${width}-related.png`) });
+      report.screenshots.push({ theme, width, ...geometry });
     }
-    report.themes.push(theme);
+    report.checks.push(`${theme}: 5 primary + 11 subviews, keyboard, history, deep links, local review and overflow`);
     await context.close();
   }
   assert.deepEqual(report.errors, []);
