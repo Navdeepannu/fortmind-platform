@@ -465,7 +465,7 @@ function ImpactMetrics() {
 
 // CHUNK 3 — Distribution cards use the same compact row treatment.
 // Colors are reserved for meaningful icons; the proportional bars stay neutral.
-function CaseDistribution() {
+export function CaseDistribution() {
   const openTotal = openPriorities.reduce((sum, item) => sum + item.value, 0);
   const verdicts = impactReports["7d"].verdicts ?? [];
   const verdictTotal = verdicts.reduce((sum, item) => sum + item.value, 0);
