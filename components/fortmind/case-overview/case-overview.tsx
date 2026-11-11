@@ -33,6 +33,8 @@ import { InvestigationSection } from "./investigation-section";
 import { ReviewVerdict } from "./review-verdict";
 import { CaseCategoryTabs } from "./section-navigation";
 import { FindingExplorer } from "./finding-explorer";
+import type { CaseSectionId } from "@/lib/case-sections";
+import type { ReactNode } from "react";
 
 function CaseHeader({ data }: { data: CaseOverviewData }) {
   const host = data.entities.find((entity) => entity.kind === "host");
@@ -829,6 +831,28 @@ function Timeline({ data }: { data: CaseOverviewData }) {
   );
 }
 
+/**
+ * Reuse the exact production investigation sections in isolated navigation
+ * experiments; the design lab must not invent or duplicate case evidence.
+ */
+export function buildCaseOverviewViews(
+  data: CaseOverviewData,
+): Record<CaseSectionId, ReactNode> {
+  return {
+    conclusion: <Conclusion data={data} />,
+    "how-oscar-decided": <InvestigationSummary data={data} />,
+    findings: <Findings data={data} />,
+    hypotheses: <Hypotheses data={data} />,
+    "attack-path": <AttackPath data={data} />,
+    entities: <Entities data={data} />,
+    evidence: <Evidence data={data} />,
+    "similar-cases": <SimilarCases data={data} />,
+    actions: <Actions data={data} />,
+    "analyst-notes": <AnalystNotes />,
+    timeline: <Timeline data={data} />,
+  };
+}
+
 export function CaseOverview({ data }: { data: CaseOverviewData }) {
   return (
     <div
@@ -856,19 +880,8 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
               "similar-cases": data.relatedCases.length,
               actions: data.actions.length,
             }}
-            views={{
-              conclusion: <Conclusion data={data} />,
-              "how-oscar-decided": <InvestigationSummary data={data} />,
-              findings: <Findings data={data} />,
-              hypotheses: <Hypotheses data={data} />,
-              "attack-path": <AttackPath data={data} />,
-              entities: <Entities data={data} />,
-              evidence: <Evidence data={data} />,
-              "similar-cases": <SimilarCases data={data} />,
-              actions: <Actions data={data} />,
-              "analyst-notes": <AnalystNotes />,
-              timeline: <Timeline data={data} />,
-            }}
+            views={buildCaseOverviewViews(data)}
+
           />
         </Suspense>
         <p data-ui="preview-footnote" className="pb-8 text-caption text-muted-foreground">
