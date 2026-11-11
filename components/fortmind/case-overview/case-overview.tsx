@@ -532,68 +532,42 @@ function FindingRow({
   return (
     <details
       data-ui="finding"
-      className="group/finding scroll-mt-40 outline-none border-t border-border first:border-t-0 [&_summary::-webkit-details-marker]:hidden [&_summary:hover]:bg-muted [&_summary:focus-visible]:outline-2 [&_summary:focus-visible]:outline-ring [&_summary:focus-visible]:-outline-offset-2"
       id={`finding-${finding.id}`}
+      className="group/finding scroll-mt-40 border-t border-border first:border-t-0 [&_summary::-webkit-details-marker]:hidden [&_summary:hover]:bg-muted/35 [&_summary:focus-visible]:outline-2 [&_summary:focus-visible]:outline-ring [&_summary:focus-visible]:-outline-offset-2"
     >
-      <summary className="flex items-baseline gap-3.75 pt-4.25 pr-6 pb-4.25 pl-6 cursor-pointer list-none @max-[501px]/case:pl-3.25 @max-[501px]/case:pr-3.25">
-        <span
-          data-ui="finding-number"
-          className="text-muted-foreground font-mono text-caption"
-        >
+      <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-3.5 sm:px-5">
+        <span data-ui="finding-number" className="pt-0.5 font-mono text-caption text-muted-foreground">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span
-          data-ui="finding-content"
-          className="flex flex-1 flex-col gap-1 min-w-0"
-        >
-          <span
-            data-ui="finding-title-row"
-            className="flex items-baseline flex-wrap gap-2"
-          >
-            <strong className="text-body font-medium">
-              {finding.title}
-            </strong>
-            {finding.severity && <SeverityBadge value={finding.severity} />}
+        <span data-ui="finding-content" className="flex min-w-0 flex-1 flex-col gap-1">
+          <span data-ui="finding-title-row" className="flex flex-wrap items-center gap-2">
+            <strong className="text-label font-semibold">{finding.title}</strong>
+            {finding.relationship === "Supports concern" && finding.severity && (
+              <SeverityBadge value={finding.severity} />
+            )}
           </span>
-          <span
-            data-ui="finding-summary"
-            className="text-muted-foreground text-label"
-          >
+          <span data-ui="finding-summary" className="text-label text-muted-foreground">
             {finding.summary}
           </span>
-          <span
-            data-ui="finding-metadata"
-            className="flex flex-wrap gap-y-0.75 gap-x-3.75 mt-0.5 text-muted-foreground text-caption"
-          >
-            <span>{finding.evidenceState}</span>
-            <span>· {finding.relationship}</span>
+          <span data-ui="finding-metadata" className="mt-0.5 text-caption text-muted-foreground">
+            {finding.evidenceState}
           </span>
         </span>
         <ChevronDown
           data-ui="finding-chevron"
-          className="flex-none size-4 self-center text-muted-foreground transition-transform duration-150 group-open/finding:rotate-180"
           aria-hidden="true"
+          className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-open/finding:rotate-180"
         />
       </summary>
-      <div
-        data-ui="finding-expanded"
-        className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-5.5 pt-4.75 pr-6 pb-5.25 pl-12.5 border-t border-border bg-muted @max-[641px]/case:grid-cols-1 @max-[641px]/case:gap-3.25 @max-[501px]/case:pl-10.25"
-      >
+      <div data-ui="finding-expanded" className="grid min-w-0 gap-4 border-t border-border bg-muted/30 px-4 py-4 sm:px-5 @min-[620px]/case:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div>
-          <span className="text-muted-foreground text-caption font-medium uppercase tracking-[.04em]">
-            Evidence and interpretation
-          </span>
+          <h4 className="text-caption font-semibold text-muted-foreground">Interpretation and limits</h4>
           <p className="mt-1.5 text-label">{finding.detail}</p>
         </div>
         <div>
-          <span className="text-muted-foreground text-caption font-medium uppercase tracking-[.04em]">
-            Source / provenance
-          </span>
-          <p className="mt-1.5 text-label">
-            <FileSearch
-              aria-hidden="true"
-              className="inline w-3.25 h-3.25 mr-1.5 [vertical-align:-2px] text-muted-foreground"
-            />
+          <h4 className="text-caption font-semibold text-muted-foreground">Provenance</h4>
+          <p className="mt-1.5 flex items-start gap-1.5 text-label">
+            <FileSearch aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
             {finding.provenance}
           </p>
         </div>
@@ -603,21 +577,41 @@ function FindingRow({
 }
 
 function Findings({ data }: { data: CaseOverviewData }) {
+  const groups = [
+    { relationship: "Supports concern", label: "Signals supporting concern", note: "A reported claim is not confirmed execution" },
+    { relationship: "Context · unresolved", label: "Context still unresolved", note: "Related data does not establish a connection" },
+    { relationship: "Limits corroboration", label: "Missing corroboration", note: "Empty lookups do not mean benign activity" },
+  ] as const;
+
   return (
     <InvestigationSection
       id="findings"
-      title="Findings"
+      title="Investigation findings"
       count={data.findings.length}
-      description="What the alert and source lookups reported, and what they leave unresolved"
+      description="Grouped by how each result informs the investigation"
       contentClassName="p-0"
     >
-      <div
-        data-ui="findings-list"
-        className="overflow-hidden rounded-[inherit]"
-      >
-        {data.findings.map((finding, index) => (
-          <FindingRow key={finding.id} finding={finding} index={index} />
-        ))}
+      <div data-ui="findings-list">
+        {groups.map((group) => {
+          const rows = data.findings.filter((finding) => finding.relationship === group.relationship);
+          if (!rows.length) return null;
+          return (
+            <section
+              key={group.relationship}
+              data-ui="finding-group"
+              aria-label={group.label}
+              className="min-w-0 border-b border-border last:border-b-0"
+            >
+              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/30 px-4 py-3 sm:px-5">
+                <h3 className="text-label font-semibold">{group.label} <span className="ml-1 font-normal text-muted-foreground">{rows.length}</span></h3>
+                <p className="text-caption text-muted-foreground">{group.note}</p>
+              </header>
+              {rows.map((finding) => (
+                <FindingRow key={finding.id} finding={finding} index={data.findings.indexOf(finding)} />
+              ))}
+            </section>
+          );
+        })}
       </div>
     </InvestigationSection>
   );
