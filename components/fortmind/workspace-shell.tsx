@@ -146,6 +146,11 @@ function AppSidebar({ section }: { section: PlatformSection }) {
             className="size-8 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden"
           />
         </div>
+        <div data-ui="workspace-organization" className="mx-3 mt-3 flex min-h-10 items-center gap-2 rounded-md px-2 text-label group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-sm border border-sidebar-border bg-card font-mono text-caption">CZ</span>
+          <span className="min-w-0 flex-1 truncate font-medium text-foreground group-data-[collapsible=icon]:hidden">Customer Zero</span>
+          <span className="rounded-full border border-sidebar-border px-1.5 py-0.5 text-caption text-muted-foreground group-data-[collapsible=icon]:hidden">Member</span>
+        </div>
       </SidebarHeader>
 
       <SidebarContent className="gap-0 bg-sidebar px-3 pb-5 pt-5 group-data-[collapsible=icon]:px-2">
