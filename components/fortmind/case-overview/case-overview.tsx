@@ -418,7 +418,7 @@ function SimilarCases({ data }: { data: CaseOverviewData }) {
       <ol data-ui="related-list" className="min-w-0 divide-y divide-border">
         {data.relatedCases.map((item, index) => (
           <li key={item.id} data-ui="related-item" className="min-w-0 px-4 py-4 sm:px-5">
-            <article className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+            <article className="grid min-w-0 gap-3 @min-[740px]/case:grid-cols-[minmax(0,1fr)_auto] @min-[740px]/case:items-start">
               <div className="min-w-0">
                 <p className="text-caption text-muted-foreground">
                   <span className="font-mono tabular-nums">{String(index + 1).padStart(2, "0")}</span>
