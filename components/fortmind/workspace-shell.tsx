@@ -526,7 +526,7 @@ export function WorkspaceShell({ children, sectionOverride }: { children: ReactN
                   className="size-8 shrink-0 md:hidden"
                 />
                 <CollapsedSidebarTrigger />
-                <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-2 text-body sm:flex">
+                <nav aria-label="Breadcrumb" className={cn("min-w-0 items-center gap-2 text-body", caseRoute ? "flex" : "hidden sm:flex")}>
                   <span className="h-4 w-px bg-border" aria-hidden="true" />
                   {caseRoute ? (
                     <>
@@ -534,9 +534,10 @@ export function WorkspaceShell({ children, sectionOverride }: { children: ReactN
                         Cases
                       </Link>
                       <ChevronRight aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
-                      <span className="min-w-0 truncate">
+                      <span className="min-w-0 truncate max-sm:hidden">
                         <CopyTechnicalValue label="case ID" value={caseId} />
                       </span>
+                      <span className="text-muted-foreground sm:hidden">Case</span>
                     </>
                   ) : (
                     <span className="truncate font-medium">{section}</span>
