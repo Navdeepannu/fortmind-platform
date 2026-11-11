@@ -62,7 +62,7 @@ function ContainedAccordion({
           <span className="shrink-0 font-mono text-caption tabular-nums text-muted-foreground">{count}</span>
         )}
       </summary>
-      <div data-ui="client-accordion-body" className="min-w-0 border-t border-border px-4 py-4 sm:px-5 [&_[data-ui=section-header]]:sr-only [&_[data-ui=section-card]]:rounded-sm [&_[data-ui=section-card]]:border-border [&_[data-ui=section-body]]:px-4 [&_[data-ui=section-body]]:py-4">
+      <div data-ui="client-accordion-body" className="min-w-0 border-t border-border px-4 py-4 sm:px-5 [&_[data-ui=section-header]]:mb-0 [&_[data-ui=section-heading-copy]]:sr-only [&_[data-ui=section-card]]:rounded-sm [&_[data-ui=section-card]]:border-0 [&_[data-ui=section-card]]:bg-transparent [&_[data-ui=section-body]]:px-4 [&_[data-ui=section-body]]:py-4">
         {children}
       </div>
     </details>
@@ -83,7 +83,8 @@ export function CaseReferenceTabs({
   useEffect(() => {
     const sync = () => {
       const url = new URL(window.location.href);
-      const hash = decodeURIComponent(url.hash.slice(1)).replace(/-heading$/, "");
+      let hash = "";
+      try { hash = decodeURIComponent(url.hash.slice(1)).replace(/-heading$/, ""); } catch { /* Ignore malformed URL fragments. */ }
       setTab(hash ? tabForSection(hash) : initialTab(url.searchParams.get("tab"), url.searchParams.get("view")));
     };
     window.addEventListener("popstate", sync);
