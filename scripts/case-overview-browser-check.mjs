@@ -40,9 +40,8 @@ async function selectView(category, view) {
     } else {
       const picker = panel.locator('[data-ui="mobile-section-nav"]');
       await picker.getByRole("combobox").click();
-      const label = categories[category].find(([id]) => id === view)[1].replace(/ \\(\\d+\\)$/, "");
-      await page.getByRole("option", { name: new RegExp(`^${label.replace(/[.*+?^${}()|[\\]\\]/g, "\\    const label = categories[category].find(([id]) => id === view)[1];
-    await page.getByRole("tablist", { name: `${category} views`, exact: true }).getByRole("tab", { name: label, exact: true }).click();")}`) }).click();
+      const label = categories[category].find(([id]) => id === view)[1].split(" (")[0];
+      await page.getByRole("option", { name: new RegExp("^" + label) }).click();
     }
   }
   await expectView(category, view);
