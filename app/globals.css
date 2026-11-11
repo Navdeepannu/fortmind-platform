@@ -108,8 +108,8 @@
   --color-priority-inactive: var(--priority-inactive);
 
   /* Fonts */
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-inter);
+  --font-sans: var(--font-geist-sans);
+  --font-heading: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
   /* 13px UI base × 1.25, rounded per step to a 4px grid: 13 → 16 → 20 → 24 → 32.
@@ -385,7 +385,7 @@
   --border: oklch(0.296183 0.010017 260.71); /* #2A2D32 */
   --border-strong: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
   --input: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
-  --ring: var(--brand);
+  --ring: oklch(0.78 0.005 265); /* neutral keyboard focus on dark surfaces */
   --overlay: oklch(0 0 0 / 0.68);
   /* Navigation-only hover and selection; keep the shared surface palette intact. */
   --sidebar-foreground: var(--muted-foreground);
