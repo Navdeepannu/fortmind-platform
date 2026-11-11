@@ -48,6 +48,9 @@ export function CaseCategoryTabs({
       // fetching the case again or remounting forms when a view changes.
       window.history.pushState(null, "", href);
     }
+    // History pushState doesn't emit hashchange. Notify mounted evidence views
+    // so a source deep link selects its finding even after filters were applied.
+    if (target) window.dispatchEvent(new Event("fortmind:case-navigation"));
     setRequest((value) => value + 1);
   }
 
