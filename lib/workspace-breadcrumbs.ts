@@ -1,4 +1,5 @@
 import { previewIntegrations } from "./preview-integrations";
+import { casePreviewId } from "./case-preview-id";
 import { platformRoutes } from "./platform-routes";
 
 export type NavigationCrumb = {
@@ -20,7 +21,7 @@ export function platformBreadcrumbs(pathname: string): NavigationCrumb[] {
   if (area === "overview") return [root, section("Overview")];
   if (area === "cases") {
     if (!item) return [root, section("Cases")];
-    const caseLabel = item === "case-detail" ? "Investigation" : decodeURIComponent(item);
+    const caseLabel = item === "case-detail" ? `Case ${casePreviewId.slice(0, 8)}` : decodeURIComponent(item);
     return [root, section("Cases", platformRoutes.cases), section(caseLabel)];
   }
   if (area === "integrations") {
