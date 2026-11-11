@@ -124,6 +124,7 @@ import { QueueStatusIndicator, QueueVerdictBadge } from "./case-queue-semantic";
 import {
   PriorityBadge,
   PriorityBars,
+  QueuePriorityIcon,
   CaseStatusBadge,
   VerdictMarker,
 } from "./semantic";
@@ -148,12 +149,12 @@ const optionalColumns = [
 type OptionalColumn = (typeof optionalColumns)[number];
 type SortKey = OptionalColumn | "title" | "attention";
 const columnClasses: Record<OptionalColumn, string> = {
-  priority: "w-28 @max-[680px]/case-grid:hidden",
-  verdict: "w-43 @max-[520px]/case-grid:hidden",
-  status: "w-37 @max-[600px]/case-grid:hidden",
-  owner: "w-28 @max-[1080px]/case-grid:hidden",
-  age: "w-17 @max-[960px]/case-grid:hidden",
-  source: "w-36 text-caption @max-[1200px]/case-grid:hidden",
+  priority: "w-28",
+  verdict: "w-40",
+  status: "w-36",
+  owner: "w-32",
+  age: "w-16",
+  source: "w-36 text-body",
 };
 const currentAnalyst = "Navdeep Annu";
 const sourceOptionIcons: Record<Source, LucideIcon> = {
@@ -168,7 +169,7 @@ function Owner({ name }: { name: string | null }) {
   return (
     <span
       data-ui="owner"
-      className="inline-flex items-center gap-1.5 text-caption whitespace-nowrap"
+      className="inline-flex items-center gap-1.5 text-body whitespace-nowrap"
     >
       {name ? (
         <>
@@ -323,7 +324,7 @@ function CaseFilterDropdown({
               return (
                 <DropdownMenuRadioItem key={option.value} value={option.value} closeOnClick>
                   {option.priority ? (
-                    <PriorityBars value={option.priority} />
+                    <QueuePriorityIcon value={option.priority} />
                   ) : option.verdict ? (
                     <VerdictMarker value={option.verdict} />
                   ) : Icon ? (
@@ -1179,7 +1180,7 @@ export function CaseTable({
                   >
                     <Table
                       data-ui="case-table"
-                      className="group/queue min-w-0 table-fixed [&_tbody_td]:h-16 [&_tbody_td]:py-3 data-[density=comfortable]:[&_tbody_td]:h-20 data-[density=comfortable]:[&_tbody_td]:py-4"
+                      className="group/queue min-w-[960px] table-fixed [&_tbody_td]:h-16 [&_tbody_td]:py-3 data-[density=comfortable]:[&_tbody_td]:h-20 data-[density=comfortable]:[&_tbody_td]:py-4"
                       data-density={density}
                     >
                       <caption className="sr-only">
@@ -1429,7 +1430,7 @@ export function CaseTable({
                               </div>
                               <div
                                 data-ui="mobile-badges"
-                                className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 @min-[600px]/case-grid:hidden"
+                                className="hidden"
                               >
                                 {columns.priority && (
                                   <span className="@min-[520px]/case-grid:hidden">
