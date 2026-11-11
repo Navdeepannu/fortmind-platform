@@ -34,6 +34,7 @@ import { CopyIdentifier } from "./copy-identifier";
 import { InvestigationSection } from "./investigation-section";
 import { ReviewVerdict } from "./review-verdict";
 import { CaseCategoryTabs } from "./section-navigation";
+import { FindingExplorer } from "./finding-explorer";
 
 function CaseHeader({ data }: { data: CaseOverviewData }) {
   const host = data.entities.find((entity) => entity.kind === "host");
@@ -460,97 +461,16 @@ function SimilarCases({ data }: { data: CaseOverviewData }) {
   );
 }
 
-function FindingRow({
-  finding,
-  index,
-}: {
-  finding: OverviewFinding;
-  index: number;
-}) {
-  return (
-    <details
-      data-ui="finding"
-      id={`finding-${finding.id}`}
-      className="group/finding scroll-mt-40 border-t border-border first:border-t-0 [&_summary::-webkit-details-marker]:hidden [&_summary:hover]:bg-muted/35 [&_summary:focus-visible]:outline-2 [&_summary:focus-visible]:outline-ring [&_summary:focus-visible]:-outline-offset-2"
-    >
-      <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-3.5 sm:px-5">
-        <span data-ui="finding-number" className="pt-0.5 font-mono text-caption text-muted-foreground">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <span data-ui="finding-content" className="flex min-w-0 flex-1 flex-col gap-1">
-          <span data-ui="finding-title-row" className="flex flex-wrap items-center gap-2">
-            <strong className="text-label font-semibold">{finding.title}</strong>
-            {finding.relationship === "Supports concern" && finding.severity && (
-              <SeverityBadge value={finding.severity} />
-            )}
-          </span>
-          <span data-ui="finding-summary" className="text-label text-muted-foreground">
-            {finding.summary}
-          </span>
-          <span data-ui="finding-metadata" className="mt-0.5 text-caption text-muted-foreground">
-            {finding.evidenceState}
-          </span>
-        </span>
-        <ChevronDown
-          data-ui="finding-chevron"
-          aria-hidden="true"
-          className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-open/finding:rotate-180"
-        />
-      </summary>
-      <div data-ui="finding-expanded" className="grid min-w-0 gap-4 border-t border-border bg-muted/30 px-4 py-4 sm:px-5 @min-[620px]/case:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <div>
-          <h4 className="text-caption font-semibold text-muted-foreground">Interpretation and limits</h4>
-          <p className="mt-1.5 text-label">{finding.detail}</p>
-        </div>
-        <div>
-          <h4 className="text-caption font-semibold text-muted-foreground">Provenance</h4>
-          <p className="mt-1.5 flex items-start gap-1.5 text-label">
-            <FileSearch aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-            {finding.provenance}
-          </p>
-        </div>
-      </div>
-    </details>
-  );
-}
-
 function Findings({ data }: { data: CaseOverviewData }) {
-  const groups = [
-    { relationship: "Supports concern", label: "Signals supporting concern", note: "A reported claim is not confirmed execution" },
-    { relationship: "Context · unresolved", label: "Context still unresolved", note: "Related data does not establish a connection" },
-    { relationship: "Limits corroboration", label: "Missing corroboration", note: "Empty lookups do not mean benign activity" },
-  ] as const;
-
   return (
     <InvestigationSection
       id="findings"
-      title="Investigation findings"
+      title="Findings"
       count={data.findings.length}
-      description="Grouped by how each result informs the investigation"
+      description="Review the observations behind OSCAR's assessment"
       contentClassName="p-0"
     >
-      <div data-ui="findings-list">
-        {groups.map((group) => {
-          const rows = data.findings.filter((finding) => finding.relationship === group.relationship);
-          if (!rows.length) return null;
-          return (
-            <section
-              key={group.relationship}
-              data-ui="finding-group"
-              aria-label={group.label}
-              className="min-w-0 border-b border-border last:border-b-0"
-            >
-              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/30 px-4 py-3 sm:px-5">
-                <h3 className="text-label font-semibold">{group.label} <span className="ml-1 font-normal text-muted-foreground">{rows.length}</span></h3>
-                <p className="text-caption text-muted-foreground">{group.note}</p>
-              </header>
-              {rows.map((finding) => (
-                <FindingRow key={finding.id} finding={finding} index={data.findings.indexOf(finding)} />
-              ))}
-            </section>
-          );
-        })}
-      </div>
+      <FindingExplorer findings={data.findings} />
     </InvestigationSection>
   );
 }
