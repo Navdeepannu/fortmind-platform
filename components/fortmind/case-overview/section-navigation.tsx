@@ -123,7 +123,7 @@ export function CaseCategoryTabs({
   }
 
   return (
-    <div ref={workspaceRef} onClick={followReference} data-ui="case-navigation" className="min-w-0 [--case-primary-nav-height:3.0625rem]">
+    <div ref={workspaceRef} onClick={followReference} data-ui="case-navigation" className="min-w-0 [--case-primary-nav-height:2.75rem]">
       <Tabs
         value={selection.tab}
         onValueChange={(value) => {
@@ -135,9 +135,9 @@ export function CaseCategoryTabs({
       >
         <div data-ui="page-nav" className="sticky top-(--workspace-header-height) z-20 flex h-(--case-primary-nav-height) min-w-0 items-center gap-5 border-b bg-background @max-[501px]/case:gap-3">
           <div data-case-tab-scroll className="relative min-w-0 flex-1 overflow-x-auto [scrollbar-width:thin]">
-            <TabsList variant="line" activateOnFocus aria-label="Case categories" className="min-w-max gap-6 border-0 p-0 group-data-horizontal/tabs:h-12">
+            <TabsList variant="line" activateOnFocus aria-label="Case categories" className="min-w-max gap-4 border-0 p-0 group-data-horizontal/tabs:h-11 sm:gap-5">
               {caseSectionGroups.map((group) => (
-                <TabsTrigger key={group.id} value={group.id} className="h-12 flex-none rounded-none px-0 group-data-horizontal/tabs:after:bottom-0">
+                <TabsTrigger key={group.id} value={group.id} className="h-11 flex-none rounded-none px-0 group-data-horizontal/tabs:after:bottom-0">
                   {group.label}
                 </TabsTrigger>
               ))}
@@ -203,10 +203,10 @@ export function CaseCategoryTabs({
                 <aside
                   data-ui="secondary-nav"
                   aria-label={`${group.label} sections`}
-                  className="hidden min-w-0 @min-[760px]/case:sticky @min-[760px]/case:top-[calc(var(--workspace-header-height)+var(--case-primary-nav-height)+1rem)] @min-[760px]/case:block @min-[760px]/case:w-48 @min-[760px]/case:flex-none @min-[760px]/case:border-r @min-[760px]/case:border-border @min-[760px]/case:py-5 @min-[760px]/case:pr-4"
+                  className="hidden min-w-0 @min-[760px]/case:sticky @min-[760px]/case:top-[calc(var(--workspace-header-height)+var(--case-primary-nav-height)+1rem)] @min-[760px]/case:block @min-[760px]/case:w-44 @min-[760px]/case:flex-none @min-[760px]/case:border-r @min-[760px]/case:border-border @min-[760px]/case:py-5 @min-[760px]/case:pr-4"
                 >
                   <p className="mb-3 px-3 text-caption font-medium text-muted-foreground">
-                    {group.label} views
+                    Sections
                   </p>
                   <TabsList
                     variant="line"
