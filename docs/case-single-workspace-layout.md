@@ -1,3 +1,5 @@
+> **Superseded (Nov 10):** The scroll-through sections experiment described below was replaced by the compact one-view-at-a-time tabs in [Case compact subview tabs](./case-compact-subview-tabs.md). This file is retained as design history only.
+
 # Case detail: one navigation tier, five complete workspaces
 
 ## Why this replaces the contextual section rail
