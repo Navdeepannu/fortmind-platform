@@ -5,7 +5,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   caseSectionGroups,
   caseViewForTarget,
@@ -15,7 +14,20 @@ import {
 } from "@/lib/case-sections";
 import { caseViewHref } from "@/lib/platform-routes";
 
-function hashTarget() {
+const compactNames: Partial<Record<CaseSectionId, string>> = {
+  conclusion: "Summary",
+  "how-oscar-decided": "OSCAR trace",
+  findings: "Findings",
+  hypotheses: "Hypotheses",
+  "attack-path": "Attack path",
+  entities: "Entities",
+  evidence: "Sources",
+  "similar-cases": "Related",
+  actions: "Actions",
+  "analyst-notes": "Notes",
+};
+
+function readHash() {
   try {
     return decodeURIComponent(window.location.hash.slice(1));
   } catch {
@@ -23,6 +35,11 @@ function hashTarget() {
   }
 }
 
+/**
+ * One prominent tab bar for the five case workspaces and one compact contextual
+ * segmented control for mutually exclusive sibling views. Never show all eleven
+ * source sections as a vertically stacked report.
+ */
 export function CaseCategoryTabs({
   views,
   counts,
@@ -39,24 +56,22 @@ export function CaseCategoryTabs({
   const [request, setRequest] = useState(0);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const focusTarget = useRef<string | null>(null);
+  const initialLoad = useRef(true);
 
   function navigate(next: CaseViewSelection, target = "") {
     focusTarget.current = target || null;
     const href = caseViewHref(window.location.href, next, target);
-    if (`${location.pathname}${location.search}${location.hash}` !== href) {
-      // App Router supports the History API for local query state. This avoids
-      // fetching the case again or remounting forms when a view changes.
+    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== href) {
       window.history.pushState(null, "", href);
     }
-    // History pushState doesn't emit hashchange. Notify mounted evidence views
-    // so a source deep link selects its finding even after filters were applied.
+    // pushState doesn't emit hashchange, but the finding explorer listens here.
     if (target) window.dispatchEvent(new Event("fortmind:case-navigation"));
     setRequest((value) => value + 1);
   }
 
   useEffect(() => {
     const restore = () => {
-      const target = hashTarget();
+      const target = readHash();
       const url = new URL(window.location.href);
       const selected = caseViewForTarget(target) ?? resolveCaseView(url.searchParams);
       const canonical = caseViewHref(url.href, selected, target);
@@ -67,202 +82,207 @@ export function CaseCategoryTabs({
     };
     const frame = requestAnimationFrame(restore);
     window.addEventListener("hashchange", restore);
+    window.addEventListener("popstate", restore);
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("hashchange", restore);
+      window.removeEventListener("popstate", restore);
     };
   }, [pathname, searchKey]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      const workspace = workspaceRef.current;
-      if (!workspace) return;
-      const targetId = hashTarget();
-      const current = caseViewForTarget(targetId) ?? resolveCaseView(new URL(location.href).searchParams);
-      // The App Router may publish new query state after our local request.
-      // Wait for that selection before focusing content in a different panel.
+      const root = workspaceRef.current;
+      if (!root) return;
+
+      const targetId = readHash();
+      const current = caseViewForTarget(targetId) ??
+        resolveCaseView(new URL(window.location.href).searchParams);
+      // Wait until the App Router reflects the URL's selection.
       if (current.tab !== selection.tab || current.view !== selection.view) return;
-      for (const track of workspace.querySelectorAll<HTMLElement>("[data-case-tab-scroll]")) {
+
+      for (const track of root.querySelectorAll<HTMLElement>("[data-case-tab-scroll], [data-subview-scroll]")) {
         if (!track.getClientRects().length) continue;
-        const tab = track.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
-        if (!tab) continue;
-        const tabBox = tab.getBoundingClientRect();
-        const trackBox = track.getBoundingClientRect();
-        if (tabBox.left < trackBox.left || tabBox.right > trackBox.right) {
-          track.scrollBy({ left: tabBox.left - trackBox.left - 12, behavior: "instant" });
+        const active = track.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+        if (!active) continue;
+        const box = track.getBoundingClientRect();
+        const tabBox = active.getBoundingClientRect();
+        if (tabBox.left < box.left || tabBox.right > box.right) {
+          track.scrollBy({ left: tabBox.left - box.left - 12, behavior: "instant" });
         }
       }
-      const target = workspace.querySelector<HTMLElement>(`section[id="${selection.view}"]`);
+
+      const viewPanel = [...root.querySelectorAll<HTMLElement>("[data-case-view]")]
+        .find((panel) => panel.dataset.caseView === selection.view && panel.getClientRects().length);
+      const section = viewPanel?.querySelector<HTMLElement>(`section[id="${selection.view}"]`);
       const linked = targetId ? document.getElementById(targetId) : null;
-      const destination = linked && target?.contains(linked) ? linked : target;
+      const destination = linked && section?.contains(linked) ? linked : section;
       if (!destination) return;
       if (destination instanceof HTMLDetailsElement) destination.open = true;
+
+      const nav = root.querySelector<HTMLElement>('[data-ui="page-nav"]');
+      const navBottom = nav?.getBoundingClientRect().bottom ?? 0;
+      const panelTop = viewPanel?.getBoundingClientRect().top ?? 0;
+      const firstLoad = initialLoad.current;
+      initialLoad.current = false;
+
+      if (targetId) {
+        destination.scrollIntoView({ block: "start", behavior: "instant" });
+      } else if (!firstLoad && panelTop < navBottom) {
+        // Keep the segmented switcher visible when returning from a long view.
+        const toolbar = root.querySelector<HTMLElement>(
+          `[data-case-category="${selection.tab}"] [data-ui="contextual-view-toolbar"]`,
+        );
+        (toolbar ?? viewPanel)?.scrollIntoView({ block: "start", behavior: "instant" });
+      }
+
       if (focusTarget.current === targetId && targetId) {
-        const focus = destination instanceof HTMLDetailsElement ? destination.querySelector("summary") : destination;
-        focus?.focus({ preventScroll: true });
+        (destination instanceof HTMLDetailsElement
+          ? destination.querySelector<HTMLElement>("summary")
+          : destination
+        )?.focus({ preventScroll: true });
       }
       focusTarget.current = null;
-      // Only the primary category row sits above the content. Contextual
-      // subnavigation is a side rail, not a second sticky horizontal bar.
-      const nav = workspace.querySelector<HTMLElement>('[data-ui="page-nav"]');
-      const boundary = nav?.getBoundingClientRect().bottom ?? 0;
-      // Switching a workspace never scrolls through other views. Only recover
-      // its heading when a previously long view left the document scrolled down.
-      if (targetId || destination.getBoundingClientRect().top < boundary) {
-        destination.scrollIntoView({ block: "start", behavior: "instant" });
-      }
     });
     return () => cancelAnimationFrame(frame);
   }, [selection.tab, selection.view, request]);
 
   function followReference(event: MouseEvent<HTMLDivElement>) {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey ||
+        event.ctrlKey || event.shiftKey || event.altKey) return;
     const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
     const target = link?.hash.slice(1);
     const next = target ? caseViewForTarget(target) : undefined;
-    if (!target || !next) return;
+    if (!next || !target) return;
     event.preventDefault();
     navigate(next, target);
   }
 
   return (
-    <div ref={workspaceRef} onClick={followReference} data-ui="case-navigation" className="min-w-0 [--case-primary-nav-height:2.75rem]">
+    <div
+      ref={workspaceRef}
+      onClick={followReference}
+      data-ui="case-navigation"
+      className="min-w-0 [--case-primary-nav-height:2.75rem]"
+    >
       <Tabs
         value={selection.tab}
         onValueChange={(value) => {
-          const group = caseSectionGroups.find((group) => group.id === value);
+          const group = caseSectionGroups.find((item) => item.id === value);
           if (group) navigate({ tab: group.id, view: group.sections[0].id });
         }}
         className="min-w-0 gap-0"
         data-ui="case-category-tabs"
       >
-        <div data-ui="page-nav" className="sticky top-(--workspace-header-height) z-20 flex h-(--case-primary-nav-height) min-w-0 items-center gap-5 border-b bg-background @max-[501px]/case:gap-3">
-          <div data-case-tab-scroll className="relative min-w-0 flex-1 overflow-x-auto [scrollbar-width:thin]">
-            <TabsList variant="line" activateOnFocus aria-label="Case categories" className="min-w-max gap-4 border-0 p-0 group-data-horizontal/tabs:h-11 sm:gap-5">
-              {caseSectionGroups.map((group) => (
-                <TabsTrigger key={group.id} value={group.id} className="h-11 flex-none rounded-none px-0 group-data-horizontal/tabs:after:bottom-0">
-                  {group.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-          {status === "Needs you" && (
-            <Button size="sm" onClick={() => navigate({ tab: "decision", view: "conclusion" }, "decision-heading")} aria-label="Review verdict">
-              <span className="@max-[641px]/case:hidden">Review verdict</span>
-              <span className="hidden @max-[641px]/case:inline">Review</span>
-              <ArrowRight data-icon="inline-end" aria-hidden="true" />
-            </Button>
-          )}
-        </div>
-        {caseSectionGroups.map((group) => (
-          <TabsContent key={group.id} value={group.id} keepMounted hidden={selection.tab !== group.id} data-case-category={group.id} className="min-w-0 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2">
-            {group.sections.length > 1 ? (
-              <Tabs
-                orientation="vertical"
-                value={selection.tab === group.id ? selection.view : group.sections[0].id}
-                onValueChange={(value) => {
-                  const view = group.sections.find((section) => section.id === value);
-                  if (view) navigate({ tab: group.id, view: view.id });
-                }}
-                className="min-w-0 flex-col items-stretch gap-0 @min-[760px]/case:flex-row @min-[760px]/case:items-start"
-                data-ui="case-subview-layout"
+        <div
+          data-ui="page-nav"
+          className="sticky top-(--workspace-header-height) z-20 h-(--case-primary-nav-height) min-w-0 border-b border-border bg-background"
+        >
+          <div data-ui="primary-nav-inner" className="mx-auto flex h-full w-full max-w-[1120px] min-w-0 items-center gap-4">
+            <div data-case-tab-scroll className="relative min-w-0 flex-1 overflow-x-auto [scrollbar-width:thin]">
+              <TabsList
+                variant="line"
+                activateOnFocus
+                aria-label="Case categories"
+                className="min-w-max gap-5 border-0 p-0 group-data-horizontal/tabs:h-11"
               >
-                <div
-                  data-ui="mobile-section-nav"
-                  className="min-w-0 border-b border-border py-3 @min-[760px]/case:hidden"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="shrink-0 text-caption font-medium text-muted-foreground">
-                      View
-                    </span>
-                    <Select
-                      value={selection.tab === group.id ? selection.view : group.sections[0].id}
-                      onValueChange={(value) => {
-                        const view = group.sections.find((section) => section.id === value);
-                        if (view) navigate({ tab: group.id, view: view.id });
-                      }}
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        aria-label={`${group.label} section`}
-                        className="min-w-0 flex-1 justify-between bg-background text-label"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent align="end">
-                        {group.sections.map((section) => (
-                          <SelectItem key={section.id} value={section.id}>
-                            {section.label}
-                            {counts[section.id] !== undefined
-                              ? ` · ${counts[section.id]}`
-                              : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <aside
-                  data-ui="secondary-nav"
-                  aria-label={`${group.label} sections`}
-                  className="hidden min-w-0 @min-[760px]/case:sticky @min-[760px]/case:top-[calc(var(--workspace-header-height)+var(--case-primary-nav-height)+1rem)] @min-[760px]/case:block @min-[760px]/case:w-44 @min-[760px]/case:flex-none @min-[760px]/case:border-r @min-[760px]/case:border-border @min-[760px]/case:py-5 @min-[760px]/case:pr-4"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-2 px-3">
-                    <p className="text-caption font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                      {group.label}
-                    </p>
-                    <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
-                      {group.sections.length} views
-                    </span>
-                  </div>
-                  <TabsList
-                    variant="line"
-                    activateOnFocus
-                    aria-label={`${group.label} views`}
-                    className="flex h-auto w-full flex-col items-stretch gap-1 border-0 bg-transparent p-0"
+                {caseSectionGroups.map((group) => (
+                  <TabsTrigger
+                    key={group.id}
+                    value={group.id}
+                    className="h-11 flex-none rounded-none px-0 group-data-horizontal/tabs:after:bottom-0"
                   >
-                    {group.sections.map((section) => (
-                      <TabsTrigger
-                        key={section.id}
-                        value={section.id}
-                        data-ui="case-section-link"
-                        data-section-id={section.id}
-                        className="group/subview relative h-9 w-full flex-none justify-between rounded-md border-0 px-3 text-left text-label font-normal after:hidden before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-transparent hover:bg-muted/50 data-active:bg-muted/70 data-active:font-medium data-active:text-foreground data-active:before:bg-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <span className="min-w-0 truncate">{section.label}</span>
-                        {counts[section.id] !== undefined && (
-                          <span
-                            data-ui="section-count"
-                            aria-label={`${counts[section.id]} items`}
-                            className="ml-2 shrink-0 rounded-md bg-background px-1.5 py-0.5 text-caption font-normal tabular-nums text-muted-foreground"
-                          >
-                            {counts[section.id]}
-                          </span>
-                        )}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </aside>
-
-                {group.sections.map((section) => (
-                  <TabsContent
-                    key={section.id}
-                    value={section.id}
-                    keepMounted
-                    hidden={selection.tab !== group.id || selection.view !== section.id}
-                    data-case-view={section.id}
-                    className="min-w-0 w-full flex-1 pb-12 pt-5 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 @min-[760px]/case:pl-6 @max-[501px]/case:pt-4"
-                  >
-                    {views[section.id]}
-                  </TabsContent>
+                    {group.label}
+                  </TabsTrigger>
                 ))}
-              </Tabs>
-            ) : (
-              <div data-case-view={group.sections[0].id} className="min-w-0 pb-12 pt-6 @max-[501px]/case:pt-5">
-                {views[group.sections[0].id]}
-              </div>
+              </TabsList>
+            </div>
+            {status === "Needs you" && (
+              <Button
+                size="sm"
+                aria-label="Review verdict"
+                onClick={() => navigate({ tab: "decision", view: "conclusion" }, "decision-heading")}
+              >
+                <span className="@max-[641px]/case:hidden">Review verdict</span>
+                <span className="hidden @max-[641px]/case:inline">Review</span>
+                <ArrowRight data-icon="inline-end" aria-hidden="true" />
+              </Button>
             )}
+          </div>
+        </div>
+
+        {caseSectionGroups.map((group) => (
+          <TabsContent
+            key={group.id}
+            value={group.id}
+            keepMounted
+            hidden={selection.tab !== group.id}
+            data-case-category={group.id}
+            className="min-w-0 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            <div
+              data-ui="case-section-workspace"
+              className="mx-auto w-full max-w-[1120px] min-w-0 pb-12 pt-5 @max-[501px]/case:pt-4"
+            >
+              {group.sections.length > 1 ? (
+                <Tabs
+                  value={selection.tab === group.id ? selection.view : group.sections[0].id}
+                  onValueChange={(value) => {
+                    const view = group.sections.find((item) => item.id === value);
+                    if (view) navigate({ tab: group.id, view: view.id });
+                  }}
+                  className="min-w-0 gap-0"
+                  data-ui="case-view-tabs"
+                >
+                  <div data-ui="contextual-view-toolbar" className="flex min-w-0 scroll-mt-28 items-center justify-between gap-3 pb-4">
+                    <div data-subview-scroll className="min-w-0 overflow-x-auto [scrollbar-width:thin]">
+                      <TabsList
+                        aria-label={`${group.label} views`}
+                        activateOnFocus
+                        className="h-9 min-w-max shrink-0 border-border bg-muted/40 p-[3px] group-data-horizontal/tabs:h-9"
+                      >
+                        {group.sections.map((section) => (
+                          <TabsTrigger
+                            key={section.id}
+                            value={section.id}
+                            data-ui="case-subview-trigger"
+                            data-section-id={section.id}
+                            className="h-7 flex-none gap-2 rounded-[5px] border-transparent px-3 py-1 text-caption font-medium data-active:border-border data-active:bg-background data-active:text-foreground"
+                          >
+                            {compactNames[section.id] ?? section.label}
+                            {counts[section.id] !== undefined && (
+                              <span
+                                aria-label={`${counts[section.id]} items`}
+                                className="font-mono text-[11px] tabular-nums text-muted-foreground"
+                              >
+                                {counts[section.id]}
+                              </span>
+                            )}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </div>
+                  </div>
+
+                  {group.sections.map((section) => (
+                    <TabsContent
+                      key={section.id}
+                      value={section.id}
+                      keepMounted
+                      hidden={selection.tab !== group.id || selection.view !== section.id}
+                      data-case-view={section.id}
+                      className="min-w-0 w-full pb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
+                      {views[section.id]}
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              ) : (
+                <div data-case-view={group.sections[0].id} className="min-w-0">
+                  {views[group.sections[0].id]}
+                </div>
+              )}
+            </div>
           </TabsContent>
         ))}
       </Tabs>

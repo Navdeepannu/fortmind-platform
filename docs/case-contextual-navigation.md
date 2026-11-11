@@ -1,3 +1,5 @@
+> **Superseded layout:** The contextual section rail and secondary view picker documented here were replaced by the five full-width, single-tier workspaces in [Case single-workspace layout](./case-single-workspace-layout.md). This file remains as design history, not the current UI specification.
+
 # Case contextual navigation
 
 The full investigation at `/platform/cases/case-detail` and `/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c` reuses all 11 existing view components. It renders one active subsection, rather than a category's sections in a scrolling document.
