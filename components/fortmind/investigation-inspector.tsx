@@ -207,10 +207,10 @@ export function InvestigationInspector(props: InspectorProps) {
   );
   const contents = (
     <>
-      <header className="sticky top-0 flex shrink-0 flex-col gap-3 bg-surface-floating px-5 py-3">
-        <div className="flex items-center justify-between gap-3">
+      <header className="sticky top-0 flex shrink-0 flex-col gap-3 bg-surface-floating px-4 py-3 sm:px-5">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <CopyTechnicalValue label="case ID" value={item.id} />
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="ml-auto flex shrink-0 items-center gap-1">
             {position >= 0 && (
               <span
                 data-ui="inspector-position"
@@ -223,6 +223,7 @@ export function InvestigationInspector(props: InspectorProps) {
               <Button
                 variant="ghost"
                 size="icon-sm"
+                className="max-sm:size-10"
                 aria-label="Previous case"
                 disabled={!onPrevious}
                 onClick={onPrevious}
@@ -234,6 +235,7 @@ export function InvestigationInspector(props: InspectorProps) {
               <Button
                 variant="ghost"
                 size="icon-sm"
+                className="max-sm:size-10"
                 aria-label="Next case"
                 disabled={!onNext}
                 onClick={onNext}
@@ -246,6 +248,7 @@ export function InvestigationInspector(props: InspectorProps) {
               <Button
                 variant="ghost"
                 size="icon-sm"
+                className="max-sm:size-10"
                 aria-label="Close investigation preview"
                 onClick={onClose}
               >
