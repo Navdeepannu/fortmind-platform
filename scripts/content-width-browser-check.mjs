@@ -106,7 +106,8 @@ async function caseViews(route, state) {
         const content = active?.querySelector('[data-ui="case-section-workspace"]');
         const headerBody = document.querySelector('[data-ui="header-body"]');
         const primary = document.querySelector('[data-ui="primary-nav-inner"]');
-        const section = active?.querySelector('section[data-ui="section"]:not([hidden])');
+        const section = [...(active?.querySelectorAll('section[data-ui="section"]') ?? [])]
+          .find(node => node.getClientRects().length);
         return {
           full: full.map(node => ({ name: node.dataset.ui, x: rect(node).x, width: rect(node).width })),
           content: { x: rect(content).x, right: rect(content).right, width: rect(content).width },
