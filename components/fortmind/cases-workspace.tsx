@@ -17,7 +17,7 @@ function CasesContent({ queue, view }: { queue: Queue; view?: CaseListView }) {
         className="flex flex-wrap justify-between max-[1101px]:items-start max-md:items-start max-md:gap-3 items-end gap-5 max-[761px]:items-start"
       >
         <div>
-          <h1 className="text-page-title">Fortcases</h1>
+          <h1 className="text-page-title">Cases</h1>
           <p className="mt-1 text-prose text-muted-foreground">
             Review investigations and move the next decision forward.
           </p>
