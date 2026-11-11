@@ -775,7 +775,7 @@ export function CaseTable({
             className="overflow-hidden rounded-lg bg-surface border border-border"
           >
             <div data-ui="queue-top" className="border-b bg-surface px-5 max-md:px-3">
-              <div className="max-w-full overflow-x-auto">
+              <div className="max-w-full overflow-x-auto overscroll-x-contain">
                 <TabsList
                   variant="line"
                   aria-label="Case queue views"
@@ -810,11 +810,11 @@ export function CaseTable({
             </div>
             <div
               data-ui="filter-row"
-              className="flex flex-wrap items-center gap-3 border-b bg-surface px-5 py-3 max-md:px-3"
+              className="flex flex-col items-stretch gap-3 border-b border-border bg-surface px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:px-5"
             >
               <div
                 data-ui="search"
-                className="relative min-w-40 flex-1 sm:max-w-80 max-sm:basis-full"
+                className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-48 sm:max-w-80"
               >
                 <Search
                   aria-hidden="true"
@@ -832,7 +832,7 @@ export function CaseTable({
               </div>
               <div
                 data-ui="table-view-tools"
-                className="ml-auto flex flex-wrap items-center gap-2 max-sm:w-full"
+                className="flex w-full flex-wrap items-center gap-2 max-sm:justify-between max-sm:[&_button]:min-h-10 sm:ml-auto sm:w-auto"
               >
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -1155,7 +1155,10 @@ export function CaseTable({
                 >
                   <div
                     data-ui="case-table-scroll"
-                    className="min-h-0 flex-1 overflow-y-auto overscroll-contain [&>[data-slot=table-container]]:overflow-visible"
+                    role="region"
+                    aria-label="Cases table, scroll horizontally to access additional columns"
+                    tabIndex={0}
+                    className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [&>[data-slot=table-container]]:overflow-visible"
                   >
                     <Table
                       data-ui="case-table"
