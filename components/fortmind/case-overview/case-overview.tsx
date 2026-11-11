@@ -759,49 +759,47 @@ function Hypotheses({ data }: { data: CaseOverviewData }) {
   return (
     <InvestigationSection
       id="hypotheses"
-      title="Hypotheses"
+      title="Competing explanations"
       count={data.hypotheses.length}
-      description="Alternative explanations considered by OSCAR"
+      description="Compare supporting and missing evidence; neither hypothesis is confirmed"
     >
-      <div data-ui="record-list" className="flex flex-col">
+      <div data-ui="record-list" className="grid min-w-0 gap-3 @min-[680px]/case:grid-cols-2">
         {data.hypotheses.map((item, index) => (
           <article
             data-ui="record"
-            className="mt-5 border-t border-border pt-5 first:mt-0 first:border-t-0 first:pt-0"
             key={item.title}
+            className="flex min-w-0 flex-col rounded-md border border-border bg-muted/25 p-4"
           >
-            <div
-              data-ui="record-top"
-              className="flex items-center justify-between gap-3 text-muted-foreground text-caption"
-            >
-              <span>
-                H{index + 1} · {item.result}
-              </span>
-              {item.score !== undefined && (
-                <strong className="text-foreground font-medium">
-                  {item.level && `${item.level} · `}{item.score}
+            <div data-ui="record-top" className="flex flex-wrap items-center justify-between gap-2 text-caption text-muted-foreground">
+              <span className="font-mono">Hypothesis {String(index + 1).padStart(2, "0")}</span>
+              <span>{item.result}</span>
+            </div>
+            <h3 className="mt-2 text-body font-semibold">{item.title}</h3>
+            {item.score !== undefined && (
+              <div className="mt-3 flex items-center justify-between gap-2 border-y border-border py-2 text-caption text-muted-foreground">
+                <span>Agent score · not probability</span>
+                <strong className="font-medium tabular-nums text-foreground">
+                  {item.score}/100 {item.level ? `· ${item.level}` : ""}
                 </strong>
+              </div>
+            )}
+            <div className="mt-3 flex flex-1 flex-col gap-3 text-label">
+              {item.supportingEvidence && (
+                <div>
+                  <h4 className="text-caption font-semibold text-foreground">Supporting signal</h4>
+                  <p className="mt-1 text-muted-foreground">{item.supportingEvidence}</p>
+                </div>
+              )}
+              {item.limitations && (
+                <div className="border-t border-border pt-3">
+                  <h4 className="text-caption font-semibold text-foreground">Evidence missing or disputed</h4>
+                  <p className="mt-1 text-muted-foreground">{item.limitations}</p>
+                </div>
+              )}
+              {!item.supportingEvidence && !item.limitations && (
+                <p className="text-muted-foreground">{item.explanation}</p>
               )}
             </div>
-            <h3 className="mt-1.25 text-panel-title">
-              {item.title}
-            </h3>
-            {item.supportingEvidence && item.limitations ? (
-              <dl className="mt-4 grid grid-cols-2 gap-5 text-label @max-[641px]/case:grid-cols-1 @max-[641px]/case:gap-3">
-                <div>
-                  <dt className="font-medium">Supporting evidence</dt>
-                  <dd className="mt-1 text-muted-foreground">{item.supportingEvidence}</dd>
-                </div>
-                <div>
-                  <dt className="font-medium">Contradicting or missing evidence</dt>
-                  <dd className="mt-1 text-muted-foreground">{item.limitations}</dd>
-                </div>
-              </dl>
-            ) : (
-              <p className="max-w-[90ch] mt-1.5 text-muted-foreground text-label">
-                {item.explanation}
-              </p>
-            )}
           </article>
         ))}
       </div>
