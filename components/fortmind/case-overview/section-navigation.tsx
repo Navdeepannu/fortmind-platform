@@ -128,10 +128,12 @@ export function CaseCategoryTabs({
 
       if (targetId) {
         destination.scrollIntoView({ block: "start", behavior: "instant" });
-      } else if ((!firstLoad || selection.view !== "conclusion") && panelTop < navBottom) {
-        // Changing tabs restores the compact view controls, but does not
-        // scroll through or reveal the other panels.
-        viewPanel?.scrollIntoView({ block: "start", behavior: "instant" });
+      } else if (!firstLoad && panelTop < navBottom) {
+        // Keep the segmented switcher visible when returning from a long view.
+        const toolbar = root.querySelector<HTMLElement>(
+          `[data-case-category="${selection.tab}"] [data-ui="contextual-view-toolbar"]`,
+        );
+        (toolbar ?? viewPanel)?.scrollIntoView({ block: "start", behavior: "instant" });
       }
 
       if (focusTarget.current === targetId && targetId) {
@@ -232,12 +234,12 @@ export function CaseCategoryTabs({
                   className="min-w-0 gap-0"
                   data-ui="case-view-tabs"
                 >
-                  <div data-ui="contextual-view-toolbar" className="flex min-w-0 items-center justify-between gap-3 pb-4">
+                  <div data-ui="contextual-view-toolbar" className="flex min-w-0 scroll-mt-28 items-center justify-between gap-3 pb-4">
                     <div data-subview-scroll className="min-w-0 overflow-x-auto [scrollbar-width:thin]">
                       <TabsList
                         aria-label={`${group.label} views`}
                         activateOnFocus
-                        className="h-9 min-w-max shrink-0 border-border bg-muted/40 p-0.75 group-data-horizontal/tabs:h-9"
+                        className="h-9 min-w-max shrink-0 border-border bg-muted/40 p-[3px] group-data-horizontal/tabs:h-9"
                       >
                         {group.sections.map((section) => (
                           <TabsTrigger
