@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CopyIdentifier } from "@/components/fortmind/case-overview/copy-identifier";
 import {
   platformBreadcrumbs,
   settingsBreadcrumbs,
@@ -38,7 +39,11 @@ function TopBarBreadcrumbs({ items }: { items: NavigationCrumb[] }) {
                   )}
                 />
               )}
-              {item.href && !current ? (
+              {current && item.copyValue ? (
+                <span aria-current="page" className="font-medium text-foreground [&_code]:font-mono [&_button]:size-7">
+                  <CopyIdentifier value={item.copyValue} display={item.label} label="case ID" />
+                </span>
+              ) : item.href && !current ? (
                 <Link
                   href={item.href}
                   className="min-w-0 truncate rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
