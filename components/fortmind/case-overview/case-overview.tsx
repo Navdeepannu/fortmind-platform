@@ -754,64 +754,52 @@ function Hypotheses({ data }: { data: CaseOverviewData }) {
 }
 
 function Evidence({ data }: { data: CaseOverviewData }) {
+  const sources = [...new Set(data.evidence.map((item) => item.source))];
   return (
     <InvestigationSection
       id="evidence"
-      title="Evidence"
+      title="Source responses"
       count={data.evidence.length}
-      description="Captured source response summaries; raw requests and responses were not supplied"
+      description="Captured lookup summaries grouped by source"
+      footer={
+        <p className="text-caption text-muted-foreground">
+          Raw requests and responses were not supplied. No matching records does not prove benign activity.
+        </p>
+      }
+      contentClassName="p-0"
     >
-      <div
-        data-ui="table-scroll"
-        className="max-w-full overflow-x-auto [&:focus-visible]:outline-2 [&:focus-visible]:outline-ring [&:focus-visible]:-outline-offset-2 [&_[data-slot='table-container']]:w-[max-content] [&_[data-slot='table-container']]:min-w-full [&_[data-slot='table-container']]:overflow-visible"
-        role="region"
-        aria-label="Evidence results"
-        tabIndex={0}
-      >
-        <Table
-          data-ui="evidence-table"
-          className="min-w-162.5 [&_:is(th,td)]:pt-2.75 [&_:is(th,td)]:pr-3.5 [&_:is(th,td)]:pb-2.75 [&_:is(th,td)]:pl-3.5 [&_:is(th,td)]:align-top [&_:is(th,td)]:text-label [&_:is(th,td)]:leading-5 [&_th:first-child]:w-32.5 [&_th:nth-child(2)]:w-38.75"
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHead
-                scope="col"
-                className="text-muted-foreground text-caption font-medium"
-              >
-                Source
-              </TableHead>
-              <TableHead
-                scope="col"
-                className="text-muted-foreground text-caption font-medium"
-              >
-                Lookup
-              </TableHead>
-              <TableHead
-                scope="col"
-                className="text-muted-foreground text-caption font-medium"
-              >
-                Response summary
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.evidence.map((item, index) => (
-              <TableRow key={`${item.source}-${index}`}>
-                <TableCell>{item.source}</TableCell>
-                <TableCell>{item.context}</TableCell>
-                <TableCell>{item.result}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div data-ui="evidence-list">
+        {sources.map((source) => {
+          const results = data.evidence.filter((item) => item.source === source);
+          return (
+            <section
+              key={source}
+              data-ui="evidence-source"
+              aria-label={`${source} lookups`}
+              className="border-b border-border last:border-b-0"
+            >
+              <header className="flex items-baseline justify-between gap-3 border-b border-border bg-muted/30 px-4 py-3 sm:px-5">
+                <h3 className="text-label font-semibold">{source}</h3>
+                <span className="text-caption text-muted-foreground">
+                  {results.length} {results.length === 1 ? "lookup" : "lookups"}
+                </span>
+              </header>
+              <ul className="divide-y divide-border">
+                {results.map((item, index) => (
+                  <li
+                    key={`${item.context}-${index}`}
+                    data-ui="evidence-result"
+                    className="grid min-w-0 grid-cols-1 gap-1 px-4 py-3 text-label sm:px-5 @min-[550px]/case:grid-cols-[minmax(100px,0.35fr)_minmax(0,1fr)] @min-[550px]/case:gap-4"
+                  >
+                    <span className="text-caption font-medium text-muted-foreground">{item.context}</span>
+                    <span>{item.result}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
       </div>
-      <p
-        data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
-      >
-        Successful lookups establish only the response shown. Empty results do
-        not establish benign activity.
-      </p>
     </InvestigationSection>
   );
 }
