@@ -151,10 +151,13 @@ test("workspace, filter controls, and floating content consume the layered palet
     path,
     await readFile(new URL(`../${path}`, import.meta.url), "utf8"),
   ])));
-  assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="utility-bar"\s+className="[^"]*bg-shell/);
+  assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="utility-bar"\s+className="[^"]*bg-background/);
   assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="inset"\s+className="[^"]*bg-background/);
-  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*bg-surface/);
+  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*mb-3/);
   assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="table-shell"\s+className="[^"]*bg-card/);
+  assert.match(sources["components/fortmind/workspace-shell.tsx"], /variant="inset"/, "sidebar uses the shadcn inset variant");
+  assert.match(sources["components/fortmind/case-table.tsx"], /<CaseFilterDropdown/, "quick filters use accessible Base UI dropdowns");
+  assert.doesNotMatch(sources["components/fortmind/case-table.tsx"], /<select\b/, "the Cases toolbar must not contain native selects");
   assert.match(sources["components/ui/button.tsx"], /border-border-strong bg-transparent text-foreground/);
   for (const path of ["input", "textarea", "native-select", "select"]) {
     assert.match(sources[`components/ui/${path}.tsx`], /bg-control/, `${path} uses the shared control fill`);
