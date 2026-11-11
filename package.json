@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "node --test scripts/*.test.mjs",
     "test:preview": "node --test scripts/preview-data.test.mjs scripts/preview-semantics.test.mjs",
     "test:colors": "node --test scripts/color-audit.test.mjs"
