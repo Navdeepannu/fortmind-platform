@@ -80,7 +80,7 @@ try {
       await expectView(category, view);
     }
   }
-  assert.equal(await page.locator("#findings details").count(), 5);
+  assert.equal(await page.locator('#findings [data-ui="finding"]').count(), 5);
   assert.equal(await page.locator("#hypotheses article").count(), 2);
   assert.equal(await page.locator("#entities [data-ui='entity-row']").count(), 4);
   assert.equal(await page.locator("#evidence [data-ui='evidence-result']").count(), 5);
@@ -98,13 +98,23 @@ try {
   await page.locator('[data-ui="question"] summary').first().click();
   assert.ok(await page.locator('[data-ui="question"]').first().evaluate(node => node.open));
 
-  // Findings are grouped by evidentiary meaning, while individual details remain linkable.
+  // Scan five observations while inspecting only the selected item's source.
   await selectView("Investigation", "findings");
-  assert.deepEqual(
-    await page.locator('[data-ui="finding-group"]').evaluateAll(nodes => nodes.map(node => node.getAttribute("aria-label"))),
-    ["Signals supporting concern", "Context still unresolved", "Missing corroboration"],
-  );
-  assert.equal(await page.locator('#findings [data-ui="finding"]').count(), 5);
+  const explorer = page.locator('[data-ui="finding-explorer"]');
+  assert.equal(await explorer.locator('[data-ui="finding"]').count(), 5);
+  assert.equal(await explorer.locator('[data-ui="finding-inspector"]').count(), 1);
+  assert.match(await page.locator('#findings [data-ui="section-location"]').innerText(), /Investigation.*01 \/ 03/i);
+  assert.match(await explorer.locator('[data-ui="selected-finding-title"]').innerText(), /LSASS memory access reported/);
+  await explorer.getByRole("button", { name: /Not corroborated 2/ }).click();
+  assert.equal(await explorer.locator('[data-ui="finding"]:visible').count(), 2);
+  assert.match(await explorer.locator('[data-ui="selected-finding-title"]').innerText(), /Wazuh/);
+  await explorer.getByRole("button", { name: /Unresolved 1/ }).click();
+  assert.equal(await explorer.locator('[data-ui="finding"]:visible').count(), 1);
+  await explorer.getByRole("button", { name: /All 5/ }).click();
+  assert.equal(await explorer.locator('[data-ui="finding"]:visible').count(), 5);
+  await explorer.locator('#finding-host-alerts [data-ui="finding-select"]').click();
+  assert.match(await explorer.locator('[data-ui="selected-finding-title"]').innerText(), /Six active security alerts/);
+  assert.match(await explorer.locator('[data-ui="finding-inspector"]').innerText(), /Elasticsearch/);
 
   // All confidence bars are phase scores, not verdict confidence.
   await selectView("Decision", "how-oscar-decided");
@@ -170,14 +180,15 @@ try {
   await expectView("Evidence", "entities");
   await page.goto(`${base}#finding-host-alerts`, { waitUntil: "networkidle" });
   await expectView("Investigation", "findings");
-  await page.waitForFunction(() => document.getElementById("finding-host-alerts").open);
+  await page.waitForFunction(() => document.querySelector('#finding-host-alerts [data-ui="finding-select"]')?.getAttribute("aria-pressed") === "true");
   await selectView("Investigation", "hypotheses");
   await selectView("Investigation", "findings");
-  assert.equal(await page.locator("#finding-host-alerts").getAttribute("open"), "", "Finding disclosures survive view changes");
+  assert.equal(await page.locator('#finding-host-alerts [data-ui="finding-select"]').getAttribute("aria-pressed"), "true", "Selected finding survives view changes");
   await selectPrimary("Decision");
   await page.getByRole("link", { name: "View finding", exact: true }).first().click();
   await expectView("Investigation", "findings");
-  await page.waitForFunction(() => document.activeElement === document.querySelector("#finding-memory-access > summary"));
+  await page.waitForFunction(() => document.activeElement === document.querySelector("#finding-memory-access"));
+  assert.equal(await page.locator('#finding-memory-access [data-ui="finding-select"]').getAttribute("aria-pressed"), "true");
   await page.getByRole("button", { name: "Review verdict", exact: true }).click();
   await expectView("Decision", "conclusion");
   await page.waitForFunction(() => document.activeElement === document.getElementById("decision-heading"));
@@ -245,7 +256,7 @@ try {
         }
       }
       await selectView("Investigation", "findings");
-      await page.locator("#findings details").evaluateAll(nodes => nodes.forEach(node => { node.open = true; }));
+      await page.locator('#finding-entra-signins [data-ui="finding-select"]').click();
       await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
       const nav = await page.locator('[data-ui="page-nav"]').evaluate(node => node.getBoundingClientRect().top);
       const rail = page.locator('[data-case-category="investigation"] [data-ui="secondary-nav"]');
