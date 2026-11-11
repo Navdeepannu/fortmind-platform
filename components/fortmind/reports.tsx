@@ -55,6 +55,12 @@ function comparison(value: number | null, previous: number | null, format?: stri
   if (value === null || previous === null) return "Previous comparison unavailable";
   if (value === previous) return "Unchanged from comparison period";
   if (format === "percent") return `${value > previous ? "+" : ""}${(value - previous).toFixed(1)} pts vs comparison period`;
+  if (format === "minutes") {
+    const change = value - previous;
+    const absolute = Math.abs(change);
+    const duration = absolute >= 1440 ? `${(absolute / 1440).toFixed(1)} d` : absolute >= 60 ? `${(absolute / 60).toFixed(1)} h` : `${Math.round(absolute)} min`;
+    return `${change > 0 ? "+" : "−"}${duration} vs comparison period`;
+  }
   if (previous === 0) return "No previous volume";
   const delta = (value - previous) / previous * 100;
   return `${delta > 0 ? "+" : ""}${new Intl.NumberFormat("en", { maximumFractionDigits: 1 }).format(delta)}% vs comparison period`;
