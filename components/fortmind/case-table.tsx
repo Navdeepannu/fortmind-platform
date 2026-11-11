@@ -137,12 +137,12 @@ const initialFilters: CaseFilters = {
   autonomous: false,
 };
 const optionalColumns = [
-  "verdict",
   "priority",
+  "source",
+  "verdict",
   "status",
   "owner",
   "age",
-  "source",
 ] as const;
 type OptionalColumn = (typeof optionalColumns)[number];
 type SortKey = OptionalColumn | "title" | "attention";
@@ -1235,6 +1235,16 @@ export function CaseTable({
                               }
                             />
                           </TableHead>
+                          {columns.priority && (
+                            <TableHead
+                              data-ui="col-priority"
+                              scope="col"
+                              className={cn("px-3", columnClasses.priority)}
+                              aria-sort={sort.key === "priority" ? sort.descending ? "descending" : "ascending" : "none"}
+                            >
+                              {sortHeader("priority", "Priority")}
+                            </TableHead>
+                          )}
                           <TableHead
                             data-ui="col-case"
                             className="px-3"
@@ -1250,7 +1260,7 @@ export function CaseTable({
                             {sortHeader("title", "Case")}
                           </TableHead>
                           {optionalColumns
-                            .filter((column) => columns[column])
+                            .filter((column) => columns[column] && column !== "priority")
                             .map((column) => (
                               <TableHead
                                 key={column}
@@ -1318,6 +1328,16 @@ export function CaseTable({
                                 }
                               />
                             </TableCell>
+                            {columns.priority && (
+                              <TableCell
+                                data-ui="col-priority"
+                                className={cn("px-3", columnClasses.priority)}
+                              >
+                                <CasePriorityTooltip item={item}>
+                                  <PriorityBadge value={item.priority} queue />
+                                </CasePriorityTooltip>
+                              </TableCell>
+                            )}
                             <TableCell
                               data-ui="case-cell col-case"
                               className="px-3"
@@ -1460,6 +1480,14 @@ export function CaseTable({
                                 )}
                               </div>
                             </TableCell>
+                            {columns.source && (
+                              <TableCell
+                                data-ui="col-source"
+                                className={cn("px-3", columnClasses.source)}
+                              >
+                                {item.source}
+                              </TableCell>
+                            )}
                             {columns.verdict && (
                               <TableCell
                                 data-ui="col-verdict"
@@ -1468,16 +1496,6 @@ export function CaseTable({
                                 <CaseVerdictTooltip item={item}>
                                   <QueueVerdictBadge item={item} />
                                 </CaseVerdictTooltip>
-                              </TableCell>
-                            )}
-                            {columns.priority && (
-                              <TableCell
-                                data-ui="col-priority"
-                                className={cn("px-3", columnClasses.priority)}
-                              >
-                                <CasePriorityTooltip item={item}>
-                                  <PriorityBadge value={item.priority} queue />
-                                </CasePriorityTooltip>
                               </TableCell>
                             )}
                             {columns.status && (
@@ -1506,14 +1524,6 @@ export function CaseTable({
                                 <CaseTimestampTooltip
                                   ageMinutes={item.ageMinutes}
                                 />
-                              </TableCell>
-                            )}
-                            {columns.source && (
-                              <TableCell
-                                data-ui="col-source"
-                                className={cn("px-3", columnClasses.source)}
-                              >
-                                {item.source}
                               </TableCell>
                             )}
                             <TableCell
