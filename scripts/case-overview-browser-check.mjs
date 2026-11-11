@@ -33,8 +33,17 @@ async function selectPrimary(category) {
 async function selectView(category, view) {
   if (await primary().getByRole("tab", { selected: true }).innerText() !== category) await selectPrimary(category);
   if (categories[category].length > 1) {
-    const label = categories[category].find(([id]) => id === view)[1];
-    await page.getByRole("tablist", { name: `${category} views`, exact: true }).getByRole("tab", { name: label, exact: true }).click();
+    const panel = page.locator(`[data-case-category="${category.toLowerCase()}"]`);
+    const rail = panel.locator('[data-ui="secondary-nav"]');
+    if (await rail.isVisible()) {
+      await rail.locator(`[data-section-id="${view}"]`).click();
+    } else {
+      const picker = panel.locator('[data-ui="mobile-section-nav"]');
+      await picker.getByRole("combobox").click();
+      const label = categories[category].find(([id]) => id === view)[1].replace(/ \\(\\d+\\)$/, "");
+      await page.getByRole("option", { name: new RegExp(`^${label.replace(/[.*+?^${}()|[\\]\\]/g, "\\    const label = categories[category].find(([id]) => id === view)[1];
+    await page.getByRole("tablist", { name: `${category} views`, exact: true }).getByRole("tab", { name: label, exact: true }).click();")}`) }).click();
+    }
   }
   await expectView(category, view);
 }
@@ -55,7 +64,13 @@ try {
   for (const [category, views] of Object.entries(categories)) {
     await selectPrimary(category);
     if (views.length > 1) {
-      assert.deepEqual(await page.getByRole("tablist", { name: `${category} views`, exact: true }).getByRole("tab").allTextContents(), views.map(([, label]) => label));
+      const rail = page.locator(`[data-case-category="${category.toLowerCase()}"] [data-ui="secondary-nav"]`);
+      assert.equal(await rail.getAttribute("aria-label"), `${category} sections`);
+      assert.deepEqual(
+        await rail.locator('[data-section-id]').evaluateAll(nodes => nodes.map(node => node.dataset.sectionId)),
+        views.map(([id]) => id),
+      );
+      assert.equal(await rail.getByRole("tablist").getAttribute("aria-orientation"), "vertical");
     } else assert.equal(await page.getByRole("tablist").count(), 1, "Timeline has no redundant second navigation level");
     for (const [view] of views) {
       await selectView(category, view);
@@ -116,8 +131,8 @@ try {
   await primary().getByRole("tab", { name: "Decision", exact: true }).focus();
   await page.keyboard.press("ArrowRight");
   await expectView("Investigation", "findings");
-  await page.getByRole("tablist", { name: "Investigation views" }).getByRole("tab", { name: "Findings (5)", exact: true }).focus();
-  await page.keyboard.press("ArrowRight");
+  await page.locator('[data-case-category="investigation"] [data-section-id="findings"]').focus();
+  await page.keyboard.press("ArrowDown");
   await expectView("Investigation", "hypotheses");
   await page.keyboard.press("End");
   await expectView("Investigation", "attack-path");
@@ -234,18 +249,25 @@ try {
       await page.locator("#findings details").evaluateAll(nodes => nodes.forEach(node => { node.open = true; }));
       await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
       const nav = await page.locator('[data-ui="page-nav"]').evaluate(node => node.getBoundingClientRect().top);
-      const secondary = await page.locator('[data-case-category="investigation"] [data-ui="secondary-nav"]').evaluate(node => node.getBoundingClientRect().top);
+      const rail = page.locator('[data-case-category="investigation"] [data-ui="secondary-nav"]');
+      const picker = page.locator('[data-case-category="investigation"] [data-ui="mobile-section-nav"]');
+      const railVisible = await rail.isVisible();
       assert.ok(Math.abs(nav - 48) < 2, `${name} ${theme} primary nav ${nav}`);
-      assert.ok(Math.abs(secondary - 97) < 2, `${name} ${theme} secondary nav ${secondary}`);
+      if (railVisible) {
+        assert.equal(await rail.evaluate(node => getComputedStyle(node).position), "sticky");
+        assert.equal(await picker.isVisible(), false);
+      } else {
+        assert.equal(await picker.isVisible(), true);
+      }
       await selectView("Investigation", "hypotheses");
-      await page.waitForFunction(() => document.getElementById("hypotheses").getBoundingClientRect().top >= 138 || scrollY === 0);
+      await page.waitForFunction(() => document.getElementById("hypotheses").getBoundingClientRect().top >= 98 || scrollY === 0);
       await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
       await page.screenshot({ path: join(output, `${name}-${theme}-hypotheses.png`) });
       await selectView("Decision", "conclusion");
       await page.screenshot({ path: join(output, `${name}-${theme}-conclusion.png`) });
       await selectView("Investigation", "findings");
       await page.screenshot({ path: join(output, `${name}-${theme}-findings.png`) });
-      layouts.push({ name, theme, width, nav, secondary });
+      layouts.push({ name, theme, width, nav, navigation: railVisible ? "side rail" : "section picker" });
     }
     await context.close();
   }
