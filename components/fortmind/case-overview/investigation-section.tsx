@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { CaseSectionId } from "@/lib/case-sections";
+import { caseSectionGroups, caseViewForSection, type CaseSectionId } from "@/lib/case-sections";
 
 export function InvestigationSection({
   id,
@@ -26,6 +26,10 @@ export function InvestigationSection({
   contentClassName?: string;
   children: ReactNode;
 }) {
+  const context = caseViewForSection(id);
+  const group = caseSectionGroups.find((item) => item.id === context?.tab);
+  const position = group?.sections.findIndex((item) => item.id === id) ?? -1;
+  const total = group?.sections.length ?? 0;
   return (
     <section
       data-ui="section"
@@ -39,9 +43,19 @@ export function InvestigationSection({
     >
       <header
         data-ui="section-header"
-        className="flex items-end justify-between flex-wrap gap-y-2 gap-x-4 mb-3"
+        className="flex items-end justify-between flex-wrap gap-y-2 gap-x-4 mb-4"
       >
         <div data-ui="section-heading-copy">
+          {group && (
+            <p data-ui="section-location" className="mb-1.5 flex items-center gap-2 text-caption font-medium text-muted-foreground">
+              <span className="uppercase tracking-[0.08em]">{group.label}</span>
+              {total > 1 && (
+                <span className="font-mono text-[11px] tabular-nums">
+                  {String(position + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                </span>
+              )}
+            </p>
+          )}
           <h2
             id={`${id}-heading`}
             className="text-section-title"
