@@ -1,3 +1,5 @@
+> **Superseded layout:** The contextual section rail and secondary view picker documented here were replaced by the five full-width, single-tier workspaces in [Case single-workspace layout](./case-single-workspace-layout.md). This file remains as design history, not the current UI specification.
+
 # Case details: evidence explorer and location hierarchy
 
 ## Observed problem
