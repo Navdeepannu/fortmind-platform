@@ -219,6 +219,7 @@ export function CaseCategoryTabs({
                         key={section.id}
                         value={section.id}
                         data-ui="case-section-link"
+                        data-section-id={section.id}
                         className="group/subview relative h-9 w-full flex-none justify-between rounded-md border-0 px-3 text-left text-label font-normal after:hidden hover:bg-muted/50 data-active:bg-muted data-active:font-medium data-active:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <span className="min-w-0 truncate">{section.label}</span>
