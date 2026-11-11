@@ -34,16 +34,10 @@ import { CopyIdentifier } from "./copy-identifier";
 import { InvestigationSection } from "./investigation-section";
 import { ReviewVerdict } from "./review-verdict";
 import { CaseCategoryTabs } from "./section-navigation";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 function CaseHeader({ data }: { data: CaseOverviewData }) {
+  const host = data.entities.find((entity) => entity.kind === "host");
+  const user = data.entities.find((entity) => entity.kind === "user");
   return (
     <header
       data-ui="header"
@@ -113,20 +107,18 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
             Involved entities
           </dt>
           <dd className="flex items-center flex-wrap gap-y-0.75 gap-x-2.75 min-w-0 text-label">
-            <span className="inline-flex items-center gap-1">
-              <Monitor
-                aria-hidden="true"
-                className="w-3.25 h-3.25 text-muted-foreground"
-              />
-              <CopyIdentifier value="fmlab-ws1" label="host fmlab-ws1" />
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <UserRound
-                aria-hidden="true"
-                className="w-3.25 h-3.25 text-muted-foreground"
-              />
-              <CopyIdentifier value="lab.bob" label="user lab.bob" />
-            </span>
+            {host && (
+              <span className="inline-flex items-center gap-1">
+                <Monitor aria-hidden="true" className="w-3.25 h-3.25 text-muted-foreground" />
+                <CopyIdentifier value={host.name} label={`host ${host.name}`} />
+              </span>
+            )}
+            {user && (
+              <span className="inline-flex items-center gap-1">
+                <UserRound aria-hidden="true" className="w-3.25 h-3.25 text-muted-foreground" />
+                <CopyIdentifier value={user.name} label={`user ${user.name}`} />
+              </span>
+            )}
           </dd>
         </div>
         <div>
