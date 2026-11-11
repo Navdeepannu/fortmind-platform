@@ -26,11 +26,9 @@ function readHash() {
  */
 export function CaseCategoryTabs({
   views,
-  counts: _counts,
   status,
 }: {
   views: Record<CaseSectionId, ReactNode>;
-  counts: Partial<Record<CaseSectionId, number>>;
   status: string;
 }) {
   const pathname = usePathname();
