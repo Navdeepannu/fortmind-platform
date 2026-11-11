@@ -343,61 +343,43 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
 }
 
 function EntityRow({ entity }: { entity: OverviewEntity }) {
-  const Icon =
-    entity.kind === "host"
-      ? Monitor
-      : entity.kind === "user"
-        ? UserRound
-        : Terminal;
+  const Icon = entity.kind === "host" ? Monitor : entity.kind === "user" ? UserRound : Terminal;
   return (
-    <TableRow
+    <li
       data-ui="entity-row"
       id={`entity-${entity.id}`}
-      className="scroll-mt-40 outline-none min-h-15.5 text-label"
       tabIndex={-1}
+      className="min-w-0 scroll-mt-40 bg-card p-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <TableCell>
-        <span
-          data-ui="entity-kind"
-          className="inline-flex items-center gap-1.75 text-muted-foreground capitalize"
-        >
-          <Icon aria-hidden="true" className="w-3.75 h-3.75" />
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <span data-ui="entity-kind" className="inline-flex items-center gap-1.5 text-caption capitalize text-muted-foreground">
+          <Icon aria-hidden="true" className="size-3.5" />
           {entity.kind}
         </span>
-      </TableCell>
-      <TableCell
-        data-ui="entity-identity"
-        className="[&_code]:text-foreground [&_code]:text-label"
-      >
+        {entity.findingCount !== undefined && (
+          <span data-ui="entity-context" className="text-caption text-muted-foreground">
+            {entity.findingCount} {entity.findingCount === 1 ? "finding" : "findings"}
+          </span>
+        )}
+      </div>
+      <div data-ui="entity-identity" className="mt-2 text-label font-semibold [&_code]:text-body [&_code]:text-foreground">
         <CopyIdentifier value={entity.name} label={entity.name} />
-      </TableCell>
-      <TableCell data-ui="entity-description" className="min-w-0">
+      </div>
+      <p data-ui="entity-description" className="mt-1 text-label text-muted-foreground">
         {entity.role}
-      </TableCell>
-      <TableCell
-        data-ui="entity-sources"
-        className="text-muted-foreground text-caption"
-      >
-        {entity.sources.join(" · ")}
-      </TableCell>
-      <TableCell>
-        <span
-          data-ui="entity-context"
-          className="text-muted-foreground text-caption flex flex-col"
-        >
-          {entity.findingCount !== undefined && (
-            <span>{entity.findingCount} findings</span>
-          )}
-          {entity.otherCaseCount !== undefined && (
-            <span>
-              {entity.otherCaseCount
-                ? `${entity.otherCaseCount} other cases`
-                : "Only this case"}
-            </span>
-          )}
-        </span>
-      </TableCell>
-    </TableRow>
+      </p>
+      <div className="mt-3 border-t border-border pt-3">
+        <p className="text-caption text-muted-foreground">Reported sources</p>
+        <p data-ui="entity-sources" className="mt-1 text-caption">{entity.sources.join(" · ")}</p>
+        {entity.otherCaseCount !== undefined && (
+          <p className="mt-2 text-caption text-muted-foreground">
+            {entity.otherCaseCount > 0
+              ? `${entity.otherCaseCount} related ${entity.otherCaseCount === 1 ? "case" : "cases"}`
+              : "No other recorded cases"}
+          </p>
+        )}
+      </div>
+    </li>
   );
 }
 
@@ -405,60 +387,24 @@ function Entities({ data }: { data: CaseOverviewData }) {
   return (
     <InvestigationSection
       id="entities"
-      title="Entities"
+      title="Involved entities"
       count={data.entities.length}
-      description="Identifiers and relationships recorded in this investigation"
+      description="Identifiers named or queried during investigation"
       footer={
         <p className="text-caption text-muted-foreground">
-          The source classifies the host and user as “Confirmed affected.” That
-          label does not establish compromise.
+          Source wording such as “Confirmed affected” identifies the referenced entity, not a confirmed compromise.
         </p>
       }
+      contentClassName="p-0"
     >
-      <Table
-        data-ui="entity-table"
-        className="min-w-187.5 table-fixed [&_:is(th,td)]:pt-3.25 [&_:is(th,td)]:pr-3 [&_:is(th,td)]:pb-3.25 [&_:is(th,td)]:pl-3 [&_:is(th,td)]:whitespace-normal [&_:is(th,td)]:align-middle [&_th:nth-child(1)]:w-26.25 [&_th:nth-child(2)]:w-46.25 [&_th:nth-child(4)]:w-42.5 [&_th:nth-child(5)]:w-31.25"
+      <ul
+        data-ui="entity-list"
+        className="grid min-w-0 grid-cols-1 gap-px overflow-hidden rounded-[inherit] bg-border @min-[620px]/case:grid-cols-2"
       >
-        <TableHeader>
-          <TableRow>
-            <TableHead
-              scope="col"
-              className="text-muted-foreground text-caption font-medium"
-            >
-              Type
-            </TableHead>
-            <TableHead
-              scope="col"
-              className="text-muted-foreground text-caption font-medium"
-            >
-              Identifier
-            </TableHead>
-            <TableHead
-              scope="col"
-              className="text-muted-foreground text-caption font-medium"
-            >
-              Relationship
-            </TableHead>
-            <TableHead
-              scope="col"
-              className="text-muted-foreground text-caption font-medium"
-            >
-              Source
-            </TableHead>
-            <TableHead
-              scope="col"
-              className="text-muted-foreground text-caption font-medium"
-            >
-              Related
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.entities.map((entity) => (
-            <EntityRow entity={entity} key={entity.id} />
-          ))}
-        </TableBody>
-      </Table>
+        {data.entities.map((entity) => (
+          <EntityRow entity={entity} key={entity.id} />
+        ))}
+      </ul>
     </InvestigationSection>
   );
 }
