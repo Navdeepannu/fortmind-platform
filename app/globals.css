@@ -39,6 +39,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-border-secondary: var(--border-secondary);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -225,6 +226,7 @@
   --surface-hover: oklch(0.957665 0.001718 247.84); /* #F0F1F2 */
   --destructive: var(--danger-foreground);
   --border: oklch(0.924740 0.002906 264.54); /* #E5E6E8 */
+  --border-secondary: var(--border); /* Light-mode fallback until a dedicated value is specified. */
   --border-strong: oklch(0.866175 0.004672 258.33); /* #D1D3D6 */
   --input: oklch(0.866175 0.004672 258.33); /* #D1D3D6 */
   --ring: oklch(0.49 0.01 265);
@@ -366,7 +368,7 @@
   color-scheme: dark;
   --background: oklch(0.158823 0.004543 264.44); /* #0C0D0F */
   --shell: var(--background); /* same canvas as sidebar */
-  --surface: oklch(0.185404 0.005178 248.11); /* #111315 */
+  --surface: oklch(0.171887 0.001633 197.00); /* #0F1010 */
   --table-stripe: oklch(0.199330 0.006777 258.37); /* #141619 */
   --control: oklch(0.217386 0.008416 264.38); /* #181A1E */
   --surface-floating: oklch(0.255182 0.010408 260.70); /* #202328 */
@@ -383,6 +385,7 @@
   --accent: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
   --surface-hover: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
   --border: oklch(0.296183 0.010017 260.71); /* #2A2D32 */
+  --border-secondary: oklch(0.264497 0.009761 268.31); /* #23252A */
   --border-strong: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
   --input: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
   --ring: oklch(0.78 0.005 265); /* neutral keyboard focus on dark surfaces */
