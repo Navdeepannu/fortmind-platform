@@ -103,7 +103,7 @@ try {
   const explorer = page.locator('[data-ui="finding-explorer"]');
   assert.equal(await explorer.locator('[data-ui="finding"]').count(), 5);
   assert.equal(await explorer.locator('[data-ui="finding-inspector"]').count(), 1);
-  assert.match(await page.locator('#findings [data-ui="section-location"]').innerText(), /Investigation.*01 \/ 03/i);
+  assert.match(await page.locator('#findings [data-ui="section-location"]').innerText(), /Investigation[\s\S]*01 \/ 03/i);
   assert.match(await explorer.locator('[data-ui="selected-finding-title"]').innerText(), /LSASS memory access reported/);
   await explorer.getByRole("button", { name: /Not corroborated 2/ }).click();
   assert.equal(await explorer.locator('[data-ui="finding"]:visible').count(), 2);
