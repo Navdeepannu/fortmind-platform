@@ -5,7 +5,6 @@ import {
   ArrowRight,
   ChevronDown,
   Crosshair,
-  FileSearch,
   Monitor,
   Terminal,
   UserRound,
@@ -21,7 +20,6 @@ import {
   PriorityBadge,
   SemanticBadge,
   SemanticIcon,
-  SeverityBadge,
   VerdictBadge,
   VerdictMarker,
 } from "@/components/fortmind/semantic";
