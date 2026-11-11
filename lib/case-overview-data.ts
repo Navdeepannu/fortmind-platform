@@ -1,4 +1,5 @@
 import type { CaseStatus, ConfidenceLevel, Priority, Verdict } from "@/lib/preview-data";
+import { casePreviewId } from "./case-preview-id";
 import type { phaseStates } from "@/lib/semantic-states";
 
 export interface OverviewEntity {
@@ -82,7 +83,7 @@ export interface CaseOverviewData {
 // analyst confirmation. The owner follows the latest "Took this case" event.
 // No live case service, mutation, invented process arguments, IPs, or raw responses.
 export const caseOverview: CaseOverviewData = {
-  id: "13845102-e81a-479e-87db-2cdb8ff21c1c",
+  id: casePreviewId,
   title: "FortMind smoke: LSASS memory access",
   description: "A SIEM alert reports procdump.exe attempting to access lsass.exe memory on fmlab-ws1 under lab.bob.",
   priority: "Urgent",
