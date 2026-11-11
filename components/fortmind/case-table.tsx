@@ -829,11 +829,7 @@ export function CaseTable({
           }}
           className="gap-0"
         >
-          <div
-            data-ui="table-shell"
-            className="overflow-hidden rounded-lg border border-border bg-card"
-          >
-            <div data-ui="queue-top" className="border-b border-border bg-card px-3 sm:px-4">
+          <div data-ui="queue-top" className="mb-3 min-w-0">
               <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
                 <TabsList
@@ -883,20 +879,17 @@ export function CaseTable({
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <div role="group" aria-label="Row density" className="inline-flex rounded-md border border-border p-0.5">
-                    <Button variant={density === "comfortable" ? "secondary" : "ghost"} size="xs" onClick={() => setDensity("comfortable")}>Comfortable</Button>
-                    <Button variant={density === "compact" ? "secondary" : "ghost"} size="xs" onClick={() => setDensity("compact")}>Compact</Button>
-                  </div>
+
                 </div>
               </div>
             </div>
             <div
               data-ui="filter-row"
-              className="flex flex-col items-stretch gap-3 border-b border-border bg-surface px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:px-5"
+              className="mb-3 flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:flex-nowrap"
             >
               <div
                 data-ui="search"
-                className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-48 sm:max-w-80"
+                className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-48 xl:min-w-44"
               >
                 <Search
                   aria-hidden="true"
@@ -912,7 +905,7 @@ export function CaseTable({
                   className="pl-9"
                 />
               </div>
-              <div data-ui="quick-filters" className="flex min-w-0 flex-wrap items-center gap-2">
+              <div data-ui="quick-filters" className="flex min-w-0 flex-wrap items-center gap-2 xl:flex-nowrap">
                 <CaseFilterDropdown
                   label="Owner"
                   value={filters.assignment}
@@ -945,7 +938,7 @@ export function CaseTable({
               </div>
               <div
                 data-ui="table-view-tools"
-                className="flex w-full flex-wrap items-center gap-2 max-sm:justify-between max-sm:[&_button]:min-h-10 sm:ml-auto sm:w-auto"
+                className="flex min-w-0 flex-wrap items-center gap-2 max-sm:[&_button]:min-h-10 sm:ml-auto xl:flex-nowrap"
               >
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -964,40 +957,6 @@ export function CaseTable({
                     <DropdownMenuGroup>
                       <DropdownMenuLabel>Filter cases</DropdownMenuLabel>
                       <CaseFilterSubmenu
-                        label="Owner"
-                        value={filters.assignment}
-                        onChange={(value) => updateFilter("assignment", value)}
-                        options={[
-                          {
-                            label: "Assigned to me",
-                            value: currentAnalyst,
-                            icon: UserRound,
-                          },
-                          {
-                            label: "Unassigned",
-                            value: "unassigned",
-                            icon: assignmentStates.Unassigned.icon,
-                          },
-                          ...owners
-                            .filter((owner) => owner !== currentAnalyst)
-                            .map((owner) => ({
-                              label: owner,
-                              value: owner,
-                              icon: UserRound,
-                            })),
-                        ]}
-                      />
-                      <CaseFilterSubmenu
-                        label="Priority"
-                        value={filters.priority}
-                        onChange={(value) => updateFilter("priority", value)}
-                        options={priorities.map((value) => ({
-                          label: value,
-                          value,
-                          priority: value,
-                        }))}
-                      />
-                      <CaseFilterSubmenu
                         label="Status"
                         value={caseStatus}
                         onChange={(value) => {
@@ -1014,27 +973,9 @@ export function CaseTable({
                           ).iconClassName,
                         }))}
                       />
-                      <CaseFilterSubmenu
-                        label="Source"
-                        value={filters.source}
-                        onChange={(value) => updateFilter("source", value)}
-                        options={sources.map((value) => ({
-                          label: value,
-                          value,
-                          icon: sourceOptionIcons[value],
-                        }))}
-                      />
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuCheckboxItem
-                        checked={filters.autonomous}
-                        onCheckedChange={(checked) =>
-                          updateFilter("autonomous", checked)
-                        }
-                      >
-                        Closed by OSCAR only
-                      </DropdownMenuCheckboxItem>
                       {filterChips.length > 0 && (
                         <DropdownMenuItem onClick={clearFilters}>
                           Clear filters
@@ -1192,6 +1133,10 @@ export function CaseTable({
                 </div>
               )}
             </div>
+            <div
+              data-ui="table-shell"
+              className="overflow-hidden rounded-md border border-border bg-card"
+            >
             {selected.size > 0 && (
               <div
                 data-ui="selection-toolbar"
@@ -1658,7 +1603,7 @@ export function CaseTable({
                   </div>
                   <div
                     data-ui="table-footer"
-                    className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-surface px-4 py-3 border-border @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:w-full @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:order-3"
+                    className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-card px-4 py-3 border-border @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:w-full @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:order-3"
                   >
                     <span
                       data-ui="caption"
