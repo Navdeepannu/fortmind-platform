@@ -29,6 +29,7 @@ import { QueueStatusIndicator, QueueVerdictBadge } from "./case-queue-semantic";
 import { PriorityBadge } from "./semantic";
 import { CopyTechnicalValue } from "./copy-technical-value";
 import { IconTooltip } from "./case-contextual-preview";
+import { OscarCaseLifecyclePreview } from "./overview/oscar-case-lifecycle-preview";
 
 const narrowQuery = "(max-width: 1023px)";
 function subscribe(listener: () => void) {
@@ -75,6 +76,12 @@ function InspectorDetails({ item }: { item: SecurityCase }) {
       aria-label="Investigation preview details"
       className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-5 py-4 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
     >
+      <OscarCaseLifecyclePreview
+        item={item}
+        stage={item.investigationPhase ?? item.status}
+        mode="timeline"
+      />
+      <Separator />
       <section
         aria-label="OSCAR investigation"
         className="flex shrink-0 flex-col gap-2"
@@ -125,8 +132,20 @@ function InspectorDetails({ item }: { item: SecurityCase }) {
         aria-label="Supporting context"
         className="flex shrink-0 flex-col gap-3"
       >
-        <h3 className="text-label font-medium">Supporting context</h3>
+        <h3 className="text-label font-semibold">Case details</h3>
         <dl className="flex flex-col gap-2">
+          <div className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-baseline gap-3">
+            <dt className="text-caption text-muted-foreground">Priority</dt>
+            <dd className="text-body">{item.priority}</dd>
+          </div>
+          <div className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-baseline gap-3">
+            <dt className="text-caption text-muted-foreground">Owner</dt>
+            <dd className="text-body">{item.owner ?? "Unassigned"}</dd>
+          </div>
+          <div className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-baseline gap-3">
+            <dt className="text-caption text-muted-foreground">Case ID</dt>
+            <dd className="min-w-0"><CopyTechnicalValue label="case ID" value={item.id} /></dd>
+          </div>
           {(allContext ? context : context.slice(0, 4)).map(([key, value]) => (
             <div
               key={key}
@@ -147,12 +166,6 @@ function InspectorDetails({ item }: { item: SecurityCase }) {
             <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-baseline gap-3">
               <dt className="text-caption text-muted-foreground">Source</dt>
               <dd className="text-caption">{item.source}</dd>
-            </div>
-          )}
-          {item.owner && (
-            <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-baseline gap-3">
-              <dt className="text-caption text-muted-foreground">Owner</dt>
-              <dd className="text-caption">{item.owner}</dd>
             </div>
           )}
         </dl>
@@ -207,7 +220,7 @@ export function InvestigationInspector(props: InspectorProps) {
   );
   const contents = (
     <>
-      <header className="sticky top-0 flex shrink-0 flex-col gap-3 bg-surface-floating px-4 py-3 sm:px-5">
+      <header className="sticky top-0 flex shrink-0 flex-col gap-3 bg-background px-4 py-3 sm:px-5">
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <CopyTechnicalValue label="case ID" value={item.id} />
           <div className="ml-auto flex shrink-0 items-center gap-1">
@@ -258,17 +271,17 @@ export function InvestigationInspector(props: InspectorProps) {
           </div>
         </div>
         {narrow ? (
-          <SheetTitle id={headingId} className="text-panel-title wrap-anywhere">
+          <SheetTitle id={headingId} className="text-body font-medium wrap-anywhere">
             {item.title}
           </SheetTitle>
         ) : (
-          <h2 id={headingId} className="text-panel-title wrap-anywhere">
+          <h2 id={headingId} className="text-body font-medium wrap-anywhere">
             {item.title}
           </h2>
         )}
         <section
           aria-label="Classification"
-          className="flex flex-wrap items-center gap-x-4 gap-y-2"
+          className="flex flex-wrap items-center gap-x-3 gap-y-1"
         >
           <PriorityBadge value={item.priority} />
           <QueueStatusIndicator item={item} />
@@ -288,15 +301,16 @@ export function InvestigationInspector(props: InspectorProps) {
       <Separator />
       <InspectorDetails key={item.id} item={item} />
       <Separator />
-      <footer className="sticky bottom-0 shrink-0 bg-surface-floating px-5 py-3">
+      <footer className="sticky bottom-0 flex shrink-0 justify-end border-t border-border bg-background px-5 py-3">
         <Button
           nativeButton={false}
-          variant="brand"
+          variant="outline"
+          size="sm"
           role="link"
           render={<Link prefetch={false} href={caseHref(item.id)} />}
-          className="w-full rounded-sm"
+          className="min-w-28 rounded-md"
         >
-          Open investigation <ArrowUpRight data-icon="inline-end" />
+          Open case <ArrowUpRight data-icon="inline-end" />
         </Button>
       </footer>
     </>
@@ -319,7 +333,7 @@ export function InvestigationInspector(props: InspectorProps) {
           ref={(node) => {
             regionRef.current = node;
           }}
-          className="gap-0 bg-surface-floating shadow-sm p-0 transition-none data-[side=right]:w-full data-[side=right]:sm:max-w-none data-[side=right]:rounded-none data-[side=right]:data-starting-style:translate-x-0 data-[side=right]:data-ending-style:translate-x-0"
+          className="gap-0 bg-background shadow-none p-0 transition-none data-[side=right]:w-full data-[side=right]:sm:max-w-none data-[side=right]:rounded-none data-[side=right]:data-starting-style:translate-x-0 data-[side=right]:data-ending-style:translate-x-0"
         >
           {contents}
         </SheetContent>
@@ -335,7 +349,7 @@ export function InvestigationInspector(props: InspectorProps) {
       data-presentation="overlay"
       aria-labelledby={headingId}
       tabIndex={-1}
-      className="fixed right-0 bottom-0 top-(--workspace-header-height) z-20 flex w-110 max-w-full min-h-0 min-w-0 flex-col overflow-hidden rounded-tl-sm border-l border-border bg-surface-floating shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      className="fixed right-0 bottom-0 top-(--workspace-header-height) z-20 flex w-110 max-w-full min-h-0 min-w-0 flex-col overflow-hidden border-l border-border bg-background shadow-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
     >
       {contents}
     </aside>

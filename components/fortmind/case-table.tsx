@@ -36,6 +36,8 @@ import {
   MoreHorizontal,
   ArrowUpRight,
   SlidersHorizontal,
+  Columns3,
+  LayoutList,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -104,6 +106,7 @@ import {
   statuses,
   formatAge,
   type Priority,
+  type Verdict,
   type SecurityCase,
   type Queue,
   type CaseStatus,
@@ -112,6 +115,7 @@ import {
   type Tone,
 } from "@/lib/preview-data";
 import { platformCases } from "@/lib/platform-cases";
+import { CaseBoard } from "./case-board";
 import { queueStatusStates, type SemanticState } from "@/lib/semantic-states";
 import {
   caseListViews,
@@ -123,6 +127,7 @@ import { QueueStatusIndicator, QueueVerdictBadge } from "./case-queue-semantic";
 import {
   PriorityBadge,
   PriorityBars,
+  QueuePriorityIcon,
   CaseStatusBadge,
   VerdictMarker,
 } from "./semantic";
@@ -147,12 +152,12 @@ const optionalColumns = [
 type OptionalColumn = (typeof optionalColumns)[number];
 type SortKey = OptionalColumn | "title" | "attention";
 const columnClasses: Record<OptionalColumn, string> = {
-  priority: "w-28 @max-[680px]/case-grid:hidden",
-  verdict: "w-43 @max-[520px]/case-grid:hidden",
-  status: "w-37 @max-[600px]/case-grid:hidden",
-  owner: "w-28 @max-[1080px]/case-grid:hidden",
-  age: "w-17 @max-[960px]/case-grid:hidden",
-  source: "w-36 text-caption @max-[1200px]/case-grid:hidden",
+  priority: "w-28",
+  verdict: "w-40",
+  status: "w-36",
+  owner: "w-32",
+  age: "w-16",
+  source: "w-36 text-body",
 };
 const currentAnalyst = "Navdeep Annu";
 const sourceOptionIcons: Record<Source, LucideIcon> = {
@@ -167,7 +172,7 @@ function Owner({ name }: { name: string | null }) {
   return (
     <span
       data-ui="owner"
-      className="inline-flex items-center gap-1.5 text-caption whitespace-nowrap"
+      className="inline-flex items-center gap-1.5 text-body whitespace-nowrap"
     >
       {name ? (
         <>
@@ -210,6 +215,7 @@ type FilterOption = {
   icon?: LucideIcon;
   tone?: Tone;
   priority?: Priority;
+  verdict?: Verdict;
   iconClassName?: string;
 };
 
@@ -278,6 +284,63 @@ function CaseFilterSubmenu({
         </DropdownMenuGroup>
       </DropdownMenuSubContent>
     </DropdownMenuSub>
+  );
+}
+
+/** All primary case filters share the existing accessible Base UI menu primitive. */
+function CaseFilterDropdown({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: FilterOption[];
+}) {
+  const selected = options.find((option) => option.value === value);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label={`Filter by ${label.toLowerCase()}: ${selected?.label ?? "All"}`}
+            className="h-9 max-w-48 shrink-0 gap-2"
+          />
+        }
+      >
+        <span className="max-w-32 truncate">{selected?.label ?? label}</span>
+        <ChevronDown aria-hidden="true" data-icon="inline-end" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-48">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{label}</DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={value} onValueChange={(next) => onChange(String(next))}>
+            <DropdownMenuRadioItem value="" closeOnClick>
+              {label === "Owner" ? "All owners" : label === "Priority" ? "All priorities" : `All ${label.toLowerCase()}s`}
+            </DropdownMenuRadioItem>
+            {options.map((option) => {
+              const Icon = option.icon;
+              return (
+                <DropdownMenuRadioItem key={option.value} value={option.value} closeOnClick>
+                  {option.priority ? (
+                    <QueuePriorityIcon value={option.priority} />
+                  ) : option.verdict ? (
+                    <VerdictMarker value={option.verdict} />
+                  ) : Icon ? (
+                    <Icon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+                  ) : null}
+                  {option.label}
+                </DropdownMenuRadioItem>
+              );
+            })}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -445,6 +508,11 @@ export function CaseTable({
   const [caseStatus, setCaseStatus] = useState<CaseStatus | "">(entry.status);
   const [filters, setFilters] = useState<CaseFilters>(initialFilters);
   const [density, setDensity] = useState("compact");
+  const [layoutMode, setLayoutMode] = useState<"list" | "board">("list");
+  const listContext = useRef<{ view: CaseListView; status: CaseStatus | "" }>({
+    view: initialView ?? entry.view,
+    status: entry.status,
+  });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [columns, setColumns] = useState<Record<OptionalColumn, boolean>>({
     priority: true,
@@ -645,6 +713,23 @@ export function CaseTable({
       ? [{ key: "autonomous" as const, label: "Closed by OSCAR" }]
       : []),
   ];
+  function changeLayout(next: "list" | "board") {
+    if (next === layoutMode) return;
+    if (next === "board") {
+      listContext.current = { view, status: caseStatus };
+      setView("all");
+      setCaseStatus("");
+    } else {
+      setView(listContext.current.view);
+      setCaseStatus(listContext.current.status);
+    }
+    setLayoutMode(next);
+    setPage(0);
+    setPreview(null);
+    setSelected(new Set());
+    setAnnouncement(next === "board" ? "Cases grouped by workflow." : "List view restored.");
+  }
+
   function clearFilters() {
     setFilters((previous) => ({
       ...initialFilters,
@@ -770,11 +855,7 @@ export function CaseTable({
           }}
           className="gap-0"
         >
-          <div
-            data-ui="table-shell"
-            className="overflow-hidden rounded-lg border border-border bg-card"
-          >
-            <div data-ui="queue-top" className="border-b border-border bg-card px-3 sm:px-4">
+          <div data-ui="queue-top" className="mb-3 min-w-0">
               <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain">
                 <TabsList
@@ -824,20 +905,17 @@ export function CaseTable({
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <div role="group" aria-label="Row density" className="inline-flex rounded-md border border-border p-0.5">
-                    <Button variant={density === "comfortable" ? "secondary" : "ghost"} size="xs" onClick={() => setDensity("comfortable")}>Comfortable</Button>
-                    <Button variant={density === "compact" ? "secondary" : "ghost"} size="xs" onClick={() => setDensity("compact")}>Compact</Button>
-                  </div>
+
                 </div>
               </div>
             </div>
             <div
               data-ui="filter-row"
-              className="flex flex-col items-stretch gap-3 border-b border-border bg-surface px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:px-5"
+              className="mb-3 flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:flex-nowrap"
             >
               <div
                 data-ui="search"
-                className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-48 sm:max-w-80"
+                className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-48 xl:min-w-44"
               >
                 <Search
                   aria-hidden="true"
@@ -853,68 +931,41 @@ export function CaseTable({
                   className="pl-9"
                 />
               </div>
-              <div data-ui="quick-filters" className="flex min-w-0 flex-wrap items-center gap-2">
-                <select aria-label="Filter by owner" value={filters.assignment} onChange={(event) => updateFilter("assignment", event.target.value)} className="h-9 min-w-28 rounded-md border border-input bg-background px-2.5 text-label text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option value="">Owner</option>
-                  <option value={currentAnalyst}>Assigned to me</option>
-                  <option value="unassigned">Unassigned</option>
-                  {owners.filter((name) => name !== currentAnalyst).map((name) => <option key={name} value={name}>{name}</option>)}
-                </select>
-                <select aria-label="Filter by priority" value={filters.priority} onChange={(event) => updateFilter("priority", event.target.value)} className="h-9 min-w-28 rounded-md border border-input bg-background px-2.5 text-label text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option value="">Priority</option>
-                  {priorities.map((priority) => <option key={priority} value={priority}>{priority}</option>)}
-                </select>
-                <select aria-label="Filter by source" value={filters.source} onChange={(event) => updateFilter("source", event.target.value)} className="h-9 min-w-28 rounded-md border border-input bg-background px-2.5 text-label text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option value="">Source</option>
-                  {sources.map((source) => <option key={source} value={source}>{source}</option>)}
-                </select>
+              <div data-ui="quick-filters" className="flex min-w-0 flex-wrap items-center gap-2 xl:flex-nowrap">
+                <CaseFilterDropdown
+                  label="Owner"
+                  value={filters.assignment}
+                  onChange={(value) => updateFilter("assignment", value)}
+                  options={[
+                    { label: "Assigned to me", value: currentAnalyst, icon: UserRound },
+                    { label: "Unassigned", value: "unassigned", icon: assignmentStates.Unassigned.icon },
+                    ...owners.filter((name) => name !== currentAnalyst).map((name) => ({ label: name, value: name, icon: UserRound })),
+                  ]}
+                />
+                <CaseFilterDropdown
+                  label="Priority"
+                  value={filters.priority}
+                  onChange={(value) => updateFilter("priority", value)}
+                  options={priorities.map((value) => ({ label: value, value, priority: value }))}
+                />
+                <CaseFilterDropdown
+                  label="Source"
+                  value={filters.source}
+                  onChange={(value) => updateFilter("source", value)}
+                  options={sources.map((value) => ({ label: value, value, icon: sourceOptionIcons[value] }))}
+                />
+                <CaseFilterDropdown
+                  label="Verdict"
+                  value={filters.verdict}
+                  onChange={(value) => updateFilter("verdict", value)}
+                  options={verdicts.map((value) => ({ label: value, value, verdict: value }))}
+                />
                 <Button variant={filters.autonomous ? "secondary" : "outline"} aria-pressed={filters.autonomous} size="sm" onClick={() => updateFilter("autonomous", !filters.autonomous)}>Autonomous only</Button>
               </div>
               <div
                 data-ui="table-view-tools"
-                className="flex w-full flex-wrap items-center gap-2 max-sm:justify-between max-sm:[&_button]:min-h-10 sm:ml-auto sm:w-auto"
+                className="flex min-w-0 flex-wrap items-center gap-2 max-sm:[&_button]:min-h-10 sm:ml-auto xl:flex-nowrap"
               >
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        variant="outline"
-                        aria-label={`Filter by verdict: ${filters.verdict || "All verdicts"}`}
-                      />
-                    }
-                  >
-                    <span className={cn(filters.verdict && "max-sm:hidden")}>
-                      Verdict{filters.verdict ? ":" : ""}
-                    </span>
-                    {filters.verdict && <span>{filters.verdict}</span>}
-                    <ChevronDown data-icon="inline-end" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="min-w-52">
-                    <DropdownMenuGroup>
-                      <DropdownMenuLabel>Verdict</DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={filters.verdict}
-                        onValueChange={(value) =>
-                          updateFilter("verdict", String(value))
-                        }
-                      >
-                        <DropdownMenuRadioItem value="" closeOnClick>
-                          All verdicts
-                        </DropdownMenuRadioItem>
-                        {verdicts.map((value) => (
-                          <DropdownMenuRadioItem
-                            key={value}
-                            value={value}
-                            closeOnClick
-                          >
-                            <VerdictMarker value={value} />
-                            {value}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
@@ -932,40 +983,6 @@ export function CaseTable({
                     <DropdownMenuGroup>
                       <DropdownMenuLabel>Filter cases</DropdownMenuLabel>
                       <CaseFilterSubmenu
-                        label="Owner"
-                        value={filters.assignment}
-                        onChange={(value) => updateFilter("assignment", value)}
-                        options={[
-                          {
-                            label: "Assigned to me",
-                            value: currentAnalyst,
-                            icon: UserRound,
-                          },
-                          {
-                            label: "Unassigned",
-                            value: "unassigned",
-                            icon: assignmentStates.Unassigned.icon,
-                          },
-                          ...owners
-                            .filter((owner) => owner !== currentAnalyst)
-                            .map((owner) => ({
-                              label: owner,
-                              value: owner,
-                              icon: UserRound,
-                            })),
-                        ]}
-                      />
-                      <CaseFilterSubmenu
-                        label="Priority"
-                        value={filters.priority}
-                        onChange={(value) => updateFilter("priority", value)}
-                        options={priorities.map((value) => ({
-                          label: value,
-                          value,
-                          priority: value,
-                        }))}
-                      />
-                      <CaseFilterSubmenu
                         label="Status"
                         value={caseStatus}
                         onChange={(value) => {
@@ -982,27 +999,9 @@ export function CaseTable({
                           ).iconClassName,
                         }))}
                       />
-                      <CaseFilterSubmenu
-                        label="Source"
-                        value={filters.source}
-                        onChange={(value) => updateFilter("source", value)}
-                        options={sources.map((value) => ({
-                          label: value,
-                          value,
-                          icon: sourceOptionIcons[value],
-                        }))}
-                      />
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuCheckboxItem
-                        checked={filters.autonomous}
-                        onCheckedChange={(checked) =>
-                          updateFilter("autonomous", checked)
-                        }
-                      >
-                        Closed by OSCAR only
-                      </DropdownMenuCheckboxItem>
                       {filterChips.length > 0 && (
                         <DropdownMenuItem onClick={clearFilters}>
                           Clear filters
@@ -1130,6 +1129,23 @@ export function CaseTable({
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <div
+                  data-ui="case-view-switch"
+                  role="group"
+                  aria-label="Case layout"
+                  className="flex shrink-0 items-center overflow-hidden rounded-xs border border-border"
+                >
+                  <Button type="button" size="sm" variant={layoutMode === "list" ? "secondary" : "ghost"}
+                    aria-label="List view" aria-pressed={layoutMode === "list"}
+                    onClick={() => changeLayout("list")} className="rounded-none border-r border-border px-2.5">
+                    <LayoutList aria-hidden="true" className="size-3.5" /><span className="hidden lg:inline">List</span>
+                  </Button>
+                  <Button type="button" size="sm" variant={layoutMode === "board" ? "secondary" : "ghost"}
+                    aria-label="Board view" aria-pressed={layoutMode === "board"}
+                    onClick={() => changeLayout("board")} className="rounded-none px-2.5">
+                    <Columns3 aria-hidden="true" className="size-3.5" /><span className="hidden lg:inline">Board</span>
+                  </Button>
+                </div>
               </div>
               {filterChips.length > 0 && (
                 <div
@@ -1160,7 +1176,11 @@ export function CaseTable({
                 </div>
               )}
             </div>
-            {selected.size > 0 && (
+            <div
+              data-ui="table-shell"
+              className="overflow-hidden rounded-md border border-border bg-card"
+            >
+            {layoutMode === "list" && selected.size > 0 && (
               <div
                 data-ui="selection-toolbar"
                 className="flex items-center gap-2.25 mt-3 mr-4.5 mb-3 ml-4.5 pt-1.75 pr-2.5 pb-1.75 pl-2.5 border border-border rounded-md bg-surface"
@@ -1188,7 +1208,7 @@ export function CaseTable({
               </div>
             )}
             <TabsContent data-ui="table-panel" value={view} className="m-0">
-              <div data-ui="investigation-workspace" className="min-w-0">
+              <div data-ui="investigation-workspace" className="min-w-0" hidden={layoutMode !== "list"}>
                 <div
                   data-ui="case-grid"
                   className="@container/case-grid flex min-h-0 min-w-0 flex-col"
@@ -1202,7 +1222,7 @@ export function CaseTable({
                   >
                     <Table
                       data-ui="case-table"
-                      className="group/queue min-w-0 table-fixed [&_tbody_td]:h-16 [&_tbody_td]:py-3 data-[density=comfortable]:[&_tbody_td]:h-20 data-[density=comfortable]:[&_tbody_td]:py-4"
+                      className="group/queue min-w-[960px] table-fixed [&_tbody_td]:h-16 [&_tbody_td]:py-3 data-[density=comfortable]:[&_tbody_td]:h-20 data-[density=comfortable]:[&_tbody_td]:py-4"
                       data-density={density}
                     >
                       <caption className="sr-only">
@@ -1452,7 +1472,7 @@ export function CaseTable({
                               </div>
                               <div
                                 data-ui="mobile-badges"
-                                className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 @min-[600px]/case-grid:hidden"
+                                className="hidden"
                               >
                                 {columns.priority && (
                                   <span className="@min-[520px]/case-grid:hidden">
@@ -1626,7 +1646,7 @@ export function CaseTable({
                   </div>
                   <div
                     data-ui="table-footer"
-                    className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-surface px-4 py-3 border-border @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:w-full @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:order-3"
+                    className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-card px-4 py-3 border-border @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:w-full @max-[520px]/case-grid:[&_[data-ui~=preview-note]]:order-3"
                   >
                     <span
                       data-ui="caption"
@@ -1673,6 +1693,11 @@ export function CaseTable({
                   </div>
                 </div>
               </div>
+              {layoutMode === "board" && (
+                <CaseBoard cases={filtered}
+                  onPreview={(item, trigger, keyboard) => openPreview(item, trigger, keyboard)}
+                />
+              )}
             </TabsContent>
           </div>
         </Tabs>

@@ -44,15 +44,16 @@ function initialTab(tab: string | null, view: string | null): CaseReferenceTab {
 }
 
 function ContainedAccordion({
-  title, count, children, initiallyOpen = false,
+  title, count, children, initiallyOpen = false, sectionId,
 }: {
   title: string;
   count?: number;
   children: ReactNode;
   initiallyOpen?: boolean;
+  sectionId?: CaseSectionId;
 }) {
   return (
-    <details className="group min-w-0 border-b border-border last:border-b-0" open={initiallyOpen ? true : undefined}>
+    <details data-case-section={sectionId} className="group min-w-0 border-b border-border last:border-b-0" open={initiallyOpen ? true : undefined}>
       <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-label font-medium outline-none transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
         <span className="flex min-w-0 items-center gap-2">
           <ChevronDown aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
@@ -86,7 +87,18 @@ export function CaseReferenceTabs({
       let hash = "";
       try { hash = decodeURIComponent(url.hash.slice(1)).replace(/-heading$/, ""); } catch { /* Ignore malformed URL fragments. */ }
       setTab(hash ? tabForSection(hash) : initialTab(url.searchParams.get("tab"), url.searchParams.get("view")));
+      if (hash) {
+        const section = hash.startsWith("finding-") ? "findings"
+          : hash.startsWith("entity-") ? "entities"
+          : hash === "decision-heading" ? "conclusion"
+          : hash;
+        const disclosure = [...document.querySelectorAll<HTMLDetailsElement>("details[data-case-section]")]
+          .find((node) => node.dataset.caseSection === section);
+        if (disclosure) disclosure.open = true;
+        window.requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView({ block: "start" }));
+      }
     };
+    sync();
     window.addEventListener("popstate", sync);
     window.addEventListener("hashchange", sync);
     return () => {
@@ -129,7 +141,7 @@ export function CaseReferenceTabs({
         </div>
         <section aria-label="Investigation overview sections" className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
           {overviewAccordions.map((item) => (
-            <ContainedAccordion key={item.id} title={item.title} count={counts[item.id]} initiallyOpen={item.id === "entities"}>
+            <ContainedAccordion key={item.id} sectionId={item.id} title={item.title} count={counts[item.id]} initiallyOpen={item.id === "entities"}>
               {views[item.id]}
             </ContainedAccordion>
           ))}
@@ -138,7 +150,7 @@ export function CaseReferenceTabs({
       <TabsContent value="evidence" keepMounted hidden={tab !== "evidence"} className="min-w-0 space-y-4 pb-10 pt-5">
         {views.evidence}
         <section aria-label="OSCAR decision rationale" className="overflow-hidden rounded-lg border border-border bg-card">
-          <ContainedAccordion title="How OSCAR decided">
+          <ContainedAccordion title="How OSCAR decided" sectionId="how-oscar-decided">
             {views["how-oscar-decided"]}
           </ContainedAccordion>
         </section>
@@ -146,7 +158,7 @@ export function CaseReferenceTabs({
       <TabsContent value="actions" keepMounted hidden={tab !== "actions"} className="min-w-0 space-y-4 pb-10 pt-5">
         {views.actions}
         <section aria-label="Analyst notes" className="overflow-hidden rounded-lg border border-border bg-card">
-          <ContainedAccordion title="Analyst notes">{views["analyst-notes"]}</ContainedAccordion>
+          <ContainedAccordion title="Analyst notes" sectionId="analyst-notes">{views["analyst-notes"]}</ContainedAccordion>
         </section>
       </TabsContent>
       <TabsContent value="activity" keepMounted hidden={tab !== "activity"} className="min-w-0 pb-10 pt-5">{views.timeline}</TabsContent>

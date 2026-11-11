@@ -95,19 +95,18 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   assert.equal(aliases.declarations["--color-control"], "var(--control)");
   assert.equal(aliases.declarations["--color-table-stripe"], "var(--table-stripe)");
   assert.equal(aliases.declarations["--color-floating-hover"], "var(--floating-hover)");
-  // Keyboard focus remains neutral; brand green is reserved for intentional actions.
   assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "oklch(0.78 0.005 265)");
   const surfaceContract = {
     "--surface": ["oklch(1 0 0)", "oklch(0.171887 0.001633 197.00)"],
-    "--surface-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.233609 0.008932 255.60)"],
-    "--surface-floating": ["oklch(1 0 0)", "oklch(0.255182 0.010408 260.70)"],
+    "--surface-hover": ["oklch(0.966 0.002 260)", "oklch(0.208 0.006 258)"],
+    "--surface-floating": ["oklch(1 0 0)", "var(--background)"],
     "--border": ["oklch(0.924740 0.002906 264.54)", "oklch(0.270684 0.002912 196.98)"],
     "--control": ["oklch(0.976419 0.001323 286.38)", "oklch(0.217386 0.008416 264.38)"],
-    "--floating-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.296183 0.010017 260.71)"],
+    "--floating-hover": ["oklch(0.966 0.002 260)", "oklch(0.208 0.006 258)"],
     "--shell": ["var(--background)", "var(--background)"],
     "--border-strong": ["oklch(0.866175 0.004672 258.33)", "oklch(0.359444 0.011117 264.43)"],
     "--input": ["oklch(0.866175 0.004672 258.33)", "oklch(0.359444 0.011117 264.43)"],
-    "--table-stripe": ["oklch(0.978 0.0015 255)", "oklch(0.199330 0.006777 258.37)"],
+    "--table-stripe": ["oklch(0.989 0.001 255)", "oklch(0.199330 0.006777 258.37)"],
   };
   const overrides = inventoryModule.readVariableBlocks(awaitableGlobals).find(block => block.selector === '.dark[data-visual-experiment="graphite"]');
   for (const [name, [light, dark]] of Object.entries(surfaceContract)) {
@@ -152,10 +151,13 @@ test("workspace, filter controls, and floating content consume the layered palet
     path,
     await readFile(new URL(`../${path}`, import.meta.url), "utf8"),
   ])));
-  assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="utility-bar"\s+className="[^"]*bg-shell/);
+  assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="utility-bar"\s+className="[^"]*bg-background/);
   assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="inset"\s+className="[^"]*bg-background/);
-  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*bg-surface/);
-  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="table-shell"\s+className="[^"]*bg-surface/);
+  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*mb-3/);
+  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="table-shell"\s+className="[^"]*bg-card/);
+  assert.match(sources["components/fortmind/workspace-shell.tsx"], /variant="inset"/, "sidebar uses the shadcn inset variant");
+  assert.match(sources["components/fortmind/case-table.tsx"], /<CaseFilterDropdown/, "quick filters use accessible Base UI dropdowns");
+  assert.doesNotMatch(sources["components/fortmind/case-table.tsx"], /<select\b/, "the Cases toolbar must not contain native selects");
   assert.match(sources["components/ui/button.tsx"], /border-border-strong bg-transparent text-foreground/);
   for (const path of ["input", "textarea", "native-select", "select"]) {
     assert.match(sources[`components/ui/${path}.tsx`], /bg-control/, `${path} uses the shared control fill`);
