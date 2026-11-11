@@ -95,7 +95,7 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   assert.equal(aliases.declarations["--color-control"], "var(--control)");
   assert.equal(aliases.declarations["--color-table-stripe"], "var(--table-stripe)");
   assert.equal(aliases.declarations["--color-floating-hover"], "var(--floating-hover)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "var(--brand)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "oklch(0.78 0.005 265)");
   const surfaceContract = {
     "--surface": ["oklch(1 0 0)", "oklch(0.185404 0.005178 248.11)"],
     "--surface-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.233609 0.008932 255.60)"],
@@ -154,7 +154,7 @@ test("workspace, filter controls, and floating content consume the layered palet
   assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="utility-bar"\s+className="[^"]*bg-shell/);
   assert.match(sources["components/fortmind/workspace-shell.tsx"], /data-ui="inset"\s+className="[^"]*bg-background/);
   assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="filter-row"\s+className="[^"]*bg-surface/);
-  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="table-shell"\s+className="[^"]*bg-surface/);
+  assert.match(sources["components/fortmind/case-table.tsx"], /data-ui="table-shell"\s+className="[^"]*bg-card/);
   assert.match(sources["components/ui/button.tsx"], /border-border-strong bg-transparent text-foreground/);
   for (const path of ["input", "textarea", "native-select", "select"]) {
     assert.match(sources[`components/ui/${path}.tsx`], /bg-control/, `${path} uses the shared control fill`);
