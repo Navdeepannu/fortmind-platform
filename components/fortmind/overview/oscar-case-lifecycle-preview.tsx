@@ -79,6 +79,7 @@ export function OscarCaseLifecyclePreview({
   return (
     <div
       data-ui="oscar-case-lifecycle-preview"
+      role="group"
       className="flex min-w-0 flex-col gap-5"
       aria-label={`Case lifecycle for ${item.id}`}
     >
@@ -93,7 +94,7 @@ export function OscarCaseLifecyclePreview({
           <h3 className="text-panel-title wrap-anywhere">{item.title}</h3>
           <p className="mt-1 text-caption text-muted-foreground">
             {item.entities.hostname} · {elapsed
-              ? `Recorded elapsed ${elapsed}`
+              ? `Sample elapsed ${elapsed}`
               : `Case age ${formatAge(item.ageMinutes)}`}
           </p>
         </div>
