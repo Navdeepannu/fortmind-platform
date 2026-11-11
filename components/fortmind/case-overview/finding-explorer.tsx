@@ -36,6 +36,64 @@ const classification: Record<
   },
 };
 
+function FindingDetail({
+  finding,
+  index,
+  total,
+  mobile = false,
+}: {
+  finding: OverviewFinding;
+  index: number;
+  total: number;
+  mobile?: boolean;
+}) {
+  const source = classification[finding.evidenceState];
+  return (
+    <div data-ui="finding-detail-content" className="flex min-w-0 flex-col gap-4">
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-caption font-medium text-muted-foreground">
+            Finding {String(index).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          </span>
+          <span className={cn("inline-flex items-center gap-1.5 text-caption font-medium", source.tone)}>
+            {finding.evidenceState === "Alert report · unverified" ? <CircleAlert className="size-3.5" aria-hidden="true" /> :
+              finding.evidenceState === "Tool result" ? <SearchCheck className="size-3.5" aria-hidden="true" /> :
+              <FileSearch className="size-3.5" aria-hidden="true" />}
+            {source.label}
+          </span>
+        </div>
+        <h3 data-ui={mobile ? "inline-finding-title" : "selected-finding-title"}
+          className="mt-3 text-panel-title font-semibold"
+        >
+          {finding.title}
+        </h3>
+        <p className="mt-2 text-prose">{finding.summary}</p>
+      </div>
+      <div className="border-t border-border pt-4">
+        <h4 className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+          Interpretation and limits
+        </h4>
+        <p className="mt-2 text-label text-foreground">{finding.detail}</p>
+      </div>
+      <dl className="grid min-w-0 gap-4 border-t border-border pt-4">
+        <div className="min-w-0">
+          <dt className="text-caption font-semibold text-muted-foreground">Source</dt>
+          <dd className="mt-1 text-label">{finding.provenance}</dd>
+        </div>
+        <div className="min-w-0">
+          <dt className="text-caption font-semibold text-muted-foreground">Evidence limitation</dt>
+          <dd className="mt-1 text-label">{source.meaning}</dd>
+        </div>
+      </dl>
+      <a href="#evidence"
+        className="inline-flex w-fit items-center gap-1.5 text-label font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        Review source responses <ArrowRight className="size-3.5" aria-hidden="true" />
+      </a>
+    </div>
+  );
+}
+
 /**
  * Read-only master/detail evidence explorer. Source observations never become
  * confirmed findings just because an analyst selects or filters a row.
@@ -46,7 +104,8 @@ export function FindingExplorer({ findings }: { findings: OverviewFinding[] }) {
 
   useEffect(() => {
     const selectHash = () => {
-      const hash = decodeURIComponent(window.location.hash.slice(1));
+      let hash = "";
+      try { hash = decodeURIComponent(window.location.hash.slice(1)); } catch { return; }
       if (!hash.startsWith("finding-")) return;
       const target = hash.slice("finding-".length);
       if (!findings.some((finding) => finding.id === target)) return;
@@ -56,9 +115,11 @@ export function FindingExplorer({ findings }: { findings: OverviewFinding[] }) {
     selectHash();
     window.addEventListener("hashchange", selectHash);
     window.addEventListener("popstate", selectHash);
+    window.addEventListener("fortmind:case-navigation", selectHash);
     return () => {
       window.removeEventListener("hashchange", selectHash);
       window.removeEventListener("popstate", selectHash);
+      window.removeEventListener("fortmind:case-navigation", selectHash);
     };
   }, [findings]);
 
@@ -67,7 +128,6 @@ export function FindingExplorer({ findings }: { findings: OverviewFinding[] }) {
   );
   const selected = matches.find((finding) => finding.id === selectedId) ?? matches[0];
   const selectedPosition = selected ? findings.findIndex((item) => item.id === selected.id) + 1 : 0;
-  const selectedStatus = selected ? classification[selected.evidenceState] : null;
 
   function changeFilter(next: Filter) {
     setFilter(next);
@@ -144,7 +204,6 @@ export function FindingExplorer({ findings }: { findings: OverviewFinding[] }) {
                   <button
                     type="button"
                     aria-pressed={active}
-                    aria-controls="selected-finding-detail"
                     data-ui="finding-select"
                     onClick={() => setSelectedId(finding.id)}
                     className={cn(
@@ -169,6 +228,11 @@ export function FindingExplorer({ findings }: { findings: OverviewFinding[] }) {
                       </span>
                     )}
                   </button>
+                  {active && (
+                    <div data-ui="inline-finding-detail" className="border-t border-border bg-muted/20 p-4 @min-[720px]/findings:hidden">
+                      <FindingDetail finding={finding} index={index} total={findings.length} mobile />
+                    </div>
+                  )}
                 </li>
               );
             })}
@@ -180,52 +244,10 @@ export function FindingExplorer({ findings }: { findings: OverviewFinding[] }) {
           data-ui="finding-inspector"
           role="region"
           aria-label="Selected finding detail"
-          className="min-w-0 bg-muted/20 p-4 @min-[760px]/findings:p-5"
+          className="hidden min-w-0 bg-muted/20 p-5 @min-[720px]/findings:block"
         >
-          {selected && selectedStatus ? (
-            <div className="flex flex-col gap-5">
-              <div>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-caption font-medium text-muted-foreground">
-                    Finding {String(selectedPosition).padStart(2, "0")} / {String(findings.length).padStart(2, "0")}
-                  </span>
-                  <span className={cn("inline-flex items-center gap-1.5 text-caption font-medium", selectedStatus.tone)}>
-                    {selected.evidenceState === "Alert report · unverified" ? <CircleAlert className="size-3.5" aria-hidden="true" /> :
-                      selected.evidenceState === "Tool result" ? <SearchCheck className="size-3.5" aria-hidden="true" /> :
-                      <FileSearch className="size-3.5" aria-hidden="true" />}
-                    {selectedStatus.label}
-                  </span>
-                </div>
-                <h3 data-ui="selected-finding-title" className="mt-3 text-panel-title font-semibold">
-                  {selected.title}
-                </h3>
-                <p className="mt-2 text-prose">{selected.summary}</p>
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <h4 className="text-caption font-semibold uppercase tracking-wide text-muted-foreground">
-                  What this establishes
-                </h4>
-                <p className="mt-2 text-label text-foreground">{selected.detail}</p>
-              </div>
-
-              <dl className="grid min-w-0 gap-4 border-t border-border pt-4">
-                <div className="min-w-0">
-                  <dt className="text-caption font-semibold text-muted-foreground">Source</dt>
-                  <dd className="mt-1 text-label">{selected.provenance}</dd>
-                </div>
-                <div className="min-w-0">
-                  <dt className="text-caption font-semibold text-muted-foreground">Evidence limitation</dt>
-                  <dd className="mt-1 text-label">{selectedStatus.meaning}</dd>
-                </div>
-              </dl>
-
-              <a href="#evidence"
-                className="inline-flex w-fit items-center gap-1.5 text-label font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              >
-                Review source responses <ArrowRight className="size-3.5" aria-hidden="true" />
-              </a>
-            </div>
+          {selected ? (
+            <FindingDetail finding={selected} index={selectedPosition} total={findings.length} />
           ) : (
             <p className="text-label text-muted-foreground">No findings match this filter.</p>
           )}
