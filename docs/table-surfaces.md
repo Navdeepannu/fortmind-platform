@@ -13,15 +13,15 @@ Source references:
 
 | Role | Token | Dark | Light | Primary use |
 | --- | --- | --- | --- | --- |
-| Canvas and workspace chrome | `--background`, `--shell: var(--background)` | `#0C0D0F` | `#FAFAFA` | Main area, sidebar, topbar |
+| Canvas and workspace chrome | `--background`, `--shell: var(--background)` | `#080A0A` | `#FAFAFA` | Main area, sidebar, topbar |
 | Border-led cards | `--card: var(--background)` | canvas color | canvas color | Dashboard cards/panels with an outline instead of another filled layer |
-| Selectively filled surface | `--surface` | `#111315` | `#FFFFFF` | Cases table, dense data sections |
+| Selectively filled surface | `--surface` | `#0F1010` | `#FFFFFF` | Cases table, dense data sections |
 | Subtle alternate case row | `--table-stripe` | `#141619` | approximately `#F8F8F9` | Even rows in FortCases only |
 | Inputs and filters | `--control` | `#181A1E` | `#F7F7F8` | Text inputs, selects, secondary controls |
 | Hover or selected | `--surface-hover` | `#1B1E22` | `#F0F1F2` | Hovered/selected rows and controls |
 | Floating material | `--surface-floating` | `#202328` | `#FFFFFF` | Popovers, dropdowns, tooltips |
 | Floating hover | `--floating-hover` | `#2A2D32` | `#F0F1F2` | Items inside floating menus |
-| Default border | `--border` | `#2A2D32` | `#E5E6E8` | Cards, separators, table lines |
+| Default border | `--border` | `#252727` | `#E5E6E8` | Cards, separators, table lines |
 | Interactive / elevated border | `--border-strong` | `#3A3D43` | `#D1D3D6` | Outline buttons and floating menus |
 | Primary text | `--foreground` | `#F2F2F3` | `#17181B` | Reading and hierarchy |
 | Supporting text | `--muted-foreground` | `#A2A5AA` | `#62676F` | Descriptions and metadata |
@@ -31,6 +31,7 @@ Hex references are for design review; actual source values remain precision-safe
 ### Role behavior
 
 - One shared canvas: `--shell`, `--sidebar`, and `--background` intentionally resolve to the **same fill**. Thin borders and spacing distinguish navigation from content.
+- **Border hierarchy:** Use `--border` (`#252727` in dark mode) for ordinary panel/table separation. Keep the existing stronger `--border-strong` for deliberate control or elevated boundaries. The `#3B3E41` illustration reference is unchanged and should not replace the default border throughout the data-dense application.
 - **Border first:** `bg-card border border-border` is the default for overview and most content panels. Use `bg-surface` only when a table or information-dense surface benefits from a subtle fill.
 - **Do not stack shades for decoration:** toolbar tabs, filters, table headings and rows share `bg-surface` with structural dividers. Filter inputs and secondary buttons have `bg-control`. Outline buttons use a transparent background and a stronger border.
 - **Rows:** Only `[data-ui="case-table"] tbody tr:nth-child(even)` receives a very subtle alternating fill; hover, selected and previewed rows supersede it. Do not add striping to unrelated tables or severity cards.

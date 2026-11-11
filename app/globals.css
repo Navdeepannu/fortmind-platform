@@ -364,9 +364,9 @@
 .dark {
   /* Neutral-first dark theme: brand and semantic colors remain independent. */
   color-scheme: dark;
-  --background: oklch(0.158823 0.004543 264.44); /* #0C0D0F */
+  --background: oklch(0.142283 0.003597 196.76); /* #080A0A */
   --shell: var(--background); /* same canvas as sidebar */
-  --surface: oklch(0.185404 0.005178 248.11); /* #111315 */
+  --surface: oklch(0.171887 0.001633 197.00); /* #0F1010 */
   --table-stripe: oklch(0.199330 0.006777 258.37); /* #141619 */
   --control: oklch(0.217386 0.008416 264.38); /* #181A1E */
   --surface-floating: oklch(0.255182 0.010408 260.70); /* #202328 */
@@ -382,7 +382,7 @@
   --muted-foreground: oklch(0.721033 0.007985 260.73); /* #A2A5AA */
   --accent: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
   --surface-hover: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
-  --border: oklch(0.296183 0.010017 260.71); /* #2A2D32 */
+  --border: oklch(0.270684 0.002912 196.98); /* #252727 */
   --border-strong: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
   --input: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
   --ring: oklch(0.78 0.005 265); /* neutral keyboard focus on dark surfaces */

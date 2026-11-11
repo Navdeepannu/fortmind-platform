@@ -81,10 +81,10 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   assert.equal(brand.light, "oklch(0.7688460193 0.1687457279 161.948704)");
   assert.equal(brand.dark, brand.light);
   assert.equal(inventory.entries.find(e => e.id === "global:--accent").dark, "oklch(0.233609 0.008932 255.60)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--background").dark, "oklch(0.158823 0.004543 264.44)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--background").dark, "oklch(0.142283 0.003597 196.76)");
   assert.equal(inventory.entries.find(e => e.id === "global:--card").dark, "var(--background)");
   assert.equal(inventory.entries.find(e => e.id === "global:--popover").dark, "var(--surface-floating)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--surface").dark, "oklch(0.185404 0.005178 248.11)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--surface").dark, "oklch(0.171887 0.001633 197.00)");
   assert.equal(inventory.entries.find(e => e.id === "global:--surface-elevated").dark, "var(--surface-floating)");
   assert.equal(inventory.entries.find(e => e.id === "global:--shell").dark, "var(--background)");
   assert.equal(inventory.entries.find(e => e.id === "global:--input").dark, "oklch(0.359444 0.011117 264.43)");
@@ -95,12 +95,13 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   assert.equal(aliases.declarations["--color-control"], "var(--control)");
   assert.equal(aliases.declarations["--color-table-stripe"], "var(--table-stripe)");
   assert.equal(aliases.declarations["--color-floating-hover"], "var(--floating-hover)");
-  assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "var(--brand)");
+  // Keyboard focus remains neutral; brand green is reserved for intentional actions.
+  assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "oklch(0.78 0.005 265)");
   const surfaceContract = {
-    "--surface": ["oklch(1 0 0)", "oklch(0.185404 0.005178 248.11)"],
+    "--surface": ["oklch(1 0 0)", "oklch(0.171887 0.001633 197.00)"],
     "--surface-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.233609 0.008932 255.60)"],
     "--surface-floating": ["oklch(1 0 0)", "oklch(0.255182 0.010408 260.70)"],
-    "--border": ["oklch(0.924740 0.002906 264.54)", "oklch(0.296183 0.010017 260.71)"],
+    "--border": ["oklch(0.924740 0.002906 264.54)", "oklch(0.270684 0.002912 196.98)"],
     "--control": ["oklch(0.976419 0.001323 286.38)", "oklch(0.217386 0.008416 264.38)"],
     "--floating-hover": ["oklch(0.957665 0.001718 247.84)", "oklch(0.296183 0.010017 260.71)"],
     "--shell": ["var(--background)", "var(--background)"],
@@ -129,7 +130,7 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   assert.equal(escalation.dark, "oklch(0.7 0.07 305)");
   assert.equal(
     inventory.entries.find((e) => e.id === "global:--border").dark,
-    "oklch(0.296183 0.010017 260.71)",
+    "oklch(0.270684 0.002912 196.98)",
   );
 });
 
