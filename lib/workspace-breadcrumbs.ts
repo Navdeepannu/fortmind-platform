@@ -21,7 +21,12 @@ export function platformBreadcrumbs(pathname: string): NavigationCrumb[] {
   if (area === "overview") return [root, section("Overview")];
   if (area === "cases") {
     if (!item) return [root, section("Cases")];
-    const caseLabel = item === "case-detail" ? `Case ${casePreviewId.slice(0, 8)}` : decodeURIComponent(item);
+    const caseLabel =
+      item === "layout-lab"
+        ? "Layout lab"
+        : item === "case-detail"
+          ? `Case ${casePreviewId.slice(0, 8)}`
+          : decodeURIComponent(item);
     return [root, section("Cases", platformRoutes.cases), section(caseLabel)];
   }
   if (area === "integrations") {
