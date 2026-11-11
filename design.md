@@ -1,5 +1,7 @@
 # FortMind visual contract
 
+> **Client reference update — 11 November 2026:** The eight supplied platform screenshots define the page-layout baseline. See [client-reference-alignment.md](docs/client-reference-alignment.md) for the Home, Cases, Case Detail, Integrations, Reports and Settings implementation map and targeted prompts. This branch deliberately preserves the existing FortMind/OSCAR color identity and demo semantics instead of copying the production platform's monochrome treatment. It builds on the earlier Geist font alignment branch. Do not assume the live platform shares this repository's architecture.
+
 Status: working design/engineering guidance for the **local demonstration prototype** (11 November 2026). This repository is not the client production application. Implemented styles, not this prose, determine current behavior.
 
 ## Sources of truth
