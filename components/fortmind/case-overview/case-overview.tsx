@@ -171,122 +171,130 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
   );
 }
 
+/** Data provenance is a distribution of finding types, never a confidence score. */
+function FindingProvenance({ findings }: { findings: OverviewFinding[] }) {
+  const rows = [
+    { label: "Reported only", value: findings.filter((item) => item.evidenceState === "Alert report · unverified").length, color: "bg-warning" },
+    { label: "Tool results", value: findings.filter((item) => item.evidenceState === "Tool result").length, color: "bg-oscar" },
+    { label: "No corroboration", value: findings.filter((item) => item.evidenceState === "Missing corroboration").length, color: "bg-muted-foreground/50" },
+  ];
+  const total = findings.length;
+  return (
+    <div data-ui="finding-provenance" className="min-w-0">
+      <div
+        role="img"
+        aria-label={`${total} findings: ${rows.map((item) => `${item.value} ${item.label.toLowerCase()}`).join(", ")}`}
+        className="flex h-2 w-full overflow-hidden rounded-full bg-muted"
+      >
+        {rows.map(({ label, value, color }) => (
+          value > 0 ? <span key={label} className={color} style={{ width: `${(value / total) * 100}%` }} /> : null
+        ))}
+      </div>
+      <dl className="mt-3 grid grid-cols-3 gap-3">
+        {rows.map(({ label, value, color }) => (
+          <div key={label} className="min-w-0">
+            <dt className="flex items-center gap-1.5 text-caption text-muted-foreground">
+              <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${color}`} />
+              {label}
+            </dt>
+            <dd className="mt-1 text-lg font-semibold tabular-nums">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 function Conclusion({ data }: { data: CaseOverviewData }) {
+  const concern = data.findings.filter((item) => item.relationship === "Supports concern");
+  const analyze = data.investigation.confidence.find((item) => item.phase === "Analyze");
+  const report = data.investigation.confidence.find((item) => item.phase === "Report");
+
   return (
     <InvestigationSection
       id="conclusion"
-      title="OSCAR decision summary"
-      description="Proposed assessment, evidence limits, and the analyst decision"
-      footer={
-        <div className="grid grid-cols-1 gap-3.75 @min-[760px]/case:grid-cols-[170px_minmax(0,1fr)]">
-          <div>
-            <h3 className="text-panel-title">
-              Recommended next steps
-            </h3>
-            <p className="mt-0.5 text-caption text-muted-foreground">
-              Suggestions only; no response has been approved or executed here.
-            </p>
-          </div>
-          <ol className="grid grid-cols-3 gap-x-6 gap-y-3.5 pl-4.5 list-decimal text-label marker:text-muted-foreground @max-[641px]/case:grid-cols-1">
-            {data.nextSteps.map((step) => (
-              <li className="pl-0.5" key={step}>
-                {step}
-              </li>
-            ))}
-          </ol>
-        </div>
-      }
+      title="Decision briefing"
+      description="A conclusion to review, not a confirmed compromise"
+      contentClassName="px-5 py-5 @max-[501px]/case:px-4 @min-[760px]/case:px-6"
     >
       <div
         data-ui="conclusion-top"
-        className="grid grid-cols-1 gap-6.25 @min-[760px]/case:grid-cols-[minmax(0,1fr)_248px] @min-[760px]/case:gap-6.25"
+        className="grid min-w-0 grid-cols-1 items-start gap-5 @min-[760px]/case:grid-cols-[minmax(0,1fr)_minmax(250px,32%)] @min-[760px]/case:gap-6"
       >
-        <div data-ui="assessment">
-          <p
-            data-ui="eyebrow"
-            className="text-muted-foreground text-caption font-medium"
-          >
-            OSCAR’s proposed verdict
-          </p>
-          <h3
-            data-ui="proposed-verdict"
-            className="mt-1.25 flex items-center gap-2.25 text-page-title text-foreground"
-            data-tone={verdictStates[data.proposedVerdict].tone}
-          >
-            <VerdictMarker value={data.proposedVerdict} />
-            {data.proposedVerdict}
-          </h3>
-          <p
-            data-ui="assessment-summary"
-            className="mt-3 max-w-[68ch] text-prose"
-          >
-            {data.assessment}
-          </p>
-          <p
-            data-ui="confidence-summary"
-            className="flex flex-wrap gap-y-1 gap-x-2.25 mt-4.5 text-muted-foreground text-caption [&_span:last-child]:basis-full"
-          >
-            <span>Investigation confidence</span>
-            <strong className="text-foreground font-medium">
-              Analyze 70 · Report 70
-            </strong>
-            <span>Medium by stage, not verdict confidence</span>
-          </p>
-          <div
-            data-ui="supporting"
-            className="mt-6 pt-5 border-t border-border [&_li_+_li]:border-t [&_li_+_li]:border-border [&_li_span:not([data-ui~='evidence-index'])]:block [&_li_span:not([data-ui~='evidence-index'])]:mt-1 [&_li_span:not([data-ui~='evidence-index'])]:text-muted-foreground [&_li_span:not([data-ui~='evidence-index'])]:text-caption [&_a:hover]:decoration-current"
-          >
-            <h3 className="text-panel-title">
-              Key evidence
+        <div className="min-w-0">
+          <div data-ui="assessment">
+            <p className="text-caption font-medium text-muted-foreground">OSCAR proposes</p>
+            <h3
+              data-ui="proposed-verdict"
+              className="mt-1 flex items-center gap-2 text-2xl font-semibold tracking-tight"
+              data-tone={verdictStates[data.proposedVerdict].tone}
+            >
+              <VerdictMarker value={data.proposedVerdict} />
+              {data.proposedVerdict}
             </h3>
-            <ul className="flex flex-col gap-0 mt-1.75">
-              <li className="flex items-baseline gap-3 py-3 text-prose">
-                <span
-                  data-ui="evidence-index"
-                  className="text-muted-foreground font-mono text-caption"
-                >
-                  01
-                </span>
-                <div className="min-w-0">
-                  <p>
-                    The SIEM alert reports <code>procdump.exe</code> attempting
-                    to access <code>lsass.exe</code> memory.
-                  </p>
-                  <span>Alert report · not independently confirmed</span>
-                  <a
-                    href="#finding-memory-access"
-                    className="inline-flex items-center gap-1 mt-1 text-foreground text-caption font-medium underline decoration-border underline-offset-3"
-                  >
-                    View finding{" "}
-                    <ArrowRight aria-hidden="true" className="w-3.25 h-3.25" />
-                  </a>
-                </div>
-              </li>
-              <li className="flex items-baseline gap-3 py-3 text-prose">
-                <span
-                  data-ui="evidence-index"
-                  className="text-muted-foreground font-mono text-caption"
-                >
-                  02
-                </span>
-                <div className="min-w-0">
-                  <p>
-                    Elasticsearch returned six active security alerts for{" "}
-                    <code>fmlab-ws1</code>.
-                  </p>
-                  <span>
-                    Tool result · relationship to this activity unresolved
-                  </span>
-                  <a
-                    href="#finding-host-alerts"
-                    className="inline-flex items-center gap-1 mt-1 text-foreground text-caption font-medium underline decoration-border underline-offset-3"
-                  >
-                    View finding{" "}
-                    <ArrowRight aria-hidden="true" className="w-3.25 h-3.25" />
-                  </a>
-                </div>
-              </li>
-            </ul>
+            <p data-ui="assessment-summary" className="mt-2 max-w-[68ch] text-prose">
+              {data.assessment}
+            </p>
+            <div
+              data-ui="confidence-summary"
+              className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-muted-foreground"
+            >
+              <span className="font-medium text-warning-foreground">Human review required</span>
+              {analyze && report && (
+                <span>Stage confidence · Analyze {analyze.value} · Report {report.value}</span>
+              )}
+              <a
+                href="#how-oscar-decided"
+                className="font-medium text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-ring"
+              >
+                Why OSCAR stopped
+              </a>
+            </div>
+          </div>
+
+          <div data-ui="supporting" className="mt-5 border-t border-border pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h4 className="text-panel-title">Evidence at a glance</h4>
+                <p className="mt-0.5 text-caption text-muted-foreground">
+                  Source status, not a reliability score
+                </p>
+              </div>
+              <a
+                href="#findings"
+                className="inline-flex items-center gap-1 text-label font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+              >
+                All findings <ArrowRight aria-hidden="true" className="size-3.5" />
+              </a>
+            </div>
+            <div className="mt-4">
+              <FindingProvenance findings={data.findings} />
+            </div>
+            <div className="mt-5 border-t border-border pt-4">
+              <h4 className="text-label font-semibold">Signals supporting concern</h4>
+              <ul className="mt-1 divide-y divide-border">
+                {concern.map((finding) => (
+                  <li key={finding.id} className="flex min-w-0 items-start gap-3 py-2.5">
+                    <span
+                      aria-hidden="true"
+                      className={`mt-1.5 size-1.5 shrink-0 rounded-full ${finding.evidenceState === "Tool result" ? "bg-oscar" : "bg-warning"}`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-label font-medium">{finding.title}</p>
+                      <p className="mt-0.5 text-caption text-muted-foreground">
+                        {finding.provenance}
+                      </p>
+                    </div>
+                    <a
+                      href={`#finding-${finding.id}`}
+                      className="shrink-0 rounded-sm text-caption font-medium text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                    >
+                      View finding
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
         <ReviewVerdict
@@ -295,44 +303,40 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
           status={data.status}
         />
       </div>
-      <div
-        data-ui="conclusion-detail"
-        className="mt-6 pt-5.5 border-t border-border"
-      >
-        <div
-          data-ui="unresolved"
-          className="grid grid-cols-2 gap-y-0 gap-x-6.25 @max-[501px]/case:grid-cols-1"
-        >
-          <h3 className="col-span-full text-panel-title">
-            What remains uncertain
-          </h3>
-          <p
-            data-ui="limitation"
-            className="flex items-start gap-2 mt-3.5 text-prose col-span-full"
-          >
-            <FileSearch
-              aria-hidden="true"
-              className="flex-none w-4 h-4 mt-0.75 text-muted-foreground"
-            />
-            The memory-access claim rests on the alert alone. No tool
-            independently confirmed it.
+
+      <div data-ui="conclusion-detail" className="mt-5 grid min-w-0 gap-5 border-t border-border pt-5 @min-[700px]/case:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <section data-ui="unresolved" aria-labelledby="open-questions-heading" className="min-w-0">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h4 id="open-questions-heading" className="text-panel-title">Before you decide</h4>
+            <span className="text-caption text-muted-foreground">{data.unresolved.length} open questions</span>
+          </div>
+          <div className="mt-2 divide-y divide-border">
+            {data.unresolved.map((item) => (
+              <details key={item.question} data-ui="question" className="group/question">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3 text-label font-medium [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:outline-ring">
+                  {item.question}
+                  <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform group-open/question:rotate-180" />
+                </summary>
+                <p className="pb-3 text-label text-muted-foreground">{item.resolution}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+        <section aria-labelledby="next-step-heading" className="min-w-0 rounded-md border border-border bg-muted/40 px-4 py-4">
+          <p className="text-caption font-medium text-muted-foreground">Next recommended action</p>
+          <h4 id="next-step-heading" className="mt-1 text-body font-semibold">
+            {data.nextSteps[0]}
+          </h4>
+          <p data-ui="limitation" className="mt-2 text-caption text-muted-foreground">
+            Recommendation only. No response has been approved or executed here.
           </p>
-          {data.unresolved.map((item) => (
-            <div
-              data-ui="question"
-              className="flex items-start gap-2 mt-3.75 [&>_svg]:flex-none [&>_svg]:w-3.75 [&>_svg]:h-3.75 [&>_svg]:mt-0.75 [&>_svg]:text-muted-foreground"
-              key={item.question}
-            >
-              <SemanticIcon definition={outcomeStates.Unresolved} />
-              <div>
-                <h4 className="text-body font-medium">{item.question}</h4>
-                <p className="mt-0.75 text-muted-foreground text-label">
-                  {item.resolution}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+          <a
+            href="#actions"
+            className="mt-3 inline-flex items-center gap-1 text-label font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            See response plan <ArrowRight aria-hidden="true" className="size-3.5" />
+          </a>
+        </section>
       </div>
     </InvestigationSection>
   );
