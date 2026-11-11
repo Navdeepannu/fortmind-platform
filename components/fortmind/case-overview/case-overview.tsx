@@ -263,26 +263,24 @@ function Conclusion({ data }: { data: CaseOverviewData }) {
             <div className="mt-4">
               <FindingProvenance findings={data.findings} />
             </div>
-            <div className="mt-5 border-t border-border pt-4">
-              <h4 className="text-label font-semibold">Signals supporting concern</h4>
-              <ul className="mt-1 divide-y divide-border">
+            <div className="mt-4">
+              <h4 className="text-caption font-semibold text-muted-foreground">
+                Review these signals
+              </h4>
+              <ul className="mt-2 grid min-w-0 gap-2 @min-[620px]/case:grid-cols-2">
                 {concern.map((finding) => (
-                  <li key={finding.id} className="flex min-w-0 items-start gap-3 py-2.5">
-                    <span
-                      aria-hidden="true"
-                      className={`mt-1.5 size-1.5 shrink-0 rounded-full ${finding.evidenceState === "Tool result" ? "bg-oscar" : "bg-warning"}`}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-label font-medium">{finding.title}</p>
-                      <p className="mt-0.5 text-caption text-muted-foreground">
-                        {finding.provenance}
-                      </p>
-                    </div>
+                  <li key={finding.id} className="min-w-0 rounded-md border border-border bg-muted/30 px-3 py-3">
+                    <span className="text-caption text-muted-foreground">
+                      {finding.evidenceState}
+                    </span>
+                    <p className="mt-1 line-clamp-2 text-label font-medium">
+                      {finding.title}
+                    </p>
                     <a
                       href={`#finding-${finding.id}`}
-                      className="shrink-0 rounded-sm text-caption font-medium text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                      className="mt-2 inline-flex items-center gap-1 text-caption font-semibold text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     >
-                      View finding
+                      View finding <ArrowRight aria-hidden="true" className="size-3" />
                     </a>
                   </li>
                 ))}
