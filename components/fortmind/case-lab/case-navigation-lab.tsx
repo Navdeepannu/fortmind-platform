@@ -3,14 +3,13 @@
 import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft, ArrowRight, ChevronDown, ChevronLeft, ChevronRight,
-  ListTree, PanelLeft, PanelLeftClose, Rows3, ShieldCheck,
+  ArrowLeft, ChevronDown, ChevronLeft, ChevronRight,
+  ListTree, PanelLeft, Rows3, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CaseStatusBadge, PriorityBadge, VerdictBadge } from "@/components/fortmind/semantic";
 import { buildCaseOverviewViews } from "@/components/fortmind/case-overview/case-overview";
 import {
@@ -375,19 +374,27 @@ export function CaseNavigationLab({ data = caseOverview }: { data?: CaseOverview
               Switch without changing the original investigation.
             </p>
           </div>
-          <Tabs value={mode} onValueChange={(value) => setMode(value as LabMode)}>
-            <TabsList aria-label="Case layout variations" className="h-auto min-h-9 flex-wrap">
-              <TabsTrigger value="expandable" data-ui="lab-mode-expandable">
-                <Rows3 aria-hidden="true" className="size-3.5" /> Expandable
-              </TabsTrigger>
-              <TabsTrigger value="focus" data-ui="lab-mode-focus">
-                <ListTree aria-hidden="true" className="size-3.5" /> Focus
-              </TabsTrigger>
-              <TabsTrigger value="docked" data-ui="lab-mode-docked">
-                <PanelLeft aria-hidden="true" className="size-3.5" /> Docked
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div role="group" aria-label="Case layout variations"
+            className="inline-flex flex-wrap items-center gap-1 rounded-md border border-border bg-muted/50 p-[3px]">
+            {([
+              { id: "expandable", label: "Expandable", icon: Rows3 },
+              { id: "focus", label: "Focus", icon: ListTree },
+              { id: "docked", label: "Docked", icon: PanelLeft },
+            ] as const).map(({ id, label, icon: Icon }) => (
+              <button key={id} type="button" data-ui={`lab-mode-${id}`}
+                aria-pressed={mode === id}
+                onClick={() => setMode(id)}
+                className={cn(
+                  "inline-flex min-h-8 cursor-pointer items-center gap-2 rounded-[5px] px-3 text-label font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  mode === id
+                    ? "border border-border bg-card text-foreground shadow-xs"
+                    : "border border-transparent text-muted-foreground hover:text-foreground",
+                )}>
+                <Icon aria-hidden="true" className="size-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {mode === "expandable" ? (
