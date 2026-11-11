@@ -93,9 +93,13 @@ async function caseViews(route, state) {
       const container = document.querySelector('[data-ui="page-container"]').getBoundingClientRect();
       const stack = [...document.querySelectorAll('[data-ui="case-section-stack"]')]
         .find(node => node.getClientRects().length)?.getBoundingClientRect();
+      const headerBody = document.querySelector('[data-ui="header-body"]').getBoundingClientRect();
+      const navInner = document.querySelector('[data-ui="primary-nav-inner"]').getBoundingClientRect();
       return {
         full: full.map(node => ({ name: node.dataset.ui, x: node.getBoundingClientRect().x, width: node.getBoundingClientRect().width })),
         stack: stack && { x: stack.x, right: stack.right, width: stack.width },
+        headerBody: { x: headerBody.x, width: headerBody.width },
+        navInner: { x: navInner.x, width: navInner.width },
         container: { x: container.x, right: container.right },
         sectionBoxes: [...document.querySelectorAll('[data-case-category] section[data-ui="section"]')]
           .filter(node => node.getClientRects().length)
@@ -107,6 +111,10 @@ async function caseViews(route, state) {
       near(item.width, dimensions.container.width, `${item.name}: full-width header`);
     }
     assert.ok(alignment.stack.width > 0 && alignment.stack.width <= 1121);
+    near(alignment.headerBody.x, alignment.stack.x, "header aligns to section content");
+    near(alignment.navInner.x, alignment.stack.x, "primary tabs align to section content");
+    near(alignment.headerBody.width, alignment.stack.width, "header and content use same readable measure");
+    near(alignment.navInner.width, alignment.stack.width, "navigation and content use same readable measure");
     assert.ok(alignment.stack.x >= alignment.container.x - 1);
     assert.ok(alignment.stack.right <= alignment.container.right + 1);
     for (const section of alignment.sectionBoxes) {
