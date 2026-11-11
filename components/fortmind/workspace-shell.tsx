@@ -79,12 +79,7 @@ export { FortMindMark } from "./brand-logo";
 
 type Panel = "integrations" | "search";
 
-type PlatformSection =
-  | "Overview"
-  | "Cases"
-  | "OSCAR Context"
-  | "Reports"
-  | "Integrations";
+type PlatformSection = "Home" | "Cases" | "Integrations" | "Knowledge" | "Reports" | "Settings";
 
 const WorkspaceContext = createContext<{
   openPanel: (panel: Panel) => void;
@@ -103,30 +98,13 @@ function AppSidebar({ section }: { section: PlatformSection }) {
   const { setOpenMobile } = useSidebar();
 
   const workspaceItems = [
-    { label: "Overview", icon: LayoutDashboard, href: platformRoutes.overview },
+    { label: "Home", icon: LayoutDashboard, href: platformRoutes.overview },
     { label: "Cases", icon: Inbox, href: platformRoutes.cases },
-    {
-      label: "OSCAR Context",
-      icon: BookOpen,
-      href: platformRoutes.knowledge,
-    },
+    { label: "Integrations", icon: Link2, href: platformRoutes.integrations },
+    { label: "Knowledge", icon: BookOpen, href: platformRoutes.knowledge },
     { label: "Reports", icon: ChartColumn, href: platformRoutes.reports },
-  ];
-
-  const managementItems: {
-    label: string;
-    icon: LucideIcon;
-    href: string;
-    count?: number;
-  }[] = [
-    {
-      label: "Integrations",
-      icon: Link2,
-      href: platformRoutes.integrations,
-      count: attentionIntegrations.length,
-    },
     { label: "Settings", icon: Settings, href: platformRoutes.settings },
-  ];
+  ] as const;
 
   const navItemClass = cn(
     "h-10 gap-3 rounded-sm px-3 text-label font-normal text-sidebar-foreground transition-colors",
@@ -174,14 +152,7 @@ function AppSidebar({ section }: { section: PlatformSection }) {
       </SidebarHeader>
 
       <SidebarContent className="gap-0 bg-sidebar px-3 pb-5 pt-5 group-data-[collapsible=icon]:px-2">
-        <SidebarGroup
-          role="navigation"
-          aria-label="Workspace navigation"
-          className="px-0 py-0"
-        >
-          <SidebarGroupLabel className="h-7 px-2 text-caption font-normal text-muted-foreground">
-            Workspace
-          </SidebarGroupLabel>
+        <SidebarGroup role="navigation" aria-label="Platform navigation" className="px-0 py-0">
           <SidebarMenu className="gap-1">
             {workspaceItems.map((item) => (
               <SidebarMenuItem key={item.label}>
@@ -195,55 +166,11 @@ function AppSidebar({ section }: { section: PlatformSection }) {
                   onClick={() => setOpenMobile(false)}
                 >
                   <item.icon aria-hidden="true" />
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    {item.label}
-                  </span>
+                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                  {item.label === "Integrations" && attentionIntegrations.length > 0 && (
+                    <SidebarMenuBadge className="text-warning-foreground" aria-label={`${attentionIntegrations.length} tools need attention`}>{attentionIntegrations.length}</SidebarMenuBadge>
+                  )}
                 </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator className="mx-0 my-5 bg-sidebar-border group-data-[collapsible=icon]:my-4" />
-        <SidebarGroup
-          role="navigation"
-          aria-label="Management navigation"
-          className="px-0 py-0"
-        >
-          <SidebarGroupLabel className="h-7 px-2 text-caption font-normal text-muted-foreground">
-            Management
-          </SidebarGroupLabel>
-          <SidebarMenu className="gap-1">
-            {managementItems.map((item) => (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton
-                  tooltip={item.label}
-                  aria-label={item.label}
-                  isActive={section === item.label}
-                  aria-current={section === item.label ? "page" : undefined}
-                  className={navItemClass}
-                  render={<Link href={item.href} />}
-                  onClick={() => setOpenMobile(false)}
-                >
-                  <item.icon aria-hidden="true" />
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    {item.label}
-                  </span>
-                </SidebarMenuButton>
-                {item.count ? (
-                  <SidebarMenuBadge
-                    aria-label={`${item.count} integration${item.count === 1 ? "" : "s"} need attention`}
-                    className="text-warning-foreground"
-                  >
-                    {item.count}
-                  </SidebarMenuBadge>
-                ) : null}
-                {item.count ? (
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute right-1 top-1 hidden size-1.5 rounded-full bg-warning group-data-[collapsible=icon]:block"
-                  />
-                ) : null}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -527,16 +454,16 @@ function WorkspacePanel({
   );
 }
 
-export function WorkspaceShell({ children }: { children: ReactNode }) {
+export function WorkspaceShell({ children, sectionOverride }: { children: ReactNode; sectionOverride?: PlatformSection }) {
   const segment = useSelectedLayoutSegment();
   const sections: Record<string, PlatformSection> = {
-    overview: "Overview",
+    overview: "Home",
     cases: "Cases",
-    knowledge: "OSCAR Context",
+    knowledge: "Knowledge",
     reports: "Reports",
     integrations: "Integrations",
   };
-  const section = sections[segment ?? "overview"] ?? "Overview";
+  const section = sectionOverride ?? sections[segment ?? "overview"] ?? "Home";
   const [panel, setPanel] = useState<Panel | null>(null);
   const [period, setPeriod] = useState<ImpactPeriod>("7d");
   function openPanel(next: Panel) {
@@ -591,11 +518,15 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                   className="size-8 shrink-0 md:hidden"
                 />
                 <CollapsedSidebarTrigger />
+                <div className="hidden min-w-0 items-center gap-3 text-label sm:flex">
+                  <span className="h-4 w-px bg-border" aria-hidden="true" />
+                  <span className="truncate font-medium">{section}</span>
+                </div>
                 <Button
                   data-ui="global-search"
                   variant="outline"
                   size="sm"
-                  className="min-w-0 flex-1 max-w-80 justify-start gap-2 px-3 text-muted-foreground has-data-[icon=inline-start]:pl-3"
+                  className="ml-auto min-w-0 max-w-64 flex-1 justify-start gap-2 px-3 text-muted-foreground has-data-[icon=inline-start]:pl-3"
                   onClick={() => openPanel("search")}
                   aria-label="Search cases"
                 >
@@ -678,6 +609,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <WorkspaceThemeToggle />
               </div>
             </header>
             <PageContainer>{children}</PageContainer>
