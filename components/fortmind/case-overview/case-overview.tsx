@@ -848,6 +848,14 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
         }>
           <CaseCategoryTabs
             status={data.status}
+            counts={{
+              findings: data.findings.length,
+              hypotheses: data.hypotheses.length,
+              entities: data.entities.length,
+              evidence: data.evidence.length,
+              "similar-cases": data.relatedCases.length,
+              actions: data.actions.length,
+            }}
             views={{
               conclusion: <Conclusion data={data} />,
               "how-oscar-decided": <InvestigationSummary data={data} />,
