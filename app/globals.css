@@ -201,7 +201,7 @@
   --surface: oklch(1 0 0); /* #FFFFFF, filled content panels */
   --table-stripe: oklch(0.989 0.001 255); /* almost-white alternating rows */
   --control: oklch(0.976419 0.001323 286.38); /* #F7F7F8 */
-  --card: var(--background); /* border-led cards */
+  --card: var(--surface); /* clean white panels on the light canvas */
   --card-foreground: var(--foreground);
   --surface-floating: oklch(1 0 0); /* #FFFFFF */
   --floating-hover: oklch(0.966 0.002 260); /* calmer menu hover in light mode */
@@ -367,6 +367,7 @@
   --background: oklch(0.158823 0.004543 264.44); /* #0C0D0F */
   --shell: var(--background); /* same canvas as sidebar */
   --surface: oklch(0.185404 0.005178 248.11); /* #111315 */
+  --card: var(--background); /* dark content remains border-led, not elevated */
   --table-stripe: oklch(0.199330 0.006777 258.37); /* #141619 */
   --control: oklch(0.217386 0.008416 264.38); /* #181A1E */
   --surface-floating: var(--background); /* bordered overlays, no raised slate panel */
