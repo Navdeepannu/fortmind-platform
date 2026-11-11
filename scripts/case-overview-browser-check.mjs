@@ -189,6 +189,13 @@ try {
   await expectView("Investigation", "findings");
   await page.waitForFunction(() => document.activeElement === document.querySelector("#finding-memory-access"));
   assert.equal(await page.locator('#finding-memory-access [data-ui="finding-select"]').getAttribute("aria-pressed"), "true");
+  // A hash target overrides a prior filter, otherwise the linked row could be absent.
+  await explorer.getByRole("button", { name: /Not corroborated 2/ }).click();
+  await selectPrimary("Decision");
+  await page.getByRole("link", { name: "View finding", exact: true }).first().click();
+  await expectView("Investigation", "findings");
+  assert.equal(await page.locator('#finding-memory-access [data-ui="finding-select"]').getAttribute("aria-pressed"), "true");
+  assert.equal(await explorer.locator('[data-ui="finding"]:visible').count(), 5);
   await page.getByRole("button", { name: "Review verdict", exact: true }).click();
   await expectView("Decision", "conclusion");
   await page.waitForFunction(() => document.activeElement === document.getElementById("decision-heading"));
@@ -257,6 +264,13 @@ try {
       }
       await selectView("Investigation", "findings");
       await page.locator('#finding-entra-signins [data-ui="finding-select"]').click();
+      if (width <= 390) {
+        assert.equal(await page.locator('#finding-entra-signins [data-ui="inline-finding-detail"]').isVisible(), true);
+        assert.equal(await page.locator('[data-ui="finding-inspector"]').isVisible(), false);
+      } else if (width === 1920) {
+        assert.equal(await page.locator('[data-ui="finding-inspector"]').isVisible(), true);
+        assert.equal(await page.locator('[data-ui="inline-finding-detail"]:visible').count(), 0);
+      }
       await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
       const nav = await page.locator('[data-ui="page-nav"]').evaluate(node => node.getBoundingClientRect().top);
       const rail = page.locator('[data-case-category="investigation"] [data-ui="secondary-nav"]');
