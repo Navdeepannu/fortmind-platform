@@ -60,11 +60,14 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
             label="case ID"
           />
         </div>
-        <span
-          data-ui="fixture-label"
-          className="text-muted-foreground text-caption @max-[501px]/case:hidden"
-        >
-          Case preview
+        <span data-ui="fixture-label" className="inline-flex items-center gap-3 text-caption text-muted-foreground">
+          <span className="@max-[501px]/case:hidden">Case preview</span>
+          <Link
+            href="/platform/cases/layout-lab"
+            className="rounded-sm font-medium text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            Compare layouts
+          </Link>
         </span>
       </div>
       <h1 className="mt-2 text-page-title">
