@@ -40,8 +40,9 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
   return (
     <header
       data-ui="header"
-      className="flex-none min-w-0 py-5 border-b border-border bg-background @max-[501px]/case:py-4"
+      className="flex-none min-w-0 border-b border-border bg-background py-5 @max-[501px]/case:py-4"
     >
+      <div data-ui="header-body" className="mx-auto w-full max-w-[1120px] min-w-0">
       <div
         data-ui="header-meta"
         className="flex min-w-0 items-center justify-between gap-3"
@@ -158,6 +159,7 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
           </dd>
         </div>
       </dl>
+      </div>
     </header>
   );
 }
@@ -869,11 +871,10 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
             }}
           />
         </Suspense>
-        <p
-          data-ui="preview-footnote"
-          className="pb-8 text-caption text-muted-foreground"
-        >
-          Screenshot-derived case · reconstructed before analyst confirmation · local preview interactions
+        <p data-ui="preview-footnote" className="pb-8 text-caption text-muted-foreground">
+          <span className="mx-auto block w-full max-w-[1120px]">
+            Screenshot-derived case · reconstructed before analyst confirmation · local preview interactions
+          </span>
         </p>
       </div>
     </div>
