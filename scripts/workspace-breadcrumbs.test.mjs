@@ -24,7 +24,7 @@ test("detail pages expose real ancestor links and compact identity", () => {
   assert.equal(caseCrumbs[1].href, "/platform/cases");
   assert.equal(caseCrumbs[2].href, undefined);
   assert.deepEqual(labels(platformBreadcrumbs("/platform/cases/case-detail")), [
-    "Workspace", "Cases", "Investigation",
+    "Workspace", "Cases", "Case 13845102",
   ]);
   const integration = platformBreadcrumbs("/platform/integrations/microsoft-365");
   assert.deepEqual(labels(integration), ["Workspace", "Integrations", "Microsoft 365"]);
