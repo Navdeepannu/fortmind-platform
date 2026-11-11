@@ -148,8 +148,9 @@ export function CaseCategoryTabs({
       >
         <div
           data-ui="page-nav"
-          className="sticky top-(--workspace-header-height) z-20 flex h-(--case-primary-nav-height) min-w-0 items-center gap-4 border-b border-border bg-background"
+          className="sticky top-(--workspace-header-height) z-20 h-(--case-primary-nav-height) min-w-0 border-b border-border bg-background"
         >
+          <div data-ui="primary-nav-inner" className="mx-auto flex h-full w-full max-w-[1120px] min-w-0 items-center gap-4">
           <div data-case-tab-scroll className="relative min-w-0 flex-1 overflow-x-auto [scrollbar-width:thin]">
             <TabsList
               variant="line"
@@ -179,6 +180,7 @@ export function CaseCategoryTabs({
               <ArrowRight data-icon="inline-end" aria-hidden="true" />
             </Button>
           )}
+          </div>
         </div>
 
         {caseSectionGroups.map((group) => (
