@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { usePathname, useSelectedLayoutSegment } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { caseHref, platformRoutes } from "@/lib/platform-routes";
 import { caseOverview } from "@/lib/case-overview-data";
@@ -18,6 +18,7 @@ import {
 } from "react";
 import {
   ArrowRight,
+  ChevronRight,
   Bell,
   BookOpen,
   Building2,
@@ -69,6 +70,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { type ImpactPeriod } from "@/lib/overview-data";
 import { attentionIntegrations } from "@/lib/preview-integrations";
 import { CaseQuickPreview } from "./case-table";
+import { CopyTechnicalValue } from "./copy-technical-value";
 import { WorkspaceThemeToggle } from "./theme-toggle";
 import { FortMindLogo, FortMindMark } from "./brand-logo";
 
@@ -458,6 +460,7 @@ function WorkspacePanel({
 
 export function WorkspaceShell({ children, sectionOverride }: { children: ReactNode; sectionOverride?: PlatformSection }) {
   const segment = useSelectedLayoutSegment();
+  const pathname = usePathname();
   const sections: Record<string, PlatformSection> = {
     overview: "Home",
     cases: "Cases",
@@ -466,6 +469,9 @@ export function WorkspaceShell({ children, sectionOverride }: { children: ReactN
     integrations: "Integrations",
   };
   const section = sectionOverride ?? sections[segment ?? "overview"] ?? "Home";
+  const caseRoute = section === "Cases" && pathname.startsWith(`${platformRoutes.cases}/`);
+  const caseSlug = caseRoute ? pathname.slice(platformRoutes.cases.length + 1).split("/")[0] : "";
+  const caseId = caseSlug === "case-detail" ? caseOverview.id : caseSlug ? decodeURIComponent(caseSlug) : "";
   const [panel, setPanel] = useState<Panel | null>(null);
   const [period, setPeriod] = useState<ImpactPeriod>("7d");
   function openPanel(next: Panel) {
@@ -520,10 +526,22 @@ export function WorkspaceShell({ children, sectionOverride }: { children: ReactN
                   className="size-8 shrink-0 md:hidden"
                 />
                 <CollapsedSidebarTrigger />
-                <div className="hidden min-w-0 items-center gap-3 text-label sm:flex">
+                <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-2 text-body sm:flex">
                   <span className="h-4 w-px bg-border" aria-hidden="true" />
-                  <span className="truncate font-medium">{section}</span>
-                </div>
+                  {caseRoute ? (
+                    <>
+                      <Link href={platformRoutes.cases} className="text-muted-foreground hover:text-foreground focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-ring">
+                        Cases
+                      </Link>
+                      <ChevronRight aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 truncate">
+                        <CopyTechnicalValue label="case ID" value={caseId} />
+                      </span>
+                    </>
+                  ) : (
+                    <span className="truncate font-medium">{section}</span>
+                  )}
+                </nav>
                 <Button
                   data-ui="global-search"
                   variant="outline"
