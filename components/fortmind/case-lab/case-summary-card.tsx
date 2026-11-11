@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Crosshair, Monitor, UserRound } from "lucide-react";
 import { CaseStatusBadge, PriorityBadge, VerdictBadge } from "@/components/fortmind/semantic";
 import type { CaseOverviewData } from "@/lib/case-overview-data";
@@ -8,7 +9,7 @@ function Metadata({
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="min-w-0">
