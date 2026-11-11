@@ -640,55 +640,58 @@ function InvestigationSummary({ data }: { data: CaseOverviewData }) {
 }
 
 function AttackPath({ data }: { data: CaseOverviewData }) {
+  const host = data.entities.find((entity) => entity.kind === "host");
+  const user = data.entities.find((entity) => entity.kind === "user");
+  const processes = data.entities.filter((entity) => entity.kind === "process");
+  const path = [
+    { label: "Reported user", kind: "user", value: user?.name ?? "Unavailable" },
+    { label: "Initiating process", kind: "process", value: processes[0]?.name ?? "Unavailable" },
+    { label: "Memory-access target", kind: "process", value: processes[1]?.name ?? "Unavailable" },
+  ] as const;
+
   return (
     <InvestigationSection
       id="attack-path"
-      title="Attack path"
-      description="Relationship reported by the alert; event time not stated"
+      title="Reported activity path"
+      description="Claimed relationship from the SIEM alert, not verified process telemetry"
     >
-      <div
-        data-ui="attack-path"
-        className="flex items-center flex-wrap gap-y-2.5 gap-x-3.5"
-      >
-        <span className="inline-flex items-center gap-2 pt-2.25 pr-3 pb-2.25 pl-3 border border-border rounded-md bg-background">
-          <UserRound
-            aria-hidden="true"
-            className="w-3.75 h-3.75 text-muted-foreground"
-          />
-          <CopyIdentifier value="lab.bob" label="attack path user lab.bob" />
-        </span>
-        <ArrowRight
-          aria-hidden="true"
-          className="text-muted-foreground w-4 h-4"
-        />
-        <span className="inline-flex items-center gap-2 pt-2.25 pr-3 pb-2.25 pl-3 border border-border rounded-md bg-background">
-          <Terminal
-            aria-hidden="true"
-            className="w-3.75 h-3.75 text-muted-foreground"
-          />
-          <CopyIdentifier value="procdump.exe" label="attack path process procdump.exe" />
-        </span>
-        <ArrowRight
-          aria-hidden="true"
-          className="text-muted-foreground w-4 h-4"
-        />
-        <span className="inline-flex items-center gap-2 pt-2.25 pr-3 pb-2.25 pl-3 border border-border rounded-md bg-background">
-          <Terminal
-            aria-hidden="true"
-            className="w-3.75 h-3.75 text-muted-foreground"
-          />
-          <CopyIdentifier value="lsass.exe" label="attack path target lsass.exe" />
-        </span>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <span className="text-caption font-medium text-warning-foreground">Unverified source claim</span>
+        {host && (
+          <span className="text-caption text-muted-foreground">
+            Host: <code className="text-foreground">{host.name}</code>
+          </span>
+        )}
       </div>
-      <p
-        data-ui="section-note"
-        className="mt-5 pt-3.5 border-t border-border text-muted-foreground text-caption"
-      >
-        The alert describes an attempt to access LSASS memory on{" "}
-        <code>fmlab-ws1</code>, classified as {data.technique.id}{" "}
-        {data.technique.name}. Process execution and memory access were not
-        independently verified.
-      </p>
+      <div data-ui="attack-path" className="grid min-w-0 grid-cols-1 items-center gap-2 @min-[690px]/case:grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)_20px_minmax(0,1fr)]">
+        {path.map((node, index) => (
+          <div key={node.label} className="contents">
+            {index > 0 && (
+              <ArrowRight aria-hidden="true" className="mx-auto size-4 rotate-90 text-muted-foreground @min-[690px]/case:rotate-0" />
+            )}
+            <div className="min-w-0 rounded-md border border-border bg-muted/25 p-3">
+              <p className="text-caption text-muted-foreground">{node.label}</p>
+              <div className="mt-2 flex min-w-0 items-center gap-1.5">
+                {node.kind === "user"
+                  ? <UserRound aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                  : <Terminal aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />}
+                <CopyIdentifier value={node.value} label={`attack path ${node.kind} ${node.value}`} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div data-ui="section-note" className="mt-4 border-t border-border pt-3">
+        <p className="text-caption text-muted-foreground">
+          Categorized as MITRE {data.technique.id} · {data.technique.name}. Execution and memory access were not independently confirmed.
+        </p>
+        <a
+          href="#finding-memory-access"
+          className="mt-2 inline-flex items-center gap-1 text-label font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          Review source finding <ArrowRight aria-hidden="true" className="size-3.5" />
+        </a>
+      </div>
     </InvestigationSection>
   );
 }
