@@ -997,6 +997,23 @@ function Timeline({ data }: { data: CaseOverviewData }) {
   );
 }
 
+/** Reuse the same source-backed views in the main case screen and optional layout experiments. */
+export function buildCaseOverviewViews(data: CaseOverviewData) {
+  return {
+    conclusion: <Conclusion data={data} />,
+    "how-oscar-decided": <InvestigationSummary data={data} />,
+    findings: <Findings data={data} />,
+    hypotheses: <Hypotheses data={data} />,
+    "attack-path": <AttackPath data={data} />,
+    entities: <Entities data={data} />,
+    evidence: <Evidence data={data} />,
+    "similar-cases": <SimilarCases data={data} />,
+    actions: <Actions data={data} />,
+    "analyst-notes": <AnalystNotes />,
+    timeline: <Timeline data={data} />,
+  };
+}
+
 export function CaseOverview({ data }: { data: CaseOverviewData }) {
   return (
     <div
@@ -1024,19 +1041,7 @@ export function CaseOverview({ data }: { data: CaseOverviewData }) {
               evidence: data.evidence.length,
               actions: data.actions.length,
             }}
-            views={{
-              conclusion: <Conclusion data={data} />,
-              "how-oscar-decided": <InvestigationSummary data={data} />,
-              findings: <Findings data={data} />,
-              hypotheses: <Hypotheses data={data} />,
-              "attack-path": <AttackPath data={data} />,
-              entities: <Entities data={data} />,
-              evidence: <Evidence data={data} />,
-              "similar-cases": <SimilarCases data={data} />,
-              actions: <Actions data={data} />,
-              "analyst-notes": <AnalystNotes />,
-              timeline: <Timeline data={data} />,
-            }}
+            views={buildCaseOverviewViews(data)}
           />
         </Suspense>
         <p
