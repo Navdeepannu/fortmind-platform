@@ -115,9 +115,9 @@ function AppSidebar({ section }: { section: PlatformSection }) {
   return (
     <Sidebar
       data-ui="sidebar"
-      variant="sidebar"
+      variant="inset"
       collapsible="icon"
-      className="border-sidebar-border"
+      className="[&_[data-slot=sidebar-inner]]:overflow-hidden [&_[data-slot=sidebar-inner]]:rounded-lg [&_[data-slot=sidebar-inner]]:border [&_[data-slot=sidebar-inner]]:border-sidebar-border"
     >
       <SidebarHeader className="sticky top-0 z-10 shrink-0 gap-0 bg-sidebar p-0">
         {/* The product header and the utility toolbar share the same 48px baseline. */}
@@ -507,12 +507,12 @@ export function WorkspaceShell({ children, sectionOverride }: { children: ReactN
           <AppSidebar section={section} />
           <SidebarInset
             data-ui="inset"
-            className="min-w-0 min-h-dvh bg-background"
+            className="min-w-0 min-h-dvh bg-background md:peer-data-[variant=inset]:min-h-[calc(100dvh-1rem)]"
           >
             {/* Workspace tools stay available while content scrolls. */}
             <header
               data-ui="utility-bar"
-              className="sticky top-0 z-30 flex h-(--workspace-header-height) shrink-0 items-center justify-between gap-3 border-b border-sidebar-border bg-shell px-5 md:px-8"
+              className="sticky top-0 z-30 flex h-(--workspace-header-height) shrink-0 items-center justify-between gap-3 border-b border-border bg-background px-5 md:px-8"
             >
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <SidebarTrigger
