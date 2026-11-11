@@ -1,8 +1,12 @@
 import type { ReactNode } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { caseSectionGroups, caseViewForSection, type CaseSectionId } from "@/lib/case-sections";
+import type { CaseSectionId } from "@/lib/case-sections";
 
+/**
+ * One section in a case workspace. The selected top-level category is already
+ * visible in the sticky tab bar; do not repeat it as an overline here.
+ */
 export function InvestigationSection({
   id,
   title,
@@ -26,10 +30,6 @@ export function InvestigationSection({
   contentClassName?: string;
   children: ReactNode;
 }) {
-  const context = caseViewForSection(id);
-  const group = caseSectionGroups.find((item) => item.id === context?.tab);
-  const position = group?.sections.findIndex((item) => item.id === id) ?? -1;
-  const total = group?.sections.length ?? 0;
   return (
     <section
       data-ui="section"
@@ -37,73 +37,39 @@ export function InvestigationSection({
       aria-labelledby={`${id}-heading`}
       tabIndex={-1}
       className={cn(
-        "scroll-mt-40 outline-none [&:focus-visible]:outline-2 [&:focus-visible]:outline-ring [&:focus-visible]:outline-offset-5 [&:focus-visible]:rounded-lg",
+        "min-w-0 scroll-mt-28 outline-none focus-visible:rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring",
         className,
       )}
     >
-      <header
-        data-ui="section-header"
-        className="flex items-end justify-between flex-wrap gap-y-2 gap-x-4 mb-4"
-      >
-        <div data-ui="section-heading-copy">
-          {group && (
-            <p data-ui="section-location" className="mb-1.5 flex items-center gap-2 text-caption font-medium text-muted-foreground">
-              <span className="uppercase tracking-[0.08em]">{group.label}</span>
-              {total > 1 && (
-                <span className="font-mono text-[11px] tabular-nums">
-                  {String(position + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-                </span>
-              )}
-            </p>
-          )}
-          <h2
-            id={`${id}-heading`}
-            className="text-section-title"
-          >
+      <header data-ui="section-header" className="mb-3 flex min-w-0 flex-wrap items-start justify-between gap-3">
+        <div data-ui="section-heading-copy" className="min-w-0">
+          <h2 id={`${id}-heading`} className="flex flex-wrap items-baseline gap-2 text-section-title font-semibold">
             {title}
             {count !== undefined && (
-              <span
-                data-ui="section-count"
-                className="ml-2.25 text-muted-foreground text-label font-normal align-baseline"
-              >
+              <span data-ui="section-count" className="text-label font-normal tabular-nums text-muted-foreground">
                 {count}
               </span>
             )}
           </h2>
           {description && (
-            <p
-              data-ui="section-description"
-              className="mt-1 text-muted-foreground text-caption"
-            >
+            <p data-ui="section-description" className="mt-1 max-w-[72ch] text-caption leading-relaxed text-muted-foreground">
               {description}
             </p>
           )}
         </div>
         {(metadata || actions) && (
-          <div
-            data-ui="section-actions"
-            className="flex items-center min-h-7.5"
-          >
+          <div data-ui="section-actions" className="flex min-h-7 items-center gap-2">
             {metadata}
             {actions}
           </div>
         )}
       </header>
-      <Card
-        data-ui="section-card"
-        className="gap-0 rounded-lg border bg-card py-0 ring-0 [--card-spacing:0px]"
-      >
-        <CardContent
-          data-ui="section-body"
-          className={cn("px-5 py-5 @min-[760px]/case:px-6 @max-[501px]/case:px-4", contentClassName)}
-        >
+      <Card data-ui="section-card" className="min-w-0 gap-0 overflow-hidden rounded-lg border bg-card py-0 shadow-none ring-0 [--card-spacing:0px]">
+        <CardContent data-ui="section-body" className={cn("min-w-0 break-words px-5 py-5 @min-[760px]/case:px-6 @max-[501px]/case:px-4", contentClassName)}>
           {children}
         </CardContent>
         {footer && (
-          <CardFooter
-            data-ui="section-footer"
-            className="border-t border-border bg-muted/30 px-5 py-4 @max-[501px]/case:px-4"
-          >
+          <CardFooter data-ui="section-footer" className="min-w-0 border-t border-border bg-muted/20 px-5 py-3 @max-[501px]/case:px-4">
             {footer}
           </CardFooter>
         )}
