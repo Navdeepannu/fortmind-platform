@@ -82,46 +82,54 @@ async function caseViews(route, state) {
       .getByRole("tab", { name: group.label, exact: true }).click();
     await page.waitForFunction(tab =>
       document.querySelector(`[data-case-category="${tab}"]`)?.getClientRects().length > 0, group.id);
-    assert.equal(await page.locator('[data-ui="secondary-nav"]:visible').count(), 0);
-    assert.equal(await page.locator('[data-ui="mobile-section-nav"]:visible').count(), 0);
-    const sections = page.locator(`[data-case-category="${group.id}"] section[data-ui="section"]:visible`);
-    assert.equal(await sections.count(), group.sections.length);
-    const dimensions = await measure(`${route} ${group.label} ${state}`);
-    const alignment = await page.evaluate(() => {
-      const names = ["header", "header-meta", "page-nav", "preview-footnote"];
-      const full = names.map(name => document.querySelector(`[data-ui="${name}"]`)).filter(Boolean);
-      const container = document.querySelector('[data-ui="page-container"]').getBoundingClientRect();
-      const stack = [...document.querySelectorAll('[data-ui="case-section-stack"]')]
-        .find(node => node.getClientRects().length)?.getBoundingClientRect();
-      const headerBody = document.querySelector('[data-ui="header-body"]').getBoundingClientRect();
-      const navInner = document.querySelector('[data-ui="primary-nav-inner"]').getBoundingClientRect();
-      return {
-        full: full.map(node => ({ name: node.dataset.ui, x: node.getBoundingClientRect().x, width: node.getBoundingClientRect().width })),
-        stack: stack && { x: stack.x, right: stack.right, width: stack.width },
-        headerBody: { x: headerBody.x, width: headerBody.width },
-        navInner: { x: navInner.x, width: navInner.width },
-        container: { x: container.x, right: container.right },
-        sectionBoxes: [...document.querySelectorAll('[data-case-category] section[data-ui="section"]')]
-          .filter(node => node.getClientRects().length)
-          .map(node => ({ id: node.id, x: node.getBoundingClientRect().x, right: node.getBoundingClientRect().right })),
-      };
-    });
-    for (const item of alignment.full) {
-      near(item.x, dimensions.container.x, `${item.name}: aligned origin`);
-      near(item.width, dimensions.container.width, `${item.name}: full-width header`);
+
+    for (const section of group.sections) {
+      if (group.sections.length > 1) {
+        await page.getByRole("tablist", { name: `${group.label} views`, exact: true })
+          .locator(`[data-section-id="${section.id}"]`).click();
+      }
+      await page.waitForFunction(({ tab, view }) => {
+        const params = new URL(location.href).searchParams;
+        const sections = [...document.querySelectorAll('section[data-ui="section"]')]
+          .filter(node => node.getClientRects().length);
+        return params.get("tab") === tab && params.get("view") === view &&
+          sections.length === 1 && sections[0].id === view;
+      }, { tab: group.id, view: section.id });
+
+      const dimensions = await measure(`${route} ${group.label}/${section.label} ${state}`);
+      const alignment = await page.evaluate(() => {
+        const names = ["header", "header-meta", "page-nav", "preview-footnote"];
+        const full = names.map(name => document.querySelector(`[data-ui="${name}"]`)).filter(Boolean);
+        const rect = element => element.getBoundingClientRect();
+        const active = [...document.querySelectorAll('[data-case-category]')]
+          .find(node => node.getClientRects().length);
+        const content = active?.querySelector('[data-ui="case-section-workspace"]');
+        const headerBody = document.querySelector('[data-ui="header-body"]');
+        const primary = document.querySelector('[data-ui="primary-nav-inner"]');
+        const section = active?.querySelector('section[data-ui="section"]:not([hidden])');
+        return {
+          full: full.map(node => ({ name: node.dataset.ui, x: rect(node).x, width: rect(node).width })),
+          content: { x: rect(content).x, right: rect(content).right, width: rect(content).width },
+          header: { x: rect(headerBody).x, width: rect(headerBody).width },
+          primary: { x: rect(primary).x, width: rect(primary).width },
+          section: { x: rect(section).x, right: rect(section).right },
+          extraSidebar: !!active?.querySelector('[data-ui="secondary-nav"], [data-ui="mobile-section-nav"]'),
+        };
+      });
+      for (const item of alignment.full) {
+        near(item.x, dimensions.container.x, `${item.name}: origin`);
+        near(item.width, dimensions.container.width, `${item.name}: full-width band`);
+      }
+      assert.equal(alignment.extraSidebar, false);
+      assert.ok(alignment.content.width > 0 && alignment.content.width <= 1121);
+      near(alignment.header.x, alignment.content.x, "header aligned to workspace content");
+      near(alignment.primary.x, alignment.content.x, "primary tabs aligned to workspace content");
+      near(alignment.header.width, alignment.content.width, "header and panel share measure");
+      near(alignment.primary.width, alignment.content.width, "tabs and panel share measure");
+      assert.ok(alignment.section.x >= alignment.content.x - 1);
+      assert.ok(alignment.section.right <= alignment.content.right + 1);
+      report.caseViews.push({ route, state, tab: group.id, view: section.id, viewport: dimensions.viewport, theme: dimensions.theme });
     }
-    assert.ok(alignment.stack.width > 0 && alignment.stack.width <= 1121);
-    near(alignment.headerBody.x, alignment.stack.x, "header aligns to section content");
-    near(alignment.navInner.x, alignment.stack.x, "primary tabs align to section content");
-    near(alignment.headerBody.width, alignment.stack.width, "header and content use same readable measure");
-    near(alignment.navInner.width, alignment.stack.width, "navigation and content use same readable measure");
-    assert.ok(alignment.stack.x >= alignment.container.x - 1);
-    assert.ok(alignment.stack.right <= alignment.container.right + 1);
-    for (const section of alignment.sectionBoxes) {
-      assert.ok(section.x >= alignment.stack.x - 1, `${section.id} inside stack left`);
-      assert.ok(section.right <= alignment.stack.right + 1, `${section.id} inside stack right`);
-    }
-    report.caseViews.push({ route, state, tab: group.id, sectionCount: group.sections.length, viewport: dimensions.viewport, theme: dimensions.theme });
   }
 }
 
