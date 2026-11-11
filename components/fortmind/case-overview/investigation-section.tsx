@@ -39,7 +39,7 @@ export function InvestigationSection({
     >
       <header
         data-ui="section-header"
-        className="flex items-end justify-between flex-wrap gap-y-3 gap-x-6 mb-5"
+        className="flex items-end justify-between flex-wrap gap-y-2 gap-x-4 mb-3"
       >
         <div data-ui="section-heading-copy">
           <h2
@@ -59,7 +59,7 @@ export function InvestigationSection({
           {description && (
             <p
               data-ui="section-description"
-              className="mt-1 text-muted-foreground text-prose"
+              className="mt-1 text-muted-foreground text-caption"
             >
               {description}
             </p>
@@ -81,14 +81,14 @@ export function InvestigationSection({
       >
         <CardContent
           data-ui="section-body"
-          className={cn("px-7 py-7 @max-[501px]/case:px-5", contentClassName)}
+          className={cn("px-5 py-5 @min-[760px]/case:px-6 @max-[501px]/case:px-4", contentClassName)}
         >
           {children}
         </CardContent>
         {footer && (
           <CardFooter
             data-ui="section-footer"
-            className="pt-5 pr-7 pb-5 pl-7 border-t border-border bg-muted @max-[501px]/case:pl-4.25 @max-[501px]/case:pr-4.25"
+            className="border-t border-border bg-muted/30 px-5 py-4 @max-[501px]/case:px-4"
           >
             {footer}
           </CardFooter>
