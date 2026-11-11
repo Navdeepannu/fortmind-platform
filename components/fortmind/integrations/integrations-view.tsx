@@ -129,6 +129,7 @@ function IntegrationCard({ integration }: { integration: PreviewIntegration }) {
 }
 
 export function IntegrationsDirectory() {
+  const [directoryTab, setDirectoryTab] = useState<"connected" | "browse">("connected");
   const [availability, setAvailability] = useState<AvailabilityFilter>("all");
   const [category, setCategory] = useState<IntegrationCategory | "all">("all");
   const [query, setQuery] = useState("");
@@ -143,6 +144,7 @@ export function IntegrationsDirectory() {
   const visible = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
     return previewIntegrations
+      .filter((item) => directoryTab === "browse" || item.availability !== "available")
       .filter((item) => availability === "all" || item.availability === availability)
       .filter((item) => category === "all" || item.category === category)
       .filter((item) => !normalized || [item.name, item.category, item.description, ...item.tools]
@@ -152,7 +154,7 @@ export function IntegrationsDirectory() {
         if (sort === "usage") return (b.casesUsed ?? -1) - (a.casesUsed ?? -1) || a.name.localeCompare(b.name);
         return availabilityRank[a.availability] - availabilityRank[b.availability] || a.name.localeCompare(b.name);
       });
-  }, [availability, category, query, sort]);
+  }, [directoryTab, availability, category, query, sort]);
   const hasFilters = availability !== "all" || category !== "all" || Boolean(query);
 
   return (
@@ -160,13 +162,23 @@ export function IntegrationsDirectory() {
         <header data-ui="page-heading" className="flex flex-wrap items-start justify-between gap-6 max-[681px]:items-start">
           <div>
             <span data-ui="eyebrow" className="mb-1.75 block text-caption font-semibold tracking-[.09em] uppercase text-muted-foreground">Workspace tools</span>
-            <h1 className="text-page-title">Integrations</h1>
+            <h1 className="text-page-title">Connect your tools</h1>
             <p className="max-w-170 mt-1.5 text-muted-foreground text-prose">Connect security data and investigation tools so OSCAR can follow evidence across your environment.</p>
           </div>
           <Badge data-ui="preview-badge" variant="outline" className="mt-1.25 text-muted-foreground bg-card max-[681px]:hidden">Design preview</Badge>
         </header>
 
-        {attentionIntegrations.length > 0 && (
+        <div data-ui="integration-view-tabs" role="group" aria-label="Integration directory views" className="mt-6 flex items-center gap-5 border-b border-border">
+          <button type="button" aria-pressed={directoryTab === "connected"} onClick={() => { setDirectoryTab("connected"); setAvailability("all"); setCategory("all"); setQuery(""); }}
+            className={cn("flex min-h-11 items-center gap-2 border-b-2 px-1 text-label outline-none focus-visible:ring-2 focus-visible:ring-ring", directoryTab === "connected" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+            Connected <span className="font-mono text-caption">{counts.connected + counts.attention}</span>
+          </button>
+          <button type="button" aria-pressed={directoryTab === "browse"} onClick={() => { setDirectoryTab("browse"); setAvailability("all"); setCategory("all"); setQuery(""); }}
+            className={cn("flex min-h-11 items-center gap-2 border-b-2 px-1 text-label outline-none focus-visible:ring-2 focus-visible:ring-ring", directoryTab === "browse" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+            Browse <span className="font-mono text-caption">{counts.all}</span>
+          </button>
+        </div>
+        {directoryTab === "connected" && attentionIntegrations.length > 0 && (
           <Alert data-ui="attention" className="mt-6.25 items-center gap-x-2.75 border-warning-border bg-warning-muted px-3.75 py-3 text-foreground has-[>svg]:grid-cols-[18px_minmax(0,1fr)_auto] max-[681px]:has-[>svg]:grid-cols-[17px_minmax(0,1fr)]" role="status">
             <TriangleAlert aria-hidden="true" className="col-start-1 [grid-row:1_/_3] w-4.25 h-4.25 text-warning-foreground" />
             <AlertTitle className="col-start-2 row-start-1 text-label font-semibold">{attentionIntegrations.length} {attentionIntegrations.length === 1 ? "integration needs" : "integrations need"} attention</AlertTitle>
@@ -178,7 +190,7 @@ export function IntegrationsDirectory() {
         )}
 
         <section data-ui="directory" className="mt-6.75" aria-label="Integration directory">
-          <div data-ui="directory-top" className="flex items-center justify-between gap-4 max-[681px]:overflow-x-auto">
+          {directoryTab === "browse" && <div data-ui="directory-top" className="flex items-center justify-between gap-4 max-[681px]:overflow-x-auto">
             <ToggleGroup data-ui="status-filters"
               aria-label="Connection status"
               value={[availability]}
@@ -194,7 +206,7 @@ export function IntegrationsDirectory() {
               ))}
             </ToggleGroup>
             <span data-ui="preview-note" className="text-muted-foreground text-caption whitespace-nowrap max-[1161px]:hidden">Illustrative connections and usage · no live data</span>
-          </div>
+          </div>}
           <div data-ui="directory-toolbar" className="flex items-center gap-2.25 mt-4.5 max-[851px]:flex-wrap">
             <DropdownMenu>
               <DropdownMenuTrigger render={<Button data-ui="category-trigger" variant="outline" size="sm" className="w-52.5 justify-start [&_span]:min-w-0 [&_span]:overflow-hidden [&_span]:text-ellipsis max-[681px]:w-42.5 [&_svg:last-child]:ml-auto" aria-label={`Category: ${category === "all" ? "All categories" : category}`} />} className="h-9 rounded-md text-label">
@@ -235,11 +247,30 @@ export function IntegrationsDirectory() {
             </DropdownMenu>
           </div>
           <div data-ui="results-heading" className="flex items-center justify-between gap-4.5 mt-7.25 mr-0 mb-3.25 ml-0">
-            <div className="flex items-baseline gap-2.75"><h2 className="text-section-title">{availability === "all" ? "All integrations" : availabilityFilters.find((item) => item.value === availability)?.label}</h2><span role="status" className="text-muted-foreground text-caption tabular-nums">{visible.length} {visible.length === 1 ? "integration" : "integrations"}</span></div>
+            <div className="flex items-baseline gap-2.75"><h2 className="text-section-title">{directoryTab === "connected" ? "Your tools" : availability === "all" ? "Browse integrations" : availabilityFilters.find((item) => item.value === availability)?.label}</h2><span role="status" className="text-muted-foreground text-caption tabular-nums">{visible.length} {visible.length === 1 ? "integration" : "integrations"}</span></div>
             {hasFilters && <Button variant="ghost" size="sm" onClick={() => { setAvailability("all"); setCategory("all"); setQuery(""); }} className="text-muted-foreground">Clear filters</Button>}
           </div>
           {visible.length > 0 ? (
-            <div data-ui="card-grid" className="grid grid-cols-3 gap-6 max-[1161px]:grid-cols-2 max-[681px]:grid-cols-1">{visible.map((integration) => <IntegrationCard key={integration.slug} integration={integration} />)}</div>
+            directoryTab === "connected" ? (
+              <ul data-ui="connected-list" className="overflow-hidden rounded-lg border border-border bg-card divide-y divide-border">
+                {visible.map((integration) => (
+                  <li key={integration.slug}>
+                    <Link href={integrationHref(integration.slug)} className="group flex min-w-0 flex-wrap items-center gap-3 px-3 py-2.5 text-label outline-none hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-nowrap sm:px-4">
+                      <IntegrationMark integration={integration} />
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <strong className="truncate font-medium text-foreground">{integration.name}</strong>
+                        <span className="truncate text-caption text-muted-foreground">{integration.category}{integration.issue ? ` · ${integration.issue}` : ""}</span>
+                      </span>
+                      <ConnectionBadge integration={integration} />
+                      <span className="hidden shrink-0 font-mono text-caption tabular-nums text-muted-foreground md:inline">{integration.casesUsed ?? 0} cases</span>
+                      <span className="ml-auto shrink-0 rounded-md border border-border px-2.5 py-1.5 text-caption font-medium text-foreground group-hover:bg-muted sm:ml-2">Manage</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div data-ui="card-grid" className="grid grid-cols-3 gap-4 max-[1161px]:grid-cols-2 max-[681px]:grid-cols-1">{visible.map((integration) => <IntegrationCard key={integration.slug} integration={integration} />)}</div>
+            )
           ) : (
             <Empty data-ui="empty" className="min-h-77.5 border border-dashed border-border bg-card">
               <EmptyHeader><Search aria-hidden="true" className="w-5.75 h-5.75 text-muted-foreground" /><EmptyTitle className="w-5.75 h-5.75 text-muted-foreground">No integrations found</EmptyTitle><EmptyDescription className="w-5.75 h-5.75 text-muted-foreground">Try another name, tool, or category.</EmptyDescription></EmptyHeader>
