@@ -29,7 +29,7 @@ Geist Sans and Geist Mono share the same size and line-height roles. Inline code
 
 The interface uses a neutral, high-contrast focus ring in dark mode (`--ring`), distinct from the OSCAR/brand accent. This improves keyboard discoverability without turning every focus treatment green.
 
-The foundation uses the requested sRGB palette, converted to OKLCH in `app/globals.css`. The workspace-inspector refinement adopts **#00D492** for brand actions, superseding the earlier #01CC88 override. Neutral surfaces and the independent semantic palette are retained.
+The foundation uses the requested sRGB palette, converted to OKLCH in `app/globals.css`. Brand green is `#30D398` (`oklch(0.7720123 0.1554456 163.0539)`) in **both** dark and light themes, including brand-mark rendering. Brand green is not suitable as small foreground text on white (approximately 1.93:1 contrast); use high-contrast neutral text there. Filled green controls use the existing dark `--brand-foreground` ink. The workspace-inspector refinement adopts **#30D398** for brand actions, superseding the earlier #01CC88 override. Neutral surfaces and the independent semantic palette are retained.
 
 | Role / token mapping | Light | Dark (sRGB reference) |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ The foundation uses the requested sRGB palette, converted to OKLCH in `app/globa
 | Primary text / `foreground`, `card-foreground`, `popover-foreground` | Existing dark text | #F5F5F5 |
 | Secondary text / `secondary-foreground`, `sidebar-foreground` | Existing dark/muted text | #C2C3C6 |
 | Muted text / `muted-foreground` | Existing muted text | #9FA0A6 |
-| Brand / `brand`, dark `primary` | Brand buttons use #00D492 | #00D492 |
+| Brand / `brand`, dark `primary` | Brand buttons use #30D398 | #30D398 |
 | Text on brand / `brand-foreground`, dark `primary-foreground` | #09251B | #09251B |
 | Secondary / `secondary`, `muted` | Existing neutral surfaces | Elevated surface |
 | Neutral hover / `surface-hover` | Existing subtle hover | #1D1D1F |
@@ -49,7 +49,7 @@ The foundation uses the requested sRGB palette, converted to OKLCH in `app/globa
 
 The canvas sits behind headings and spacing. Tables, chart panels, metrics, information sections and integration cards consume `card`, which aliases `surface`. The Cases inspector consumes `surface-elevated`; menus, popovers, dialogs and shared sheets consume `popover`, which aliases that same elevated role. Navigation sheets retain their explicit sidebar surface. Shared overlays use borders/rings without prominent shadows.
 
-Dark-mode `primary` is brand mint. Existing `brand` button variants share the same brand source for compatibility. Ordinary hover and selection states consume neutral `accent` and `surface-hover`, not `primary`. Light-mode canvas, text, borders, neutral primary/link ink and focus behavior are retained for legibility; explicit brand buttons use the new mint in both modes. All color literals and theme mappings remain in the one global stylesheet; no additional CSS files or dependencies are introduced.
+Dark-mode `primary` is brand mint. Existing `brand` button variants share the same brand source for compatibility. Ordinary hover and selection states consume neutral `accent` and `surface-hover`, not `primary`. Light-mode canvas, text, borders, neutral primary/link ink and focus behavior are retained for legibility; explicit brand buttons and marks use the same new mint in both modes. All color literals and theme mappings remain in the one global stylesheet; no additional CSS files or dependencies are introduced.
 
 Security semantics retain their separate red, amber, blue, green, purple and gray roles. Priority and workflow indicators use the existing Lucide vocabulary; verdicts use colored squares and neutral labels. Queue tabs use neutral text and counts without icons. Priority and verdict remain separate concepts, with independent labels and visual treatments.
 
