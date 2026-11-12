@@ -95,6 +95,9 @@ test("Shared surface roles and restrained brand actions follow the theme contrac
   assert.equal(aliases.declarations["--color-control"], "var(--control)");
   assert.equal(aliases.declarations["--color-table-stripe"], "var(--table-stripe)");
   assert.equal(aliases.declarations["--color-floating-hover"], "var(--floating-hover)");
+  assert.equal(aliases.declarations["--color-illustration"], "var(--illustration)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--illustration").light, "var(--border-strong)");
+  assert.equal(inventory.entries.find(e => e.id === "global:--illustration").dark, "oklch(0.362106 0.006573 248.01)");
   assert.equal(inventory.entries.find(e => e.id === "global:--ring").dark, "oklch(0.78 0.005 265)");
   const surfaceContract = {
     "--surface": ["oklch(1 0 0)", "oklch(0.171887 0.001633 197.00)"],
