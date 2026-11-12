@@ -386,6 +386,52 @@ function DataBarRow({
   );
 }
 
+/**
+ * Simple comparison bars keep security semantics in the label, not the fill.
+ * Bar fills intentionally use the illustration token for visual separation.
+ */
+function MixBarRow({
+  name,
+  label,
+  count,
+  percentage,
+}: {
+  name: string;
+  label: ReactNode;
+  count: number;
+  percentage: number;
+}) {
+  const bounded = Math.max(0, Math.min(100, percentage));
+  const rounded = Math.round(bounded);
+
+  return (
+    <div className="min-w-0">
+      <div className="flex min-w-0 items-center justify-between gap-4">
+        <div className="min-w-0">{label}</div>
+        <div className="flex shrink-0 items-baseline gap-3 tabular-nums">
+          <span className="text-body font-semibold text-foreground">{count}</span>
+          <span className="w-8 text-right text-caption text-muted-foreground">{rounded}%</span>
+        </div>
+      </div>
+      <div
+        role="meter"
+        aria-label={`${name} share`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={rounded}
+        aria-valuetext={`${count} cases, ${rounded}%`}
+        className="mt-2.5 h-2 w-full overflow-hidden rounded-xs bg-muted"
+      >
+        <div
+          aria-hidden="true"
+          className="h-full rounded-xs bg-illustration"
+          style={{ width: `${bounded}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 // CHUNK 2 — Performance in one compact card instead of four oversized KPI tiles.
 function ImpactMetrics() {
   const [period, setPeriod] = useState<ImpactPeriod>("7d");
@@ -479,15 +525,14 @@ export function CaseDistribution() {
             {openTotal} awaiting decisions or running · current snapshot
           </p>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col gap-3 px-5 py-5">
+        <CardContent className="flex-1 flex flex-col gap-5 px-5 py-5">
           {openPriorities.map((item) => {
             const share = openTotal ? (item.value / openTotal) * 100 : 0;
             return (
-              <DataBarRow
+              <MixBarRow
                 key={item.name}
-                label={
-                  <PriorityBadge value={item.name} />
-                }
+                name={item.name}
+                label={<PriorityBadge value={item.name} />}
                 count={item.value}
                 percentage={share}
               />
@@ -506,15 +551,14 @@ export function CaseDistribution() {
             {verdictTotal} closed cases · {impactReports["7d"].dates}
           </p>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col gap-3 px-5 py-5">
+        <CardContent className="flex-1 flex flex-col gap-5 px-5 py-5">
           {verdicts.map((item) => {
             const share = verdictTotal ? (item.value / verdictTotal) * 100 : 0;
             return (
-              <DataBarRow
+              <MixBarRow
                 key={item.name}
-                label={
-                  <VerdictBadge value={item.name} />
-                }
+                name={item.name}
+                label={<VerdictBadge value={item.name} />}
                 count={item.value}
                 percentage={share}
               />

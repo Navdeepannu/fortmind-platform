@@ -11,11 +11,11 @@ const overviewRuns = readFileSync(
   "utf8",
 );
 
-test("OSCAR run inspector renders the lifecycle for the selected case", () => {
-  assert.match(overviewRuns, /<OscarCaseLifecyclePreview\s+item=\{item\}/);
-  assert.match(overviewRuns, /monitoredInvestigations\[0\]\?\.item\.id\s*\?\?\s*null/);
-  assert.match(overviewRuns, /aria-expanded=\{expanded\}/);
-  assert.match(overviewRuns, /@min-\[600px\]:overflow-y-auto/);
+test("OSCAR Home summary is compact and keeps detailed lifecycle off the dashboard", () => {
+  assert.match(overviewRuns, /monitoredInvestigations\.slice\(0, 3\)/);
+  assert.match(overviewRuns, /data-ui="oscar-activity-summary"/);
+  assert.match(overviewRuns, /href=\{caseHref\(item\.id\)\}/);
+  assert.doesNotMatch(overviewRuns, /OscarCaseLifecyclePreview|data-ui="run-inspector"/);
 });
 
 test("lifecycle states come from recorded investigation phases, not guessed progress", () => {

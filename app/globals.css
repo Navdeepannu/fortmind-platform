@@ -39,6 +39,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-illustration: var(--illustration);
   --color-border-secondary: var(--border-secondary);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
@@ -226,6 +227,7 @@
   --surface-hover: oklch(0.966 0.002 260); /* subtle hover without raised cards */
   --destructive: var(--danger-foreground);
   --border: oklch(0.924740 0.002906 264.54); /* #E5E6E8 */
+  --illustration: var(--border-strong); /* Neutral light-mode illustration fill */
   --border-secondary: var(--border); /* Light-mode alias. */
   --border-strong: oklch(0.866175 0.004672 258.33); /* #D1D3D6 */
   --input: oklch(0.866175 0.004672 258.33); /* #D1D3D6 */
@@ -386,6 +388,7 @@
   --accent: oklch(0.233609 0.008932 255.60); /* #1B1E22 */
   --surface-hover: oklch(0.208 0.006 258); /* close-to-canvas hover */
   --border: oklch(0.270684 0.002912 196.98); /* #252727 */
+  --illustration: oklch(0.362106 0.006573 248.01); /* #3B3E41 */
   --border-secondary: oklch(0.264497 0.009761 268.31); /* #23252A */
   --border-strong: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
   --input: oklch(0.359444 0.011117 264.43); /* #3A3D43 */
