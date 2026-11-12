@@ -213,11 +213,11 @@
   --primary: oklch(0.2 0.006 265);
   --primary-foreground: oklch(0.985 0.001 265);
   --primary-hover: oklch(0.23 0.007 265);
-  --brand: oklch(0.7688460193 0.1687457279 161.948704);
+  --brand: oklch(0.7720123 0.1554456 163.0539); /* #30D398 in both themes */
   --brand-foreground: oklch(0.2395655541 0.0391345071 166.526876);
-  --brand-hover: oklch(0.7808460193 0.1687457279 161.948704);
-  --brand-active: oklch(0.7488460193 0.1687457279 161.948704);
-  --brand-ink: oklch(0.44 0.095 163);
+  --brand-hover: oklch(0.7840123 0.1554456 163.0539);
+  --brand-active: oklch(0.7520123 0.1554456 163.0539);
+  --brand-ink: var(--brand); /* same brand mark in light and dark; avoid on small light-theme text */
   --secondary: var(--control);
   --secondary-foreground: oklch(0.384656 0.013631 256.76); /* #3F444B */
   --muted: oklch(0.973427 0.001324 286.38); /* #F6F6F7 */
@@ -380,7 +380,6 @@
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
   --primary-hover: var(--brand-hover);
-  --brand-ink: var(--brand);
   --secondary: var(--control);
   --secondary-foreground: oklch(0.867248 0.005584 274.96); /* #D2D3D7 */
   --muted: oklch(0.199330 0.006777 258.37); /* #141619 */
