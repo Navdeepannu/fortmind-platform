@@ -63,7 +63,7 @@ export function Overview() {
             ))}
           </section>
 
-          <div data-ui="work-grid" className="mt-4 grid min-w-0 grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <div data-ui="work-grid" className="mt-4 flex min-w-0 flex-col gap-4">
             <NeedsAttention />
             <ActiveInvestigations />
           </div>
