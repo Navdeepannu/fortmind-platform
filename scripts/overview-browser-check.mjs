@@ -30,7 +30,7 @@ try {
       const response = await page.goto(`${origin}/platform/overview`, { waitUntil: "networkidle" });
       assert.equal(response.status(), 200);
       await page.getByRole("heading", { level: 1, name: "Home" }).waitFor();
-      assert.ok(await page.evaluate(() document.documentElement.scrollWidth <= innerWidth));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 
       const attention = page.getByRole("region", { name: "Needs your attention", exact: true });
       const running = page.getByRole("region", { name: "OSCAR working", exact: true });
