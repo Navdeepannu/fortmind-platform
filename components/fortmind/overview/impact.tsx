@@ -420,12 +420,18 @@ function MixBarRow({
         aria-valuemax={100}
         aria-valuenow={rounded}
         aria-valuetext={`${count} cases, ${rounded}%`}
-        className="mt-2.5 h-2 w-full overflow-hidden rounded-xs bg-muted"
+        className="mt-2.5 h-2.5 w-full overflow-hidden rounded-xs bg-muted"
       >
         <div
           aria-hidden="true"
+          data-ui="mix-bar-fill"
           className="h-full rounded-xs bg-illustration"
-          style={{ width: `${bounded}%` }}
+          style={{
+            width: `${bounded}%`,
+            // Force a computed fill even when a Tailwind token build is stale.
+            // Source remains the shared semantic illustration variable.
+            backgroundColor: "var(--illustration, #3B3E41)",
+          }}
         />
       </div>
     </div>
