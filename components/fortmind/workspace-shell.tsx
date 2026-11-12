@@ -119,13 +119,13 @@ function AppSidebar({ section }: { section: PlatformSection }) {
       data-ui="sidebar"
       variant="inset"
       collapsible="icon"
-      className="[&_[data-slot=sidebar-inner]]:overflow-hidden [&_[data-slot=sidebar-inner]]:rounded-lg [&_[data-slot=sidebar-inner]]:border [&_[data-slot=sidebar-inner]]:border-sidebar-border"
+      className="[&_[data-slot=sidebar-inner]]:overflow-hidden [&_[data-slot=sidebar-inner]]:rounded-xl [&_[data-slot=sidebar-inner]]:border [&_[data-slot=sidebar-inner]]:border-sidebar-border"
     >
       <SidebarHeader className="sticky top-0 z-10 shrink-0 gap-0 bg-sidebar p-0">
         {/* The product header and the utility toolbar share the same 48px baseline. */}
         <div
           data-ui="sidebar-brand"
-          className="flex h-12 shrink-0 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
+          className="flex h-12 shrink-0 items-center bg-sidebar px-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2"
         >
           <Link
             href={platformRoutes.overview}
@@ -134,7 +134,7 @@ function AppSidebar({ section }: { section: PlatformSection }) {
           >
             <FortMindLogo className="h-6 w-auto max-w-full" />
           </Link>
-          {/* Collapsed sidebar retains product identity; the expand control lives in the top bar. */}
+          {/* Keep only the brand in this header; sidebar controls live in the utility bar. */}
           <Link
             href={platformRoutes.overview}
             aria-label="FortMind overview"
@@ -143,10 +143,6 @@ function AppSidebar({ section }: { section: PlatformSection }) {
           >
             <FortMindMark className="size-6" />
           </Link>
-          <SidebarTrigger
-            aria-label="Collapse sidebar"
-            className="size-8 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden"
-          />
         </div>
         <div data-ui="workspace-organization" className="mx-3 mt-3 flex min-h-10 items-center gap-2 rounded-md px-2 text-label group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
           <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-sm border border-sidebar-border bg-card font-mono text-caption">CZ</span>
@@ -256,14 +252,13 @@ function AppSidebar({ section }: { section: PlatformSection }) {
   );
 }
 
-function CollapsedSidebarTrigger() {
+function DesktopSidebarTrigger() {
   const { state } = useSidebar();
-  if (state !== "collapsed") return null;
 
   return (
     <SidebarTrigger
-      aria-label="Expand sidebar"
-      className="hidden size-8 md:inline-flex"
+      aria-label={state === "collapsed" ? "Expand sidebar" : "Collapse sidebar"}
+      className="hidden size-8 shrink-0 text-muted-foreground md:inline-flex"
     />
   );
 }
@@ -513,7 +508,7 @@ export function WorkspaceShell({ children, sectionOverride }: { children: ReactN
           <AppSidebar section={section} />
           <SidebarInset
             data-ui="inset"
-            className="min-w-0 min-h-dvh bg-background md:peer-data-[variant=inset]:min-h-[calc(100dvh-1rem)]"
+            className="min-w-0 min-h-dvh bg-background md:overflow-clip md:rounded-xl md:border-border md:peer-data-[variant=inset]:min-h-[calc(100dvh-1rem)]"
           >
             {/* Workspace tools stay available while content scrolls. */}
             <header
@@ -525,9 +520,8 @@ export function WorkspaceShell({ children, sectionOverride }: { children: ReactN
                   aria-label="Open sidebar"
                   className="size-8 shrink-0 md:hidden"
                 />
-                <CollapsedSidebarTrigger />
+                <DesktopSidebarTrigger />
                 <nav aria-label="Breadcrumb" className={cn("min-w-0 items-center gap-2 text-body", caseRoute ? "flex" : "hidden sm:flex")}>
-                  <span className="h-4 w-px bg-border" aria-hidden="true" />
                   {caseRoute ? (
                     <>
                       <Link href={platformRoutes.cases} className="text-muted-foreground hover:text-foreground focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-ring">
