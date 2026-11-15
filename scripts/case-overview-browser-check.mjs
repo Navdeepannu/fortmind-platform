@@ -68,9 +68,48 @@ try {
   }
   assert.equal(await page.locator("#findings details").count(), 5);
   assert.equal(await page.locator("#hypotheses article").count(), 2);
-  assert.equal(await page.locator("#entities tbody tr").count(), 4);
-  assert.equal(await page.locator("#evidence tbody tr").count(), 5);
-  assert.equal(await page.locator("#timeline ol > li").count(), 12);
+  assert.equal(await page.locator("#entities [data-ui='entity-row']").count(), 4);
+  assert.equal(await page.locator("#evidence [data-ui='evidence-result']").count(), 5);
+  assert.equal(await page.locator("#timeline li").count(), 12);
+  // Decision briefing differentiates unverified reports from actual tool results.
+  await selectView("Decision", "conclusion");
+  assert.equal(await page.locator('[data-ui="finding-provenance"]').count(), 1);
+  assert.deepEqual(
+    (await page.locator('[data-ui="finding-provenance"] dd').allTextContents()).map(Number),
+    [1, 2, 2],
+  );
+  assert.equal(await page.locator('[data-ui="question"]').count(), 2);
+  assert.equal(await page.locator('[data-ui="review-explanation"]').getAttribute("open"), null);
+  assert.equal(await page.locator('[data-ui="decision"] [data-ui="decision-actions"]').count(), 1);
+  await page.locator('[data-ui="question"] summary').first().click();
+  assert.ok(await page.locator('[data-ui="question"]').first().evaluate(node => node.open));
+
+  // Findings are grouped by evidentiary meaning, while individual details remain linkable.
+  await selectView("Investigation", "findings");
+  assert.deepEqual(
+    await page.locator('[data-ui="finding-group"]').evaluateAll(nodes => nodes.map(node => node.getAttribute("aria-label"))),
+    ["Signals supporting concern", "Context still unresolved", "Missing corroboration"],
+  );
+  assert.equal(await page.locator('#findings [data-ui="finding"]').count(), 5);
+
+  // All confidence bars are phase scores, not verdict confidence.
+  await selectView("Decision", "how-oscar-decided");
+  assert.equal(await page.locator('[data-ui="completed-phases"] li').count(), 5);
+  assert.equal(await page.locator('[data-ui="stage-confidence"] [role="meter"]').count(), 3);
+
+  await selectView("Evidence", "entities");
+  assert.equal(await page.locator('[data-ui="entity-list"] [data-ui="entity-row"]').count(), 4);
+  await selectView("Evidence", "evidence");
+  assert.equal(await page.locator('[data-ui="evidence-source"]').count(), 3);
+
+  // The newest five events are initially visible; the remaining seven are discoverable.
+  await selectView("Timeline", "timeline");
+  const history = page.locator('[data-ui="timeline-history"]');
+  assert.equal(await history.getAttribute("open"), null);
+  await history.locator("summary").click();
+  assert.equal(await history.getAttribute("open"), "");
+  assert.equal(await page.locator("#timeline li:visible").count(), 12);
+
 
   // Each tablist owns its own keyboard focus and panel selection.
   await selectPrimary("Decision");
@@ -214,7 +253,7 @@ try {
   const origin = new URL(base).origin;
   await page.goto(`${origin}/platform/cases/13845102-e81a-479e-87db-2cdb8ff21c1c?tab=decision&view=how-oscar-decided`, { waitUntil: "networkidle" });
   await expectView("Decision", "how-oscar-decided");
-  await page.getByRole("link", { name: "← Back to Cases" }).click();
+  await page.locator('[data-ui="topbar-breadcrumbs"]').getByRole("link", { name: "Cases", exact: true }).click();
   await page.waitForURL(`${origin}/platform/cases`);
   await page.goto(`${origin}/platform/cases/FM-1048`, { waitUntil: "networkidle" });
   await page.getByRole("heading", { level: 1, name: "LSASS process accessed by mimikatz.exe" }).waitFor();

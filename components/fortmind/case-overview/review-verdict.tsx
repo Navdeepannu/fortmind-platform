@@ -99,13 +99,13 @@ export function ReviewVerdict({
   return (
     <aside
       data-ui="decision"
-      className="rounded-md border border-border bg-muted p-5 [align-self:start]"
+      className="rounded-md border border-border bg-muted/40 p-4 @min-[760px]/case:sticky @min-[760px]/case:top-40 [align-self:start]"
       aria-labelledby="decision-heading"
     >
       <h3 id="decision-heading" tabIndex={-1} className="scroll-mt-40 text-panel-title outline-none">
         Your decision
       </h3>
-      <div data-ui="decision-body" className="flex flex-col gap-4 mt-3.25">
+      <div data-ui="decision-body" className="flex flex-col gap-3 mt-3">
         <div>
           <p
             data-ui="decision-title"
@@ -116,12 +116,15 @@ export function ReviewVerdict({
               treatment="inline"
             />
           </p>
-          <p
-            data-ui="secondary"
-            className="text-muted-foreground text-label"
-          >
-            {reason}
-          </p>
+          <details data-ui="review-explanation" className="group/reason mt-2 border-t border-border pt-2">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-caption font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+              Why review is required
+              <ChevronDown aria-hidden="true" className="size-3.5 shrink-0 transition-transform group-open/reason:rotate-180" />
+            </summary>
+            <p data-ui="secondary" className="mt-2 text-caption text-muted-foreground">
+              {reason}
+            </p>
+          </details>
         </div>
         <div
           data-ui="review-result"
@@ -161,7 +164,7 @@ export function ReviewVerdict({
             <Button
               size="lg"
               onClick={() => beginReview("confirm")}
-              className="min-h-9.5 w-full"
+              className="min-h-9 w-full"
             >
               Confirm verdict
             </Button>
