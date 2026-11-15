@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { ChevronsUp, ChevronUp, ChevronDown } from "lucide-react";
 import { semanticStyles } from "@/lib/semantic-styles";
 import { Badge } from "@/components/ui/badge";
 import type {
@@ -120,7 +121,7 @@ export function VerdictMarker({ value }: { value: Verdict }) {
       data-verdict={value}
       aria-hidden="true"
       className={cn(
-        "inline-block size-2 shrink-0 self-center",
+        "inline-block size-2 shrink-0 self-center rounded-[2px]",
         verdictMarkerClass[value],
       )}
     />
@@ -148,8 +149,8 @@ export function VerdictBadge({
       data-verdict={value}
       aria-description={verdictStates[value].meaning}
       className={cn(
-        "inline-flex min-h-6 max-w-full items-center gap-2 whitespace-nowrap text-label font-normal text-foreground",
-        compact && "min-h-5.5 text-caption",
+        "inline-flex min-h-6 max-w-full items-center gap-2 whitespace-nowrap text-body font-medium text-foreground",
+        compact && "min-h-5.5 text-body",
       )}
     >
       <VerdictMarker value={value} />
@@ -198,15 +199,31 @@ export function PriorityBars({ value }: { value: Priority }) {
   );
 }
 
-export function PriorityBadge({ value }: { value: Priority; queue?: boolean }) {
+/** Linear-style direction glyphs for the queue; color is secondary to shape and text. */
+export function QueuePriorityIcon({ value }: { value: Priority }) {
+  const Icon = value === "Urgent" ? ChevronsUp : value === "Notable" ? ChevronUp : ChevronDown;
+  return (
+    <Icon
+      data-ui="queue-priority-icon"
+      data-priority={value}
+      aria-hidden="true"
+      className={cn(
+        "size-4 shrink-0 stroke-[2.1]",
+        value === "Urgent" ? "text-foreground" : "text-muted-foreground",
+      )}
+    />
+  );
+}
+
+export function PriorityBadge({ value, queue = false }: { value: Priority; queue?: boolean }) {
   return (
     <span
       data-ui="priority"
       data-priority={value}
       aria-description={priorityStates[value].meaning}
-      className="inline-flex min-h-6 items-center gap-2 whitespace-nowrap text-caption font-normal text-foreground"
+      className="inline-flex min-h-6 items-center gap-2 whitespace-nowrap text-body font-normal text-foreground"
     >
-      <PriorityBars value={value} />
+      {queue ? <QueuePriorityIcon value={value} /> : <PriorityBars value={value} />}
       <span data-ui="priority-label">{value}</span>
     </span>
   );

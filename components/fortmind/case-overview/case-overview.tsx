@@ -11,14 +11,6 @@ import {
   UserRound,
 } from "lucide-react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
   outcomeStates,
   phaseStates,
   verdictStates,
@@ -57,47 +49,8 @@ function CaseHeader({ data }: { data: CaseOverviewData }) {
       data-ui="header"
       className="flex-none min-w-0 pb-4 pt-5 bg-background @max-[501px]/case:py-4"
     >
-      <div
-        data-ui="breadcrumb-row"
-        className="flex items-center justify-start gap-4.5 @max-[501px]/case:gap-3"
-      >
-        <Breadcrumb data-ui="breadcrumb" className="text-label">
-          <BreadcrumbList className="gap-2 text-label">
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                render={<Link href="/platform/cases" />}
-                className="whitespace-nowrap"
-              >
-                ← Back to Cases
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="@max-[501px]/case:hidden" />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="@max-[501px]/case:hidden">
-                Investigation
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <div
-          data-ui="header-id"
-          className="flex items-center gap-2.25 pl-4.5 border-l border-border text-muted-foreground text-caption @max-[501px]/case:pl-3"
-        >
-          <span>Case ID</span>
-          <CopyIdentifier
-            value={data.id}
-            display={data.id.slice(0, 8)}
-            label="case ID"
-          />
-        </div>
-        <span
-          data-ui="fixture-label"
-          className="ml-auto text-muted-foreground text-caption @max-[501px]/case:hidden"
-        >
-          Case preview
-        </span>
-      </div>
-      <h1 className="mt-2 text-page-title">
+
+      <h1 className="text-page-title">
         {data.title}
       </h1>
       <p

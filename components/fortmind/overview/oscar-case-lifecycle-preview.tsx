@@ -66,15 +66,18 @@ export function OscarCaseLifecyclePreview({
   item,
   stage,
   elapsed,
+  mode = "full",
 }: {
   item: SecurityCase;
   stage: string;
   elapsed?: string;
+  mode?: "full" | "timeline";
 }) {
   const progress = investigationProgress(item);
   const awaitingVerdict =
     item.status === "Running" || item.status === "Queued" || item.status === "Failed";
   const receivedAsAlert = item.source === "SIEM webhook";
+  const hasPhaseEvidence = progress.steps.some(({ state }) => state !== "unknown");
 
   return (
     <div
@@ -83,7 +86,7 @@ export function OscarCaseLifecyclePreview({
       className="flex min-w-0 flex-col gap-5"
       aria-label={`Case lifecycle for ${item.id}`}
     >
-      <header className="flex flex-col gap-3">
+      {mode === "full" && <header className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CopyTechnicalValue label="case ID" value={item.id} />
           <span className="text-caption text-muted-foreground">
@@ -98,7 +101,7 @@ export function OscarCaseLifecyclePreview({
               : `Case age ${formatAge(item.ageMinutes)}`}
           </p>
         </div>
-      </header>
+      </header>}
 
       <section aria-labelledby={`lifecycle-heading-${item.id}`}>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -127,7 +130,7 @@ export function OscarCaseLifecyclePreview({
               {item.source}
             </p>
           </li>
-          {progress.steps.map(({ phase, state }) => (
+          {hasPhaseEvidence ? progress.steps.map(({ phase, state }) => (
             <li key={phase} data-step-state={state} className="relative">
               <span
                 aria-hidden="true"
@@ -143,7 +146,11 @@ export function OscarCaseLifecyclePreview({
                 <PhaseStatus state={state} />
               </div>
             </li>
-          ))}
+          )) : (
+            <li className="relative rounded-md border border-border bg-card px-3 py-3 text-caption text-muted-foreground">
+              Phase history has not been recorded for this case.
+            </li>
+          )}
           <li className="relative pt-1">
             <span
               aria-hidden="true"
@@ -164,6 +171,7 @@ export function OscarCaseLifecyclePreview({
         )}
       </section>
 
+      {mode === "full" && <>
       <section aria-label="Current investigation context" className="overflow-hidden rounded-md border border-border bg-card">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-3">
           <h4 className="text-label font-semibold">Case details</h4>
@@ -210,6 +218,7 @@ export function OscarCaseLifecyclePreview({
       >
         Open investigation <ArrowUpRight data-icon="inline-end" />
       </Button>
+      </>}
     </div>
   );
 }
