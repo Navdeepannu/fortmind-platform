@@ -32,7 +32,9 @@ export function FortMindMark({ className, ...props }: MarkProps) {
       className={cn("size-6 shrink-0 text-brand-ink", className)}
       {...props}
     >
-      {iconPaths.map((d, index) => <path key={index} d={d} fill="currentColor" />)}
+      {iconPaths.map((d, index) => (
+        <path key={index} d={d} fill="currentColor" />
+      ))}
     </svg>
   );
 }
@@ -49,11 +51,41 @@ export function FortMindLogo({ className, ...props }: MarkProps) {
       {...props}
     >
       <g fill="currentColor">
-        {wordmarkPaths.map((d, index) => <path key={index} d={d} />)}
+        {wordmarkPaths.map((d, index) => (
+          <path key={index} d={d} />
+        ))}
       </g>
-      <g fill="var(--brand-ink)">
-        {iconPaths.map((d, index) => <path key={index} d={d} />)}
+      <g fill="var(--brand)">
+        {iconPaths.map((d, index) => (
+          <path key={index} d={d} />
+        ))}
       </g>
+    </svg>
+  );
+}
+
+export function Mark({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="M0.0204046 3.44611C-0.0936006 3.23842 0.295023 2.76699 0.568635 2.88237L10.5887 8.74232C10.8395 8.88078 10.9649 9.1231 10.9649 9.46926V23.8694C10.9649 24.0541 10.7436 24.031 10.6068 23.8694L8.91283 21.3771C8.63922 21.0309 8.45681 20.6502 8.3656 20.2348L6.68972 13.3116C6.55292 12.7808 6.27929 12.3885 5.86888 12.1347L2.34611 9.95387C1.9813 9.74618 1.75329 9.44617 1.66208 9.05386L0.0204046 3.44611Z"
+        fill="currentcolor"
+      />
+      <path
+        d="M23.9796 3.44673C24.0936 3.23903 23.705 2.7676 23.4314 2.88299L13.4113 8.74294C13.1605 8.8814 13.0351 9.12371 13.0351 9.46987V23.87C13.0351 24.0547 13.2564 24.0316 13.3932 23.87L15.0872 21.3777C15.3608 21.0316 15.5432 20.6508 15.6344 20.2354L17.3103 13.3122C17.4471 12.7814 17.7207 12.3891 18.1312 12.1353L21.6539 9.95449C22.0187 9.7468 22.2468 9.44679 22.338 9.05448L23.9796 3.44673Z"
+        fill="currentcolor"
+      />
+      <path
+        d="M11.8384 0.0370683C11.9229 -0.0122801 12.027 -0.0123613 12.1115 0.0368567L17.7188 3.30009C17.9018 3.40655 17.9018 3.67366 17.7189 3.78018L12.1457 7.02594C12.0612 7.07518 11.9571 7.07513 11.8726 7.02581L6.28086 3.76257C6.09831 3.65604 6.09826 3.3894 6.28078 3.28281L11.8384 0.0370683Z"
+        fill="currentcolor"
+      />
     </svg>
   );
 }
