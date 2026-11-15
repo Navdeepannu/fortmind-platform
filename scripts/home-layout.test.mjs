@@ -22,6 +22,8 @@ test("Home prioritizes the analyst inbox over a large OSCAR inspector", () => {
 test("mix bars use illustration fill without recoloring verdict semantics", () => {
   assert.match(impact, /function MixBarRow/);
   assert.match(impact, /bg-illustration/);
+  assert.match(impact, /data-ui="mix-bar-fill"/);
+  assert.match(impact, /backgroundColor: "var\(--illustration, #3B3E41\)"/);
   assert.match(impact, /<PriorityBadge value=\{item\.name\} \/>/);
   assert.match(impact, /<VerdictBadge value=\{item\.name\} \/>/);
   assert.match(impact, /aria-valuenow=\{rounded\}/);

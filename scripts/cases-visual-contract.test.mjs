@@ -19,6 +19,14 @@ test("the existing sidebar is inset, collapsible, and has a contextual header br
   assert.match(shell, /aria-label="Breadcrumb"/);
   assert.match(shell, /<CopyTechnicalValue label="case ID"/);
   assert.doesNotMatch(caseDetail, /data-ui="breadcrumb-row"/);
+  const sidebarBrand = shell.match(/data-ui="sidebar-brand"\s+className="([^"]+)"/)?.[1];
+  assert.ok(sidebarBrand, "Sidebar brand is present");
+  assert.doesNotMatch(sidebarBrand, /border-b/, "Logo row should not contain a divider");
+  assert.match(shell, /function DesktopSidebarTrigger\(\)/);
+  assert.match(shell, /<DesktopSidebarTrigger \/>/);
+  assert.match(shell, /md:overflow-clip md:rounded-xl md:border-border/);
+  assert.match(shell, /\[data-slot=sidebar-inner\]\]:rounded-xl/);
+
 });
 
 test("14px regular is the shared UI baseline; verdict and case title are medium weight", () => {

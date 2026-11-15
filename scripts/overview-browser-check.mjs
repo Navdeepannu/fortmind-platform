@@ -42,7 +42,29 @@ try {
       assert.equal(await running.locator('[data-ui="oscar-activity-summary"] li').count(), 3);
       assert.equal(await page.locator('[data-ui="run-inspector"]').count(), 0);
       assert.equal(await page.getByRole("meter").count(), 7);
-      assert.equal(await page.locator('[role="meter"] .bg-illustration').count(), 7);
+      const fills = page.locator('[role="meter"] [data-ui="mix-bar-fill"]');
+      assert.equal(await fills.count(), 7);
+      for (const fill of await fills.all()) {
+        const result = await fill.evaluate((el) => {
+          const track = el.parentElement;
+          return {
+            fill: getComputedStyle(el).backgroundColor,
+            track: track ? getComputedStyle(track).backgroundColor : "",
+            fillWidth: el.getBoundingClientRect().width,
+            trackWidth: track?.getBoundingClientRect().width ?? 0,
+          };
+        });
+        assert.notEqual(result.fill, result.track, "Proportional fill must contrast with track");
+        assert.ok(result.fillWidth > 0, "Proportional fill must have positive width");
+        assert.ok(result.fillWidth < result.trackWidth, "Proportional fill must reflect the actual share");
+      }
+      if (width >= 768) {
+        const toggle = page.getByRole("button", { name: "Collapse sidebar" });
+        assert.equal(await toggle.count(), 1);
+        await toggle.click();
+        await page.getByRole("button", { name: "Expand sidebar" }).waitFor();
+        await page.getByRole("button", { name: "Expand sidebar" }).click();
+      }
 
       await attention.getByRole("button", { name: /^Preview FM-1047:/ }).click();
       const preview = page.locator('[data-ui="case-preview"]');
