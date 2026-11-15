@@ -81,7 +81,7 @@ try {
     }
 
     await visit("/platform/cases/case-detail");
-    await checkTopbar(["Workspace", "Cases", "Investigation"]);
+    await checkTopbar(["Workspace", "Cases", "Case 13845102"]);
     assert.equal(await page.locator('[data-ui="breadcrumb-row"]').count(), 0);
     assert.equal(await page.locator('[data-ui="header-id"]').count(), 1);
     report.checks.push(`${theme}: centered breadcrumbs, ancestor links, no inline duplicates, mobile overflow`);
