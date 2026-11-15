@@ -5,6 +5,7 @@ import { platformRoutes } from "./platform-routes";
 export type NavigationCrumb = {
   label: string;
   href?: string;
+  copyValue?: string;
 };
 
 function section(label: string, href?: string): NavigationCrumb {
@@ -20,14 +21,16 @@ export function platformBreadcrumbs(pathname: string): NavigationCrumb[] {
 
   if (area === "overview") return [root, section("Overview")];
   if (area === "cases") {
-    if (!item) return [root, section("Cases")];
-    const caseLabel =
-      item === "layout-lab"
-        ? "Layout lab"
-        : item === "case-detail"
-          ? `Case ${casePreviewId.slice(0, 8)}`
-          : decodeURIComponent(item);
-    return [root, section("Cases", platformRoutes.cases), section(caseLabel)];
+    if (!item) return [section("Cases")];
+    if (item === "layout-lab") {
+      return [section("Cases", platformRoutes.cases), section("Layout lab")];
+    }
+    const isPreview = item === "case-detail" || item === "boxed-layout";
+    const id = isPreview ? casePreviewId : decodeURIComponent(item);
+    return [
+      section("Cases", platformRoutes.cases),
+      { label: isPreview ? id.slice(0, 8) : id, copyValue: id },
+    ];
   }
   if (area === "integrations") {
     if (!item) return [root, section("Integrations")];
