@@ -11,7 +11,7 @@ const labels = (crumbs) => crumbs.map(({ label }) => label);
 
 test("each top-level platform route has one predictable context", () => {
   assert.deepEqual(labels(platformBreadcrumbs("/platform/overview")), ["Workspace", "Overview"]);
-  assert.deepEqual(labels(platformBreadcrumbs("/platform/cases")), ["Workspace", "Cases"]);
+  assert.deepEqual(labels(platformBreadcrumbs("/platform/cases")), ["Cases"]);
   assert.deepEqual(labels(platformBreadcrumbs("/platform/knowledge")), ["Workspace", "OSCAR Context"]);
   assert.deepEqual(labels(platformBreadcrumbs("/platform/reports")), ["Workspace", "Reports"]);
   assert.deepEqual(labels(platformBreadcrumbs("/platform/integrations")), ["Workspace", "Integrations"]);
@@ -19,13 +19,16 @@ test("each top-level platform route has one predictable context", () => {
 
 test("detail pages expose real ancestor links and compact identity", () => {
   const caseCrumbs = platformBreadcrumbs("/platform/cases/FM-1048");
-  assert.deepEqual(labels(caseCrumbs), ["Workspace", "Cases", "FM-1048"]);
-  assert.equal(caseCrumbs[0].href, "/platform/overview");
-  assert.equal(caseCrumbs[1].href, "/platform/cases");
-  assert.equal(caseCrumbs[2].href, undefined);
+  assert.deepEqual(labels(caseCrumbs), ["Cases", "FM-1048"]);
+  assert.equal(caseCrumbs[0].href, "/platform/cases");
+  assert.equal(caseCrumbs[1].copyValue, "FM-1048");
+  assert.equal(caseCrumbs[1].href, undefined);
   assert.deepEqual(labels(platformBreadcrumbs("/platform/cases/case-detail")), [
-    "Workspace", "Cases", "Case 13845102",
+    "Cases", "13845102",
   ]);
+  assert.equal(platformBreadcrumbs("/platform/cases/boxed-layout")[1].copyValue,
+    "13845102-e81a-479e-87db-2cdb8ff21c1c");
+  assert.deepEqual(labels(platformBreadcrumbs("/platform/cases/layout-lab")), ["Cases", "Layout lab"]);
   const integration = platformBreadcrumbs("/platform/integrations/microsoft-365");
   assert.deepEqual(labels(integration), ["Workspace", "Integrations", "Microsoft 365"]);
   assert.equal(integration[1].href, "/platform/integrations");

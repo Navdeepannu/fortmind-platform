@@ -55,14 +55,14 @@ try {
     for (const width of [1440, 1024, 768, 390]) {
       await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
       await visit("/platform/cases");
-      await checkTopbar(["Workspace", "Cases"]);
+      await checkTopbar(["Cases"]);
       await page.screenshot({
         path: resolve(output, `${theme}-${width}-cases.png`),
         fullPage: false,
       });
 
       await visit("/platform/cases/FM-1048");
-      await checkTopbar(["Workspace", "Cases", "FM-1048"]);
+      await checkTopbar(["Cases", "FM-1048"]);
       assert.equal(await page.locator('[data-ui="back-link"]').count(), 0);
       await page.locator('[data-ui="topbar-breadcrumbs"]').getByRole("link", { name: "Cases" }).click();
       await page.waitForURL(`${origin}/platform/cases`);
@@ -81,9 +81,14 @@ try {
     }
 
     await visit("/platform/cases/case-detail");
-    await checkTopbar(["Workspace", "Cases", "Case 13845102"]);
+    await checkTopbar(["Cases", "13845102"]);
     assert.equal(await page.locator('[data-ui="breadcrumb-row"]').count(), 0);
     assert.equal(await page.locator('[data-ui="header-id"]').count(), 1);
+    assert.equal(await page.locator('[data-ui="topbar-breadcrumbs"] button[aria-label="Copy case ID"]').count(), 1);
+    await visit("/platform/cases/boxed-layout");
+    await checkTopbar(["Cases", "13845102"]);
+    assert.equal(await page.locator('[data-ui="boxed-case-summary"]').count(), 1);
+    assert.equal(await page.locator('[data-ui="boxed-case-workspace"]').count(), 1);
     report.checks.push(`${theme}: centered breadcrumbs, ancestor links, no inline duplicates, mobile overflow`);
     await context.close();
   }
